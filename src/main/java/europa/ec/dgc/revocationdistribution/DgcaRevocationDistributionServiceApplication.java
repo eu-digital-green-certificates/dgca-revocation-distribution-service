@@ -20,14 +20,17 @@
 
 package europa.ec.dgc.revocationdistribution;
 
+import europa.ec.dgc.revocationdistribution.config.DgcConfigProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
+@EnableConfigurationProperties({DgcConfigProperties.class})
 public class DgcaRevocationDistributionServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DgcaRevocationDistributionServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(DgcaRevocationDistributionServiceApplication.class, args);
+    }
 
 }
