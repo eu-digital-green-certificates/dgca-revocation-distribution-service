@@ -22,7 +22,14 @@ package europa.ec.dgc.revocationdistribution.service;
 
 
 import eu.europa.ec.dgc.gateway.connector.DgcGatewayRevocationListDownloadConnector;
+import eu.europa.ec.dgc.gateway.connector.dto.RevocationBatchDto;
+import eu.europa.ec.dgc.gateway.connector.dto.RevocationBatchListDto;
+import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchDownloadException;
+import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchGoneException;
+import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchParseException;
 import eu.europa.ec.dgc.gateway.connector.iterator.DgcGatewayRevocationListDownloadIterator;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -42,6 +49,8 @@ public class RevocationListDownloadServiceGatewayImpl {
 
     private final  DgcGatewayRevocationListDownloadConnector dgcGatewayRevocationListDownloadConnector;
 
+    private final RevocationListService revocationListservice;
+
 
     /**
      * Synchronises the revocation list with the gateway.
@@ -55,7 +64,32 @@ public class RevocationListDownloadServiceGatewayImpl {
             dgcGatewayRevocationListDownloadConnector.getRevocationListDownloadIterator();
 
         while(revocationListIterator.hasNext()) {
-            log.info(revocationListIterator.next().toString());
+            List<RevocationBatchListDto.RevocationBatchListItemDto> batchListItems =  revocationListIterator.next();
+
+            log.info(batchListItems.toString());
+
+            List<String> deletedBatchIds = new ArrayList<>();
+            List<String> goneBatchIds = new ArrayList<>();
+
+
+            for(RevocationBatchListDto.RevocationBatchListItemDto batchListItem : batchListItems) {
+                if (batchListItem.getDeleted()) {
+                    deletedBatchIds.add(batchListItem.getBatchId());
+                } else {
+                    try {
+
+                        RevocationBatchDto revocationBatchDto =
+                            dgcGatewayRevocationListDownloadConnector.getRevocationListBatchById(batchListItem.getBatchId());
+                        log.info(revocationBatchDto.toString());
+                        revocationListservice.updateRevocationListBatch(batchListItem.getBatchId(), revocationBatchDto);
+
+                    } catch(RevocationBatchGoneException e) {
+                        goneBatchIds.add(batchListItem.getBatchId());
+                    } catch (RevocationBatchDownloadException | RevocationBatchParseException e) {
+                        log.error("Batch download failed");
+                    }
+                }
+            }
         }
 
 
