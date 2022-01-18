@@ -52,7 +52,7 @@ public class HashesEntity {
     /**
      * ID of the Batch.
      */
-    @Column(name = "batchId", nullable = false, length = 36)
+    @Column(name = "batch_id", length = 36)
     private String batchId;
 
     /**

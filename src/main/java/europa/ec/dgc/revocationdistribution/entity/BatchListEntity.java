@@ -8,6 +8,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,7 +28,7 @@ public class BatchListEntity {
      * ID of the Batch.
      */
     @Id
-    @Column(name = "batchId", nullable = false, length = 36, unique = true)
+    @Column(name = "batch_id", nullable = false, length = 36, unique = true)
     private String batchId;
 
     /**
@@ -55,6 +56,20 @@ public class BatchListEntity {
      */
     @Column(name = "kid", length = 12)
     private String kid;
+
+    /**
+     *  The creation date of the entity
+     */
+    @Column(name = "created_at")
+    private ZonedDateTime createdAt;
+
+    @PrePersist
+    private void prePersistFunction(){
+
+        if(createdAt == null){
+            createdAt = ZonedDateTime.now();
+        }
+    }
 
     /**
      * Available types of Hash.

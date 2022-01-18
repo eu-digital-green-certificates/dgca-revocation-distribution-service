@@ -28,8 +28,12 @@ import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchDownloadExcep
 import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchGoneException;
 import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchParseException;
 import eu.europa.ec.dgc.gateway.connector.iterator.DgcGatewayRevocationListDownloadIterator;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -49,7 +53,29 @@ public class RevocationListDownloadServiceGatewayImpl {
 
     private final  DgcGatewayRevocationListDownloadConnector dgcGatewayRevocationListDownloadConnector;
 
+    private final InfoService infoService;
+
     private final RevocationListService revocationListservice;
+
+    private final GeneratorService generatorService;
+
+
+
+    private ZonedDateTime lastUpdatedBatchDate;
+
+
+    @PostConstruct
+    private void postConstruct() {
+
+        String lastUpdatedString = infoService.getValueForKey(InfoService.LAST_UPDATED_KEY);
+
+        if (lastUpdatedString != null)
+            try {
+                lastUpdatedBatchDate = ZonedDateTime.parse(lastUpdatedString);
+            }catch(DateTimeParseException e) {
+                log.error("Could not parse loaded last Updated timestamp: {}", lastUpdatedString);
+            }
+    }
 
 
     /**
@@ -60,17 +86,23 @@ public class RevocationListDownloadServiceGatewayImpl {
         lockAtMostFor = "${dgc.revocationListDownload.lockLimit}")
     public void downloadRevocationList() {
         log.info("Revocation list download started");
-        DgcGatewayRevocationListDownloadIterator revocationListIterator =
-            dgcGatewayRevocationListDownloadConnector.getRevocationListDownloadIterator();
+
+        DgcGatewayRevocationListDownloadIterator revocationListIterator;
+
+        if(lastUpdatedBatchDate != null) {
+            revocationListIterator =
+                dgcGatewayRevocationListDownloadConnector.getRevocationListDownloadIterator(lastUpdatedBatchDate);
+        } else{
+            revocationListIterator = dgcGatewayRevocationListDownloadConnector.getRevocationListDownloadIterator();
+        }
+
+        List<String> deletedBatchIds = new ArrayList<>();
+        List<String> goneBatchIds = new ArrayList<>();
 
         while(revocationListIterator.hasNext()) {
             List<RevocationBatchListDto.RevocationBatchListItemDto> batchListItems =  revocationListIterator.next();
 
             log.info(batchListItems.toString());
-
-            List<String> deletedBatchIds = new ArrayList<>();
-            List<String> goneBatchIds = new ArrayList<>();
-
 
             for(RevocationBatchListDto.RevocationBatchListItemDto batchListItem : batchListItems) {
                 if (batchListItem.getDeleted()) {
@@ -89,11 +121,27 @@ public class RevocationListDownloadServiceGatewayImpl {
                         log.error("Batch download failed");
                     }
                 }
+                lastUpdatedBatchDate = batchListItem.getDate();
             }
         }
 
+        if (!deletedBatchIds.isEmpty()) {
+            revocationListservice.deleteBatchListItemsByIds(deletedBatchIds);
+        }
+
+        if (!goneBatchIds.isEmpty()) {
+            revocationListservice.deleteBatchListItemsByIds(goneBatchIds);
+        }
+        saveLastUpdated();
+        generatorService.generateNewDataSet();
 
         log.info("Revocation list download finished");
+    }
+
+    private void saveLastUpdated(){
+        log.info("Save last updated date: {}",lastUpdatedBatchDate);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+        infoService.setValueForKey(InfoService.LAST_UPDATED_KEY, dateTimeFormatter.format(lastUpdatedBatchDate));
     }
 
 }
