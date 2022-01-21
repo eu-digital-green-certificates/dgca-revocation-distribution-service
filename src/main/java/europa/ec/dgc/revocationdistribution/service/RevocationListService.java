@@ -4,11 +4,15 @@ package europa.ec.dgc.revocationdistribution.service;
 import eu.europa.ec.dgc.gateway.connector.dto.RevocationBatchDto;
 import europa.ec.dgc.revocationdistribution.entity.BatchListEntity;
 import europa.ec.dgc.revocationdistribution.entity.HashesEntity;
+import europa.ec.dgc.revocationdistribution.entity.PartitionEntity;
 import europa.ec.dgc.revocationdistribution.entity.RevocationListJsonEntity;
 import europa.ec.dgc.revocationdistribution.repository.BatchListRepository;
 import europa.ec.dgc.revocationdistribution.repository.HashesRepository;
+import europa.ec.dgc.revocationdistribution.repository.PartitionRepository;
 import europa.ec.dgc.revocationdistribution.repository.RevocationListJsonRepository;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +30,7 @@ public class RevocationListService {
     private final BatchListRepository batchListRepository;
     private final HashesRepository hashesRepository;
     private final RevocationListJsonRepository revocationListJsonRepository;
+    private final PartitionRepository partitionRepository;
 
     @Transactional
     public void updateRevocationListBatch(String batchId, RevocationBatchDto revocationBatchDto) {
@@ -102,4 +107,12 @@ public class RevocationListService {
     }
 
 
+    public List<PartitionEntity> getPartitionsByKidAndDate(String kidId, ZonedDateTime ifModifiedSince){
+        return new ArrayList<>();
+    }
+
+
+    public List<PartitionEntity> getPartitionsByKid(String kid) {
+      return  partitionRepository.findAllByKid(kid);
+    }
 }
