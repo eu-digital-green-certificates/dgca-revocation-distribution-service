@@ -64,3 +64,8 @@ dgc:
   revocationListDownload:
     timeInterval: 1800000
     lockLimit: 3600000
+  bloomFilter:
+    enabled: true
+    type: Bloom
+    version: 1.0
+    probRate: 0.000000000001f

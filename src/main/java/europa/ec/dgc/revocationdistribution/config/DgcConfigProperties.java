@@ -31,6 +31,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class DgcConfigProperties {
 
     private final GatewayDownload revocationListDownload = new GatewayDownload();
+    private final BloomFilterConfig bloomFilter = new BloomFilterConfig();
+
+
 
     @Getter
     @Setter
@@ -39,4 +42,12 @@ public class DgcConfigProperties {
         private Integer lockLimit;
     }
 
+    @Getter
+    @Setter
+    public static class BloomFilterConfig {
+        private boolean enabled;
+        private String type;
+        private String version;
+        private float probRate;
+    }
 }

@@ -21,11 +21,10 @@ import org.hibernate.annotations.TypeDef;
 @Getter
 @Setter
 @Entity
-@Table(name = "partitions")
+@Table(name = "slices")
 @AllArgsConstructor
 @NoArgsConstructor
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-public class PartitionEntity {
+public class SliceEntity {
 
     @Id
     @Column(name = "db_id")
@@ -48,26 +47,20 @@ public class PartitionEntity {
     /**
      * Id .
      */
-    @Column(name = "partition_id", nullable = true)
+    @Column(name = "partition_id")
     private String id;
 
     /**
-     * x parameter of chunk.
+     * chunk of slice.
      */
-    @Column(name = "x", nullable = true)
-    private String x;
+    @Column(name = "chunk")
+    private String chunk;
 
     /**
-     * x parameter of chunk.
+     * chunk of slice.
      */
-    @Column(name = "y", nullable = true)
-    private String y;
-
-    /**
-     * x parameter of chunk.
-     */
-    @Column(name = "z", nullable = true)
-    private String z;
+    @Column(name = "hash")
+    private String hash;
 
     /**
      *  The creation date of the entity.
@@ -84,14 +77,13 @@ public class PartitionEntity {
     private ZonedDateTime expired;
 
     /**
-     * The hashes of the chunk.
+     * The binary data of the slice.
      */
-    @Type(type = "jsonb")
-    @Column(name = "chunks_json_data", columnDefinition = "jsonb")
-    private Map<String, Map<String,PartitionChunksJsonItemDto>> chunks;
+    @Column(name = "slice_binary_data")
+    private byte[] binaryData;
 
     /**
-     * Indicates if the partition needs to be deleted on etag change.
+     * Indicates if the slice needs to be deleted on etag change.
      */
     @Column(name= "to_be_deleted")
     private boolean toBeDeleted;

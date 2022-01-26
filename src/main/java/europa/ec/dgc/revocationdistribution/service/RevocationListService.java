@@ -2,22 +2,31 @@ package europa.ec.dgc.revocationdistribution.service;
 
 
 import eu.europa.ec.dgc.gateway.connector.dto.RevocationBatchDto;
+import europa.ec.dgc.revocationdistribution.dto.PartitionResponseDto;
 import europa.ec.dgc.revocationdistribution.entity.BatchListEntity;
 import europa.ec.dgc.revocationdistribution.entity.HashesEntity;
-import europa.ec.dgc.revocationdistribution.entity.PartitionEntity;
 import europa.ec.dgc.revocationdistribution.entity.RevocationListJsonEntity;
+import europa.ec.dgc.revocationdistribution.entity.SliceEntity;
+import europa.ec.dgc.revocationdistribution.mapper.PartitionListMapper;
 import europa.ec.dgc.revocationdistribution.repository.BatchListRepository;
 import europa.ec.dgc.revocationdistribution.repository.HashesRepository;
 import europa.ec.dgc.revocationdistribution.repository.PartitionRepository;
 import europa.ec.dgc.revocationdistribution.repository.RevocationListJsonRepository;
+import europa.ec.dgc.revocationdistribution.repository.SliceRepository;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPOutputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.bouncycastle.util.encoders.Hex;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +40,15 @@ public class RevocationListService {
     private final HashesRepository hashesRepository;
     private final RevocationListJsonRepository revocationListJsonRepository;
     private final PartitionRepository partitionRepository;
+    private final PartitionListMapper partitionListMapper;
+    private final SliceRepository sliceRepository;
 
     @Transactional
     public void updateRevocationListBatch(String batchId, RevocationBatchDto revocationBatchDto) {
 
         saveBatchList(batchId, revocationBatchDto);
 
-        for(RevocationBatchDto.BatchEntryDto hash : revocationBatchDto.getEntries()) {
+        for (RevocationBatchDto.BatchEntryDto hash : revocationBatchDto.getEntries()) {
             saveHash(batchId, hash, revocationBatchDto.getKid());
         }
 
@@ -57,7 +68,7 @@ public class RevocationListService {
     }
 
     @Transactional
-    private void saveHash(String batchId, RevocationBatchDto.BatchEntryDto hash, String kid){
+    private void saveHash(String batchId, RevocationBatchDto.BatchEntryDto hash, String kid) {
         try {
             String hexHash = decodeBase64Hash(hash.getHash());
             HashesEntity hashesEntity = new HashesEntity();
@@ -102,17 +113,71 @@ public class RevocationListService {
     }
 
     @Transactional
-    public void deleteAllOrphanedHashes(){
+    public void deleteAllOrphanedHashes() {
         hashesRepository.deleteAllOrphanedHashes();
     }
 
 
-    public List<PartitionEntity> getPartitionsByKidAndDate(String kidId, ZonedDateTime ifModifiedSince){
+    public List<PartitionResponseDto> getPartitionsByKidAndDate(String kidId, ZonedDateTime ifModifiedSince) {
         return new ArrayList<>();
     }
 
 
-    public List<PartitionEntity> getPartitionsByKid(String kid) {
-      return  partitionRepository.findAllByKid(kid);
+    public List<PartitionResponseDto> getPartitionsByKid(String etag, String kid) {
+
+        return partitionRepository.findAllByEtagAndKid(etag, kid).stream().map(partitionListMapper::map).collect(Collectors.toList());
     }
+
+    public byte[] getSliceData(String etag, String kid, String id, String cid, String sid) {
+        Optional<SliceEntity> sliceEntity;
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdIsNullAndChunkAndHash(etag, kid, cid, sid);
+
+        } else {
+            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdAndChunkAndHash(etag, kid, id, cid, sid);
+        }
+
+        if (sliceEntity.isPresent()) {
+            List<SliceEntity> sliceEntityList = new ArrayList<>();
+            sliceEntityList.add(sliceEntity.get());
+            return createTarForSlices(sliceEntityList);
+        }
+
+
+        return null;
+    }
+
+    private byte[] createTarForSlices(List<SliceEntity> sliceEntityList) {
+
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+            TarArchiveOutputStream outTar = new TarArchiveOutputStream(gzipOutputStream);
+
+            for (SliceEntity sliceEntity : sliceEntityList) {
+                String archiveEntryName = String.format("%s/%s/%s/%s",
+                    sliceEntity.getKid(),
+                    sliceEntity.getId(),
+                    sliceEntity.getChunk(),
+                    sliceEntity.getHash());
+
+                TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(archiveEntryName);
+                tarArchiveEntry.setSize(sliceEntity.getBinaryData().length);
+
+                outTar.putArchiveEntry(tarArchiveEntry);
+                outTar.write(sliceEntity.getBinaryData());
+                outTar.closeArchiveEntry();
+            }
+
+            gzipOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return byteArrayOutputStream.toByteArray();
+
+    }
+
 }
