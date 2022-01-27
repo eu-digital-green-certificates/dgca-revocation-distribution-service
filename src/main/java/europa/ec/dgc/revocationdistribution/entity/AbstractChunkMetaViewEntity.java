@@ -11,6 +11,7 @@ import org.hibernate.annotations.RowId;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.annotation.Immutable;
+import org.springframework.lang.Nullable;
 
 
 @Getter
@@ -39,18 +40,21 @@ public abstract class AbstractChunkMetaViewEntity {
     /**
      * Id of chunk
      */
+    @Nullable
     @Column(name = "partition_id")
     private String id;
 
     /**
      * x parameter of chunk.
      */
+    @Nullable
     @Column(name = "x")
     private String x;
 
     /**
      * x parameter of chunk.
      */
+    @Nullable
     @Column(name = "y")
     private String y;
 

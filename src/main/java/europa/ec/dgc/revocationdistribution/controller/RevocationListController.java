@@ -22,14 +22,15 @@ package europa.ec.dgc.revocationdistribution.controller;
 
 import europa.ec.dgc.revocationdistribution.dto.PartitionResponseDto;
 import europa.ec.dgc.revocationdistribution.dto.RevocationListJsonResponseDto;
-import europa.ec.dgc.revocationdistribution.entity.PartitionEntity;
 import europa.ec.dgc.revocationdistribution.entity.RevocationListJsonEntity;
+import europa.ec.dgc.revocationdistribution.exception.PreconditionFaildException;
 import europa.ec.dgc.revocationdistribution.service.InfoService;
 import europa.ec.dgc.revocationdistribution.service.RevocationListService;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +39,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,7 +77,6 @@ public class RevocationListController {
             return ResponseEntity.notFound().build();
         }
 
-
         return ResponseEntity.ok().eTag(currentEtag).body(revocationListJsonEntity.get().getJsonData());
     }
 
@@ -93,7 +95,7 @@ public class RevocationListController {
     }
 
     /**
-     * Http Method for getting the partitions list of a kid.
+     * Http Method for getting the all partitions a kid.
      * @return
      */
     @GetMapping(path = "lists/{kid}/partitions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -107,7 +109,7 @@ public class RevocationListController {
 
         if (!ifNoneMatch.equals(currentEtag)) {
             log.info("etag failed given {} expexted {}", ifNoneMatch, currentEtag);
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
+            throw new PreconditionFaildException();
         }
         List<PartitionResponseDto> result;
 
@@ -131,6 +133,132 @@ public class RevocationListController {
     }
 
     /**
+     * Http Method for getting the a partition of a kid.
+     * @return
+     */
+    @GetMapping(path = "lists/{kid}/partitions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PartitionResponseDto> getPartitionForKid(
+        @PathVariable String kid,
+        @PathVariable String id,
+        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
+        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
+    ) {
+
+        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+
+        if (!ifNoneMatch.equals(currentEtag)) {
+            log.info("etag failed given {} expexted {}", ifNoneMatch, currentEtag);
+            throw new PreconditionFaildException();
+        }
+        PartitionResponseDto result;
+
+        if (ifModifiedSince != null) {
+            ZonedDateTime ifModifiedDateTime;
+            try {
+                ifModifiedDateTime = ZonedDateTime.parse(ifModifiedSince);
+            } catch (DateTimeParseException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            result = revocationListService.getPartitionsByKidAndId(currentEtag, kid, id );// ifModifiedDateTime);
+        } else {
+            result = revocationListService.getPartitionsByKidAndId(currentEtag, kid, id);
+        }
+
+
+        return ResponseEntity.ok(result);
+    }
+
+
+    /**
+     * Http Method for getting the data of a partition.
+     * @return gzip file containing data
+     */
+    @PostMapping(path = "lists/{kid}/partitions/{id}/chunks",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces ="application/gzip")
+    public ResponseEntity<byte[]> getPartitionChunksData(
+        @PathVariable String kid,
+        @PathVariable String id,
+        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
+        @Valid @RequestBody(required = false)  List<String> reqestedChunksList
+    ) {
+
+        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+
+        if (!ifNoneMatch.equals(currentEtag)) {
+            throw new PreconditionFaildException();
+        }
+        byte[] result;
+
+        if (reqestedChunksList == null){
+
+            result = revocationListService.getAllChunkDataFromPartition(currentEtag, kid, id);
+        }
+        else {
+            result = revocationListService.getAllChunkDataFromPartitionWithFilter(currentEtag, kid, id, reqestedChunksList);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Http Method for getting the slice data.
+     * @return gzip file containing slice data
+     */
+    @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}", produces ="application/gzip")
+    public ResponseEntity<byte[]> getChunk(
+        @PathVariable String kid,
+        @PathVariable String id,
+        @PathVariable String cid,
+        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch
+    ) {
+
+        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+
+        if (!ifNoneMatch.equals(currentEtag)) {
+            throw new PreconditionFaildException();
+        }
+
+        byte[] result = revocationListService.getChunkData(currentEtag, kid, id, cid);
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Http Method for getting the data of a partition.
+     * @return gzip file containing data
+     */
+    @PostMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slice",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces ="application/gzip")
+    public ResponseEntity<byte[]> getPartitionChunks(
+        @PathVariable String kid,
+        @PathVariable String id,
+        @PathVariable String cid,
+        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
+        @Valid @RequestBody(required = false)  List<String> reqestedSliceList
+    ) {
+
+        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+
+        if (!ifNoneMatch.equals(currentEtag)) {
+            throw new PreconditionFaildException();
+        }
+        byte[] result;
+
+        if (reqestedSliceList == null){
+            result = revocationListService.getChunkData(currentEtag, kid, id, cid);
+        }
+        else {
+            result = revocationListService.getAllSliceDataForChunkWithFilter(currentEtag, kid, id, cid, reqestedSliceList);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+
+
+    /**
      * Http Method for getting the slice data.
      * @return gzip file containing slice data
      */
@@ -148,7 +276,7 @@ public class RevocationListController {
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
         if (!ifNoneMatch.equals(currentEtag)) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
+            throw new PreconditionFaildException();
         }
 
         byte[] result = revocationListService.getSliceData(currentEtag, kid, id, cid, sid);

@@ -5,8 +5,10 @@ import eu.europa.ec.dgc.gateway.connector.dto.RevocationBatchDto;
 import europa.ec.dgc.revocationdistribution.dto.PartitionResponseDto;
 import europa.ec.dgc.revocationdistribution.entity.BatchListEntity;
 import europa.ec.dgc.revocationdistribution.entity.HashesEntity;
+import europa.ec.dgc.revocationdistribution.entity.PartitionEntity;
 import europa.ec.dgc.revocationdistribution.entity.RevocationListJsonEntity;
 import europa.ec.dgc.revocationdistribution.entity.SliceEntity;
+import europa.ec.dgc.revocationdistribution.exception.DataNotFoundException;
 import europa.ec.dgc.revocationdistribution.mapper.PartitionListMapper;
 import europa.ec.dgc.revocationdistribution.repository.BatchListRepository;
 import europa.ec.dgc.revocationdistribution.repository.HashesRepository;
@@ -128,7 +130,103 @@ public class RevocationListService {
         return partitionRepository.findAllByEtagAndKid(etag, kid).stream().map(partitionListMapper::map).collect(Collectors.toList());
     }
 
-    public byte[] getSliceData(String etag, String kid, String id, String cid, String sid) {
+
+
+    public PartitionResponseDto getPartitionsByKidAndId(String etag, String kid, String id) throws DataNotFoundException {
+        Optional<PartitionEntity> partition = partitionRepository.findOneByEtagAndKidAndId(etag, kid, id);
+
+        if(!partition.isPresent()) {
+            throw new DataNotFoundException();
+        }
+        return partitionListMapper.map(partition.get());
+    }
+
+
+    public byte[] getAllChunkDataFromPartition(String etag, String kid, String id) {
+        List<SliceEntity> sliceEntityList;
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNull(etag, kid);
+
+        } else {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndId(etag, kid, id);
+        }
+
+        if (sliceEntityList.isEmpty()) {
+            throw new DataNotFoundException();
+        }
+
+        return createTarForSlices(sliceEntityList);
+    }
+
+    public byte[] getAllChunkDataFromPartitionWithFilter(
+        String etag,
+        String kid,
+        String id,
+        List<String> filter) {
+
+        List<SliceEntity> sliceEntityList;
+        if (id.equalsIgnoreCase("null")) {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkIn(etag, kid, filter);
+
+        } else {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkIn(etag, kid, id, filter);
+        }
+
+        if (sliceEntityList.isEmpty()) {
+            throw new DataNotFoundException();
+        }
+
+        return createTarForSlices(sliceEntityList);
+
+    }
+
+
+    public byte[] getChunkData(String etag, String kid, String id, String cid) throws DataNotFoundException {
+        List<SliceEntity> sliceEntityList;
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunk(etag, kid, cid);
+
+        } else {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunk(etag, kid, id, cid);
+        }
+
+        if (sliceEntityList.isEmpty()) {
+            throw new DataNotFoundException();
+        }
+
+        return createTarForSlices(sliceEntityList);
+    }
+
+
+    public byte[] getAllSliceDataForChunkWithFilter(
+        String etag,
+        String kid,
+        String id,
+        String cid,
+        List<String> filter) throws DataNotFoundException {
+
+        List<SliceEntity> sliceEntityList;
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndHashIn(etag, kid, cid, filter);
+
+        } else {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndHashIn(etag, kid, id, cid, filter);
+        }
+
+        if (sliceEntityList.isEmpty()) {
+            throw new DataNotFoundException();
+        }
+
+        return createTarForSlices(sliceEntityList);
+    }
+
+
+    public byte[] getSliceData(String etag, String kid, String id, String cid, String sid)
+        throws DataNotFoundException {
+
         Optional<SliceEntity> sliceEntity;
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
@@ -138,15 +236,16 @@ public class RevocationListService {
             sliceEntity = sliceRepository.findOneByEtagAndKidAndIdAndChunkAndHash(etag, kid, id, cid, sid);
         }
 
-        if (sliceEntity.isPresent()) {
-            List<SliceEntity> sliceEntityList = new ArrayList<>();
-            sliceEntityList.add(sliceEntity.get());
-            return createTarForSlices(sliceEntityList);
+        if (!sliceEntity.isPresent()) {
+            throw new DataNotFoundException();
         }
 
+        List<SliceEntity> sliceEntityList = new ArrayList<>();
+        sliceEntityList.add(sliceEntity.get());
 
-        return null;
+        return createTarForSlices(sliceEntityList);
     }
+
 
     private byte[] createTarForSlices(List<SliceEntity> sliceEntityList) {
 
@@ -179,5 +278,7 @@ public class RevocationListService {
         return byteArrayOutputStream.toByteArray();
 
     }
+
+
 
 }
