@@ -86,20 +86,12 @@ public class GeneratorService {
 
         List<KidViewEntity> kidViewEntityList = kidViewRepository.findAll();
 
-        for (KidViewEntity kidViewEntity : kidViewEntityList) {
-
-            log.info("KidView({},{},{},{}, {})",
-                kidViewEntity.getKid(),
-                kidViewEntity.getStorageMode(),
-                kidViewEntity.getTypesString(),
-                kidViewEntity.getLastUpdated(),
-                kidViewEntity.getExpired());
-        }
         ChangeList changeList = generateList();
 
         handleChangeList(changeList);
 
-        infoService.setValueForKey(InfoService.CURRENT_ETAG, etag);
+        infoService.setNewEtag(etag);
+
         cleanupData();
 
         log.info("Finished generation of new data set.");
@@ -120,7 +112,7 @@ public class GeneratorService {
         kidViewEntityList.stream().forEach(kve -> {
 
             if (kve.getTypes().isEmpty() && kve.getExpired() == null ) {
-                log.info("Delete kid entry : {} ",kve.getKid());
+                log.debug("Delete kid entry : {} ",kve.getKid());
                 if ( itemsMap.remove(kve.getKid()) != null ) {
                     changeList.getDeleted().add( new ChangeListItem(kve, null));
                 }
@@ -187,19 +179,18 @@ public class GeneratorService {
         for(ChangeListItem changeItem : changeListItems) {
             switch(changeItem.getNewStorageMode()){
                 case "POINT": {
-                    log.info("Create pattern for kid {} in POINT mode.", changeItem.getKidId());
-
+                    log.debug("Create pattern for kid {} in POINT mode.", changeItem.getKidId());
                     generatePartitionsForKidInPointMode(changeItem);
                     break;
-
                 }
                 case "VECTOR":{
-                    log.info("Create pattern for kid {} in VECTOR mode.", changeItem.getKidId());
+                    log.debug("Create pattern for kid {} in VECTOR mode.", changeItem.getKidId());
                     generatePartitionsForKidInVectorMode(changeItem);
                     break;
                 }
                 case "COORDINATE": {
-                    log.info("Create pattern for kid {} in COORDINATE mode.", changeItem.getKidId());
+                    log.debug("Create pattern for kid {} in COORDINATE mode.", changeItem.getKidId());
+                    generatePartitionsForKidInCoordinateMode(changeItem);
                     break;
                 }
                 default: {
@@ -225,7 +216,7 @@ public class GeneratorService {
         //get all ids for kId
         List<String> partitionIds = vectorViewRepository.findDistinctIdsByKid(changeItem.getKidId());
 
-        log.info("PartionIds {}",partitionIds);
+        log.debug("PartionIds {}",partitionIds);
 
         for (String partitionId : partitionIds ){
             List<ChunkMetaViewDto> entities =
@@ -243,7 +234,7 @@ public class GeneratorService {
         //get all ids for kId
         List<String> partitionIds = coordinateViewRepository.findDistinctIdsByKid(changeItem.getKidId());
 
-        log.info("PartionIds {}",partitionIds);
+        log.debug("PartionIds {}",partitionIds);
 
         for (String partitionId : partitionIds ){
             List<ChunkMetaViewDto> entities =
@@ -364,7 +355,7 @@ public class GeneratorService {
 
     private void cleanupData() {
         // set all entries in hashes table to updated false
-        //revocationListService.setAllHashesUpdatedStatesToFalse();
+        revocationListService.setAllHashesUpdatedStatesToFalse();
 
         // remove all orphaned entries in hashes table
         revocationListService.deleteAllOrphanedHashes();
