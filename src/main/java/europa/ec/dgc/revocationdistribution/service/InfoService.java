@@ -36,4 +36,7 @@ public class InfoService {
         infoRepository.save(infoEntity);
     }
 
+    public void setNewEtag(String etag) {
+        infoRepository.setNewEtag(etag);
+    }
 }
