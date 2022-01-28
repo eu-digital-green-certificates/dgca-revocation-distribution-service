@@ -80,19 +80,6 @@ public class RevocationListController {
         return ResponseEntity.ok().eTag(currentEtag).body(revocationListJsonEntity.get().getJsonData());
     }
 
-    /**
-     * Http Method for getting the partitions list of a kid.
-     * @return
-     */
-    @GetMapping(path = "kid/{kid}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getTest(
-        @PathVariable String kid
-    ) {
-
-
-
-        return ResponseEntity.ok(kid);
-    }
 
     /**
      * Http Method for getting the all partitions a kid.
@@ -173,7 +160,7 @@ public class RevocationListController {
      * Http Method for getting the data of a partition.
      * @return gzip file containing data
      */
-    @PostMapping(path = "lists/{kid}/partitions/{id}/chunks",
+    @PostMapping(path = "lists/{kid}/partitions/{id}/slices",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces ="application/gzip")
     public ResponseEntity<byte[]> getPartitionChunksData(
@@ -205,7 +192,7 @@ public class RevocationListController {
      * Http Method for getting the slice data.
      * @return gzip file containing slice data
      */
-    @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}", produces ="application/gzip")
+    @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices", produces ="application/gzip")
     public ResponseEntity<byte[]> getChunk(
         @PathVariable String kid,
         @PathVariable String id,
@@ -228,7 +215,7 @@ public class RevocationListController {
      * Http Method for getting the data of a partition.
      * @return gzip file containing data
      */
-    @PostMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slice",
+    @PostMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces ="application/gzip")
     public ResponseEntity<byte[]> getPartitionChunks(
@@ -262,7 +249,7 @@ public class RevocationListController {
      * Http Method for getting the slice data.
      * @return gzip file containing slice data
      */
-    @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slice/{sid}",
+    @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices/{sid}",
         produces ="application/gzip")
     public ResponseEntity<byte[]> getSlice(
         @PathVariable String kid,
@@ -287,6 +274,5 @@ public class RevocationListController {
 
         return ResponseEntity.ok(result);
     }
-
 
 }
