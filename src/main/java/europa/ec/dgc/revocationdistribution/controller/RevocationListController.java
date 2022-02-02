@@ -91,6 +91,8 @@ public class RevocationListController {
         @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
     ) {
+        
+        kid = transformBase64Url(kid);
 
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
@@ -131,6 +133,8 @@ public class RevocationListController {
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
     ) {
 
+        kid = transformBase64Url(kid);
+        
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
         if (!ifNoneMatch.equals(currentEtag)) {
@@ -170,6 +174,8 @@ public class RevocationListController {
         @Valid @RequestBody(required = false)  List<String> reqestedChunksList
     ) {
 
+        kid = transformBase64Url(kid);
+        
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
         if (!ifNoneMatch.equals(currentEtag)) {
@@ -199,6 +205,8 @@ public class RevocationListController {
         @PathVariable String cid,
         @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch
     ) {
+        
+        kid = transformBase64Url(kid);
 
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
@@ -225,6 +233,8 @@ public class RevocationListController {
         @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
         @Valid @RequestBody(required = false)  List<String> reqestedSliceList
     ) {
+        
+        kid = transformBase64Url(kid);
 
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
@@ -259,6 +269,8 @@ public class RevocationListController {
         @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
     ) {
+        
+        kid = transformBase64Url(kid);
 
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
@@ -273,6 +285,14 @@ public class RevocationListController {
         }
 
         return ResponseEntity.ok(result);
+    }
+    
+     /**
+     * Method to transform a base64url object
+     * returns a base64 object from a base64url object
+     */
+    private string transformBase64Url(String kid) {
+        return Base64.getEncoder().encodeToString(Base64URL.from(kid).decode());    
     }
 
 }
