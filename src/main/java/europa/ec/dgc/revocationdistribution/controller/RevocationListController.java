@@ -291,7 +291,7 @@ public class RevocationListController {
      * Method to transform a base64url object
      * returns a base64 object from a base64url object
      */
-    private string transformBase64Url(String kid) {
+    private String transformBase64Url(String kid) {
         return Base64.getEncoder().encodeToString(Base64URL.from(kid).decode());    
     }
 
