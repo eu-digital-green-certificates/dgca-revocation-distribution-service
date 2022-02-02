@@ -20,6 +20,7 @@
 
 package europa.ec.dgc.revocationdistribution.controller;
 
+import com.nimbusds.jose.util.Base64URL;
 import europa.ec.dgc.revocationdistribution.dto.PartitionResponseDto;
 import europa.ec.dgc.revocationdistribution.dto.RevocationListJsonResponseDto;
 import europa.ec.dgc.revocationdistribution.entity.RevocationListJsonEntity;
@@ -28,6 +29,7 @@ import europa.ec.dgc.revocationdistribution.service.InfoService;
 import europa.ec.dgc.revocationdistribution.service.RevocationListService;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
@@ -292,7 +294,7 @@ public class RevocationListController {
      * returns a base64 object from a base64url object
      */
     private String transformBase64Url(String kid) {
-        return Base64.getEncoder().encodeToString(Base64URL.from(kid).decode());    
+        return Base64.getEncoder().encodeToString(Base64URL.from(kid).decode());
     }
 
 }
