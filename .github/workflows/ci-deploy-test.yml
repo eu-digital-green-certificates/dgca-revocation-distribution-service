@@ -1,4 +1,4 @@
-name: ci-deploy
+name: ci-deploy-test
 on:
   workflow_dispatch:
     inputs:
@@ -24,10 +24,10 @@ jobs:
         cf api ${CF_API}
         cf auth
         cf target -o ${CF_ORG} -s ${CF_SPACE}
-        cf push ${APP_NAME} --docker-image ${APP_IMAGE}:${APP_VERSION} --docker-username ${CF_DOCKER_USERNAME}
+        cf push ${APP_NAME} --docker-image ${APP_IMAGE}:1.1.4 --docker-username ${CF_DOCKER_USERNAME}
       env:
         APP_NAME: dgca-revocation-service-eu-test2
-        APP_IMAGE: docker.pkg.github.com/dgca-businessrule-service/dgca-businessrule-service
+        APP_IMAGE: docker.pkg.github.com/eu-digital-green-certificates/dgca-businessrule-service/dgca-businessrule-service
         CF_API: ${{ secrets.CF_API }}
         CF_ORG: ${{ secrets.CF_ORG }}
         CF_SPACE: ${{ secrets.CF_SPACE }}
