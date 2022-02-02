@@ -20,4 +20,6 @@ public interface PartitionRepository extends JpaRepository<PartitionEntity, Stri
 
 
     Optional<PartitionEntity> findOneByEtagAndKidAndId(String etag, String kid, String id);
+
+    Optional<PartitionEntity> findOneByEtagAndKidAndIdIsNull(String etag, String kid);
 }

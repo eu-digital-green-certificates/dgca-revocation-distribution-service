@@ -133,7 +133,15 @@ public class RevocationListService {
 
 
     public PartitionResponseDto getPartitionsByKidAndId(String etag, String kid, String id) throws DataNotFoundException {
-        Optional<PartitionEntity> partition = partitionRepository.findOneByEtagAndKidAndId(etag, kid, id);
+
+        Optional<PartitionEntity> partition;
+
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            partition = partitionRepository.findOneByEtagAndKidAndIdIsNull(etag, kid);
+        } else {
+            partition = partitionRepository.findOneByEtagAndKidAndId(etag, kid, id);
+        }
 
         if(!partition.isPresent()) {
             throw new DataNotFoundException();
