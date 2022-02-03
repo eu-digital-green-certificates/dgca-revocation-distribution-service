@@ -21,8 +21,7 @@
 package europa.ec.dgc.revocationdistribution.config;
 
 import europa.ec.dgc.revocationdistribution.exception.DataNotFoundException;
-import europa.ec.dgc.revocationdistribution.exception.PreconditionFaildException;
-import javax.validation.ConstraintViolationException;
+import europa.ec.dgc.revocationdistribution.exception.PreconditionFailedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -40,13 +39,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ErrorHandler extends ResponseEntityExceptionHandler {
 
     /**
-     * Handles {@link PreconditionFaildException} when a validation failed.
+     * Handles {@link PreconditionFailedException} when a validation failed.
      *
-     * @param e the thrown {@link PreconditionFaildException}
+     * @param e the thrown {@link PreconditionFailedException}
      * @return A ResponseEntity with a ErrorMessage inside.
      */
-    @ExceptionHandler(PreconditionFaildException.class)
-    public ResponseEntity<Object> handleException(PreconditionFaildException e) {
+    @ExceptionHandler(PreconditionFailedException.class)
+    public ResponseEntity<Object> handleException(PreconditionFailedException e) {
         return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
 
     }

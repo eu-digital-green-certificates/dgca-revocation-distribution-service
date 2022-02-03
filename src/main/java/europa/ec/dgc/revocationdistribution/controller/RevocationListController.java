@@ -24,7 +24,7 @@ import com.nimbusds.jose.util.Base64URL;
 import europa.ec.dgc.revocationdistribution.dto.PartitionResponseDto;
 import europa.ec.dgc.revocationdistribution.dto.RevocationListJsonResponseDto;
 import europa.ec.dgc.revocationdistribution.entity.RevocationListJsonEntity;
-import europa.ec.dgc.revocationdistribution.exception.PreconditionFaildException;
+import europa.ec.dgc.revocationdistribution.exception.PreconditionFailedException;
 import europa.ec.dgc.revocationdistribution.service.InfoService;
 import europa.ec.dgc.revocationdistribution.service.RevocationListService;
 import java.time.ZonedDateTime;
@@ -96,12 +96,8 @@ public class RevocationListController {
         
         kid = transformBase64Url(kid);
 
-        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+        String currentEtag = checkEtag(ifMatch);
 
-        if (!ifMatch.equals(currentEtag)) {
-            log.info("etag failed given {} expexted {}", ifMatch, currentEtag);
-            throw new PreconditionFaildException();
-        }
         List<PartitionResponseDto> result;
 
         if (ifModifiedSince != null) {
@@ -137,12 +133,8 @@ public class RevocationListController {
 
         kid = transformBase64Url(kid);
         
-        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+        String currentEtag = checkEtag(ifMatch);
 
-        if (!ifMatch.equals(currentEtag)) {
-            log.info("etag failed given {} expexted {}", ifMatch, currentEtag);
-            throw new PreconditionFaildException();
-        }
         PartitionResponseDto result;
 
         if (ifModifiedSince != null) {
@@ -178,11 +170,8 @@ public class RevocationListController {
 
         kid = transformBase64Url(kid);
         
-        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+        String currentEtag = checkEtag(ifMatch);
 
-        if (!ifMatch.equals(currentEtag)) {
-            throw new PreconditionFaildException();
-        }
         byte[] result;
 
         if (reqestedChunksList == null){
@@ -210,11 +199,9 @@ public class RevocationListController {
         
         kid = transformBase64Url(kid);
 
-        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+        String currentEtag = checkEtag(ifMatch);
 
-        if (!ifMatch.equals(currentEtag)) {
-            throw new PreconditionFaildException();
-        }
+
 
         byte[] result = revocationListService.getChunkData(currentEtag, kid, id, cid);
 
@@ -238,11 +225,8 @@ public class RevocationListController {
         
         kid = transformBase64Url(kid);
 
-        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+        String currentEtag = checkEtag(ifMatch);
 
-        if (!ifMatch.equals(currentEtag)) {
-            throw new PreconditionFaildException();
-        }
         byte[] result;
 
         if (reqestedSliceList == null){
@@ -274,11 +258,7 @@ public class RevocationListController {
         
         kid = transformBase64Url(kid);
 
-        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
-
-        if (!ifMatch.equals(currentEtag)) {
-            throw new PreconditionFaildException();
-        }
+        String currentEtag = checkEtag(ifMatch);
 
         byte[] result = revocationListService.getSliceData(currentEtag, kid, id, cid, sid);
 
@@ -295,6 +275,24 @@ public class RevocationListController {
      */
     private String transformBase64Url(String kid) {
         return Base64.getEncoder().encodeToString(Base64URL.from(kid).decode());
+    }
+
+    /**
+     *
+     * Method to check Etag Header
+     * @param etag to check
+     * @return etag without quotes
+     * @throws PreconditionFailedException
+     */
+    private String checkEtag(String etag) throws PreconditionFailedException {
+        String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
+        String parsedEtag = etag.replaceAll("^\"|\"$", "");
+
+        if (!parsedEtag.equals(currentEtag)) {
+            log.info("etag failed given {} expexted {}", etag, currentEtag);
+            throw new PreconditionFailedException();
+        }
+        return currentEtag;
     }
 
 }
