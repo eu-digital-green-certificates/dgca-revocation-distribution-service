@@ -90,7 +90,7 @@ public class RevocationListController {
     @GetMapping(path = "lists/{kid}/partitions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PartitionResponseDto>> getPartitionListForKid(
         @PathVariable String kid,
-        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
+        @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
     ) {
         
@@ -98,8 +98,8 @@ public class RevocationListController {
 
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
-        if (!ifNoneMatch.equals(currentEtag)) {
-            log.info("etag failed given {} expexted {}", ifNoneMatch, currentEtag);
+        if (!ifMatch.equals(currentEtag)) {
+            log.info("etag failed given {} expexted {}", ifMatch, currentEtag);
             throw new PreconditionFaildException();
         }
         List<PartitionResponseDto> result;
@@ -131,7 +131,7 @@ public class RevocationListController {
     public ResponseEntity<PartitionResponseDto> getPartitionForKid(
         @PathVariable String kid,
         @PathVariable String id,
-        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
+        @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
     ) {
 
@@ -139,8 +139,8 @@ public class RevocationListController {
         
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
-        if (!ifNoneMatch.equals(currentEtag)) {
-            log.info("etag failed given {} expexted {}", ifNoneMatch, currentEtag);
+        if (!ifMatch.equals(currentEtag)) {
+            log.info("etag failed given {} expexted {}", ifMatch, currentEtag);
             throw new PreconditionFaildException();
         }
         PartitionResponseDto result;
@@ -172,7 +172,7 @@ public class RevocationListController {
     public ResponseEntity<byte[]> getPartitionChunksData(
         @PathVariable String kid,
         @PathVariable String id,
-        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
+        @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @Valid @RequestBody(required = false)  List<String> reqestedChunksList
     ) {
 
@@ -180,7 +180,7 @@ public class RevocationListController {
         
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
-        if (!ifNoneMatch.equals(currentEtag)) {
+        if (!ifMatch.equals(currentEtag)) {
             throw new PreconditionFaildException();
         }
         byte[] result;
@@ -205,14 +205,14 @@ public class RevocationListController {
         @PathVariable String kid,
         @PathVariable String id,
         @PathVariable String cid,
-        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch
+        @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch
     ) {
         
         kid = transformBase64Url(kid);
 
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
-        if (!ifNoneMatch.equals(currentEtag)) {
+        if (!ifMatch.equals(currentEtag)) {
             throw new PreconditionFaildException();
         }
 
@@ -232,7 +232,7 @@ public class RevocationListController {
         @PathVariable String kid,
         @PathVariable String id,
         @PathVariable String cid,
-        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
+        @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @Valid @RequestBody(required = false)  List<String> reqestedSliceList
     ) {
         
@@ -240,7 +240,7 @@ public class RevocationListController {
 
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
-        if (!ifNoneMatch.equals(currentEtag)) {
+        if (!ifMatch.equals(currentEtag)) {
             throw new PreconditionFaildException();
         }
         byte[] result;
@@ -268,7 +268,7 @@ public class RevocationListController {
         @PathVariable String id,
         @PathVariable String cid,
         @PathVariable String sid,
-        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch,
+        @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
     ) {
         
@@ -276,7 +276,7 @@ public class RevocationListController {
 
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
-        if (!ifNoneMatch.equals(currentEtag)) {
+        if (!ifMatch.equals(currentEtag)) {
             throw new PreconditionFaildException();
         }
 
