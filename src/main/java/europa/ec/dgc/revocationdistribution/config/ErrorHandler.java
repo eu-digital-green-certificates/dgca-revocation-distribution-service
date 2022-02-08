@@ -22,6 +22,7 @@ package europa.ec.dgc.revocationdistribution.config;
 
 import europa.ec.dgc.revocationdistribution.exception.DataNotFoundException;
 import europa.ec.dgc.revocationdistribution.exception.PreconditionFailedException;
+import europa.ec.dgc.revocationdistribution.exception.TokenValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -62,6 +63,19 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
 
     }
 
+    /**
+     * Handles {@link TokenValidationException} when a validation failed.
+     *
+     * @param e the thrown {@link TokenValidationException}
+     * @return A ResponseEntity with a ErrorMessage inside.
+     */
+    @ExceptionHandler(TokenValidationException.class)
+    public ResponseEntity<Object> handleException(TokenValidationException e) {
+        return ResponseEntity
+            .status(e.getStatus())
+            .body(e.getMessage());
+    }
+
 
     /**
      * Global Exception Handler to wrap exceptions into a readable JSON Object.
@@ -71,6 +85,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception e) {
+        log.error("Uncatched Exception {}", e);
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .contentType(MediaType.APPLICATION_JSON)
