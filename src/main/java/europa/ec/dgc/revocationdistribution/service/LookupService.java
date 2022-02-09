@@ -84,10 +84,13 @@ public class LookupService {
         ResponseEntity<DidDocument> responseEntity;
         DidDocument didDocument;
 
-        String urlEncodedHash = Base64URL.encode(Base64.getDecoder().decode(hash)).toString();
-
         try {
+            String urlEncodedHash = Base64URL.encode(Base64.getDecoder().decode(hash)).toString();
             responseEntity = issuanceDgciRestClient.getDgciByHash(urlEncodedHash);
+        } catch (IllegalArgumentException e) {
+            log.error("Encoding of dgci hash for public key request failed.");
+            throw new TokenValidationException("Token verification failed: Wrong format of DGCI hash for public key",
+                HttpStatus.BAD_REQUEST.value());
         } catch (FeignException e) {
             log.error("Download of dgdi failed. {}",
                 e.status());
