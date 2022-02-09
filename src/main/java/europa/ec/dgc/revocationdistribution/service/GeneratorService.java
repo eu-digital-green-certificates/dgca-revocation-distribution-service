@@ -360,6 +360,9 @@ public class GeneratorService {
         // remove all orphaned entries in hashes table
         revocationListService.deleteAllOrphanedHashes();
 
+        //delete all older calculations of the revocation list json
+        revocationListService.deleteAllOutdatedJsonLists(etag);
+
     }
 
 

@@ -119,6 +119,11 @@ public class RevocationListService {
         hashesRepository.deleteAllOrphanedHashes();
     }
 
+    @Transactional
+    public void deleteAllOutdatedJsonLists(String currendEtag) {
+        revocationListJsonRepository.deleteAllOutdatedEntries(currendEtag);
+    }
+
 
     public List<PartitionResponseDto> getPartitionsByKidAndDate(String kidId, ZonedDateTime ifModifiedSince) {
         return new ArrayList<>();
