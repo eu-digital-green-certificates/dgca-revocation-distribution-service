@@ -3,6 +3,7 @@ package europa.ec.dgc.revocationdistribution.service;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.util.Base64URL;
 import europa.ec.dgc.revocationdistribution.client.IssuanceDgciRestClient;
 import europa.ec.dgc.revocationdistribution.dto.DidAuthentication;
 import europa.ec.dgc.revocationdistribution.dto.DidDocument;
@@ -15,6 +16,7 @@ import java.security.PublicKey;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import io.jsonwebtoken.Jwt;
 import java.util.stream.Collectors;
@@ -82,8 +84,10 @@ public class LookupService {
         ResponseEntity<DidDocument> responseEntity;
         DidDocument didDocument;
 
+        String urlEncodedHash = Base64URL.encode(Base64.getDecoder().decode(hash)).toString();
+
         try {
-            responseEntity = issuanceDgciRestClient.getDgciByHash(hash);
+            responseEntity = issuanceDgciRestClient.getDgciByHash(urlEncodedHash);
         } catch (FeignException e) {
             log.error("Download of dgdi failed. {}",
                 e.status());
