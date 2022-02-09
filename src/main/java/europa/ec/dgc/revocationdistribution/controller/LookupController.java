@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/lookup")
+@RequestMapping("/revocation/lookup")
 @Slf4j
 @RequiredArgsConstructor
 public class LookupController {
