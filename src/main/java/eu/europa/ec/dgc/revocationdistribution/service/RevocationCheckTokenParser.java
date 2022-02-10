@@ -63,6 +63,12 @@ public class RevocationCheckTokenParser {
      */
     public Jwt extractPayload(String jwtCompact) {
         String[] splitToken = jwtCompact.split("\\.");
+
+        if (splitToken.length < 2 ) {
+            throw new TokenValidationException("Failed to parse revocation check token. Wrong format.",
+                HttpStatus.BAD_REQUEST.value());
+        }
+
         String unsignedToken = splitToken[0] + "." + splitToken[1] + ".";
         return Jwts.parser().parse(unsignedToken);
     }
