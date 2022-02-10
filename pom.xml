@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
-	<groupId>europa.ec.dgc</groupId>
+	<groupId>eu.europa.ec.dgc</groupId>
 	<artifactId>dgca-revocation-distribution-service</artifactId>
 	<version>latest</version>
 	<name>dgca-revocation-distribution-service</name>
