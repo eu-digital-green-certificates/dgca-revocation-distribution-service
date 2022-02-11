@@ -41,7 +41,7 @@ public interface SliceRepository extends JpaRepository<SliceEntity, String> {
 
     @Modifying
     @Query("UPDATE SliceEntity s SET s.toBeDeleted = true WHERE s.kid in :kids")
-    void setToBeDeletedForKids(@Param("kids") List<String> kIds);
+    void setToBeDeletedForKids(@Param("kids") List<String> kids);
 
     List<SliceEntity> findAllByEtagAndKidAndId(String etag, String kid, String id);
 

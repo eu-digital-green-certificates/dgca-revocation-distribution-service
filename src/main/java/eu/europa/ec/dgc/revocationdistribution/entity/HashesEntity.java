@@ -54,19 +54,19 @@ public class HashesEntity {
     /**
      * The first byte of the hash
      */
-    @Column(name = "x", nullable = false, length=1, columnDefinition="CHAR")
+    @Column(name = "x", nullable = false, length = 1, columnDefinition = "CHAR")
     private char x;
 
     /**
      * The second byte of the hash
      */
-    @Column(name = "y", nullable = false, length=1, columnDefinition="CHAR")
+    @Column(name = "y", nullable = false, length = 1, columnDefinition = "CHAR")
     private char y;
 
     /**
      * The third byte of the hash
      */
-    @Column(name = "z", nullable = false, length=1, columnDefinition="CHAR")
+    @Column(name = "z", nullable = false, length = 1, columnDefinition = "CHAR")
     private char z;
 
     /**

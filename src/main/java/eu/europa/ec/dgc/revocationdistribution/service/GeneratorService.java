@@ -95,7 +95,9 @@ public class GeneratorService {
     @PostConstruct
     private void postConstruct() {
         etag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
-        if (etag == null) { etag = ""; }
+        if (etag == null) {
+            etag = "";
+        }
     }
 
     public void generateNewDataSet() {
@@ -131,12 +133,12 @@ public class GeneratorService {
         //Update Items
         kidViewEntityList.stream().forEach(kve -> {
 
-            if (kve.getTypes().isEmpty() && kve.getExpired() == null ) {
-                log.debug("Delete kid entry : {} ",kve.getKid());
-                if ( itemsMap.remove(kve.getKid()) != null ) {
-                    changeList.getDeleted().add( new ChangeListItem(kve, null));
+            if (kve.getTypes().isEmpty() && kve.getExpired() == null) {
+                log.debug("Delete kid entry : {} ", kve.getKid());
+                if (itemsMap.remove(kve.getKid()) != null) {
+                    changeList.getDeleted().add(new ChangeListItem(kve, null));
                 }
-            }else{
+            } else {
                 if (kve.isUpdated()) {
                     RevocationListJsonResponseItemDto oldItem;
                     RevocationListJsonResponseItemDto item;
@@ -148,9 +150,9 @@ public class GeneratorService {
                     item.setExpires(kve.getExpired());
                     oldItem = itemsMap.put(item.getKid(), item);
                     if (oldItem != null) {
-                        changeList.getUpdated().add( new ChangeListItem(kve, oldItem.getMode()));
+                        changeList.getUpdated().add(new ChangeListItem(kve, oldItem.getMode()));
                     } else {
-                        changeList.getCreated().add( new ChangeListItem(kve,null));
+                        changeList.getCreated().add(new ChangeListItem(kve, null));
                     }
                 }
             }
@@ -168,13 +170,13 @@ public class GeneratorService {
 
     private void handleChangeList(ChangeList changeList) {
         //handle deleted kIds
-        List<String>deletedKids =
+        List<String> deletedKids =
             changeList.getDeleted().stream().map(ChangeListItem::getKidId).collect(Collectors.toList());
 
         markDataForRemoval(deletedKids);
 
         //handle updated kIds
-        List<String>updatedKids =
+        List<String> updatedKids =
             changeList.getUpdated().stream().map(ChangeListItem::getKidId).collect(Collectors.toList());
 
         markDataForRemoval(updatedKids);
@@ -186,8 +188,8 @@ public class GeneratorService {
     }
 
 
-    private void markDataForRemoval(List<String> kIds){
-        if(!kIds.isEmpty()) {
+    private void markDataForRemoval(List<String> kIds) {
+        if (!kIds.isEmpty()) {
             partitionRepository.setToBeDeletedForKids(kIds);
             sliceRepository.setToBeDeletedForKids(kIds);
         }
@@ -196,14 +198,14 @@ public class GeneratorService {
 
     private void generatePattern(List<ChangeListItem> changeListItems) {
 
-        for(ChangeListItem changeItem : changeListItems) {
-            switch(changeItem.getNewStorageMode()){
+        for (ChangeListItem changeItem : changeListItems) {
+            switch (changeItem.getNewStorageMode()) {
                 case "POINT": {
                     log.debug("Create pattern for kid {} in POINT mode.", changeItem.getKidId());
                     generatePartitionsForKidInPointMode(changeItem);
                     break;
                 }
-                case "VECTOR":{
+                case "VECTOR": {
                     log.debug("Create pattern for kid {} in VECTOR mode.", changeItem.getKidId());
                     generatePartitionsForKidInVectorMode(changeItem);
                     break;
@@ -221,7 +223,7 @@ public class GeneratorService {
         }
     }
 
-    private void generatePartitionsForKidInPointMode(ChangeListItem changeItem){
+    private void generatePartitionsForKidInPointMode(ChangeListItem changeItem) {
 
         List<ChunkMetaViewDto> entities = pointViewRepository.findAllByKid(changeItem.getKidId()).stream()
             .map(pointViewMapper::map).collect(Collectors.toList());
@@ -231,17 +233,17 @@ public class GeneratorService {
 
     }
 
-    private void generatePartitionsForKidInVectorMode(ChangeListItem changeItem){
+    private void generatePartitionsForKidInVectorMode(ChangeListItem changeItem) {
 
         //get all ids for kId
         List<String> partitionIds = vectorViewRepository.findDistinctIdsByKid(changeItem.getKidId());
 
-        log.debug("PartionIds {}",partitionIds);
+        log.debug("PartionIds {}", partitionIds);
 
-        for (String partitionId : partitionIds ){
+        for (String partitionId : partitionIds) {
             List<ChunkMetaViewDto> entities =
                 vectorViewRepository.findAllByKidAndId(changeItem.getKidId(), partitionId).stream()
-                .map(vectorViewMapper::map).collect(Collectors.toList());
+                    .map(vectorViewMapper::map).collect(Collectors.toList());
 
             generatePartition(entities, changeItem.getKidId(), partitionId);
 
@@ -249,14 +251,14 @@ public class GeneratorService {
 
     }
 
-    private void generatePartitionsForKidInCoordinateMode(ChangeListItem changeItem){
+    private void generatePartitionsForKidInCoordinateMode(ChangeListItem changeItem) {
 
         //get all ids for kId
         List<String> partitionIds = coordinateViewRepository.findDistinctIdsByKid(changeItem.getKidId());
 
-        log.debug("PartionIds {}",partitionIds);
+        log.debug("PartionIds {}", partitionIds);
 
-        for (String partitionId : partitionIds ){
+        for (String partitionId : partitionIds) {
             List<ChunkMetaViewDto> entities =
                 coordinateViewRepository.findAllByKidAndId(changeItem.getKidId(), partitionId).stream()
                     .map(coordinateViewMapper::map).collect(Collectors.toList());
@@ -275,19 +277,18 @@ public class GeneratorService {
         ZonedDateTime lastUpdated = ZonedDateTime.parse("2021-06-01T00:00:00Z");
         ZonedDateTime expired = ZonedDateTime.parse("2021-06-01T00:00:00Z");
 
-        if (entities.isEmpty()){
+        if (entities.isEmpty()) {
             log.info("No Entries found in Point View for kid: {} id: {} x: {} y: {}", kid, id);
             return;
         }
 
-        Map<String, Map<String,PartitionChunksJsonItemDto>> chunksJson = new HashMap<>();
+        Map<String, Map<String, PartitionChunksJsonItemDto>> chunksJson = new HashMap<>();
 
         for (ChunkMetaViewDto mve : entities) {
 
-            if ( !Objects.equals(mve.getKid(), kid) || !Objects.equals(mve.getId(), id)) {
-                log.error("Kid and/or id does not match: kid: {} , {} id {}, {}",kid , mve.getKid() , id , mve.getId());
-            }
-            else {
+            if (!Objects.equals(mve.getKid(), kid) || !Objects.equals(mve.getId(), id)) {
+                log.error("Kid and/or id does not match: kid: {} , {} id {}, {}", kid, mve.getKid(), id, mve.getId());
+            } else {
 
                 SliceDataDto sliceDataDto = sliceCalculationService.calculateChunk(mve.getHashes());
                 if (sliceDataDto != null) {
@@ -340,9 +341,9 @@ public class GeneratorService {
     }
 
 
-        private void savePartition(String kid, String id, String x, String y, String z,
+    private void savePartition(String kid, String id, String x, String y, String z,
                                ZonedDateTime lastUpdated, ZonedDateTime expired,
-                               Map<String, Map<String,PartitionChunksJsonItemDto>> chunksJson){
+                               Map<String, Map<String, PartitionChunksJsonItemDto>> chunksJson) {
 
         PartitionEntity partitionEntity = new PartitionEntity();
 
@@ -362,11 +363,9 @@ public class GeneratorService {
     }
 
 
-
-
     private List<RevocationListJsonResponseItemDto> getRevocationListData(String etag) {
-        Optional<RevocationListJsonEntity> optionalData =  revocationListService.getRevocationListJsonData(etag);
-        if(optionalData.isPresent()) {
+        Optional<RevocationListJsonEntity> optionalData = revocationListService.getRevocationListJsonData(etag);
+        if (optionalData.isPresent()) {
             return optionalData.get().getJsonData();
         }
 
@@ -384,7 +383,6 @@ public class GeneratorService {
         revocationListService.deleteAllOutdatedJsonLists(etag);
 
     }
-
 
 
 }

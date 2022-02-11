@@ -55,15 +55,15 @@ public class RevocationListJsonEntity {
 
 
     /**
-     *  The creation date of the entity
+     * The creation date of the entity
      */
     @Column(name = "created_at")
     private ZonedDateTime createdAt;
 
     @PrePersist
-    private void prePersistFunction(){
+    private void prePersistFunction() {
 
-        if(createdAt == null){
+        if (createdAt == null) {
             createdAt = ZonedDateTime.now();
         }
     }

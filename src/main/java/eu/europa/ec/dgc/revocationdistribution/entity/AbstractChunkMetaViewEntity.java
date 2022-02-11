@@ -83,13 +83,13 @@ public abstract class AbstractChunkMetaViewEntity {
     private String chunk;
 
     /**
-     *  The creation date of the entity.
+     * The creation date of the entity.
      */
     @Column(name = "lastupdated")
     private ZonedDateTime lastUpdated;
 
     /**
-     *  The expiration date of the entity.
+     * The expiration date of the entity.
      */
     @Column(name = "expired")
     private ZonedDateTime expired;

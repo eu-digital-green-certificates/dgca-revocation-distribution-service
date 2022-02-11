@@ -25,10 +25,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface CoordinateViewRepository extends ReadOnlyRepository<CoordinateViewEntity, String>{
+public interface CoordinateViewRepository extends ReadOnlyRepository<CoordinateViewEntity, String> {
 
     List<CoordinateViewEntity> findAllByKidAndId(String kid, String id);
 
     @Query("SELECT DISTINCT c.id FROM CoordinateViewEntity c WHERE c.kid = :kid")
-    List<String> findDistinctIdsByKid(@Param("kid") String kId);
+    List<String> findDistinctIdsByKid(@Param("kid") String kid);
 }

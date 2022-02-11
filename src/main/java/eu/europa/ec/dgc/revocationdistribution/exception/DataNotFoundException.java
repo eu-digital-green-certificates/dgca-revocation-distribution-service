@@ -20,6 +20,6 @@
 
 package eu.europa.ec.dgc.revocationdistribution.exception;
 
-public class DataNotFoundException extends RuntimeException{
+public class DataNotFoundException extends RuntimeException {
 
 }

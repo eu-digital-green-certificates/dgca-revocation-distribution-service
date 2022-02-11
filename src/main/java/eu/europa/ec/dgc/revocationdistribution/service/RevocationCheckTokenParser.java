@@ -28,17 +28,20 @@ import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureException;
 import java.security.PublicKey;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class RevocationCheckTokenParser {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * parse Token.
+     *
      * @param jwtCompact jwtCompact
-     * @param publicKey publicKey
+     * @param publicKey  publicKey
      * @return RevocationCheckTokenPayload
      */
     public RevocationCheckTokenPayload parseToken(String jwtCompact, PublicKey publicKey) {
@@ -51,6 +54,7 @@ public class RevocationCheckTokenParser {
             throw new TokenValidationException("Failed to parse revocation check token",
                 HttpStatus.BAD_REQUEST.value());
         } catch (SignatureException e) {
+            log.warn("Signature check failed for revocation check token: {}", e.getMessage());
             throw new TokenValidationException("Signature check failed for revocation check token",
                 HttpStatus.BAD_REQUEST.value());
         }
@@ -58,13 +62,14 @@ public class RevocationCheckTokenParser {
 
     /**
      * extract payload.
+     *
      * @param jwtCompact jwtCompact
      * @return JWT
      */
     public Jwt extractPayload(String jwtCompact) {
         String[] splitToken = jwtCompact.split("\\.");
 
-        if (splitToken.length < 2 ) {
+        if (splitToken.length < 2) {
             throw new TokenValidationException("Failed to parse revocation check token. Wrong format.",
                 HttpStatus.BAD_REQUEST.value());
         }

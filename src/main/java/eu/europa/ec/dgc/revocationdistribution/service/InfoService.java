@@ -41,7 +41,7 @@ public class InfoService {
     public String getValueForKey(String key) {
         Optional<InfoEntity> optionalValue = infoRepository.findById(key);
 
-        if(optionalValue.isPresent() && !optionalValue.isEmpty()) {
+        if (optionalValue.isPresent() && !optionalValue.isEmpty()) {
             return optionalValue.get().getValue();
         } else {
             return null;

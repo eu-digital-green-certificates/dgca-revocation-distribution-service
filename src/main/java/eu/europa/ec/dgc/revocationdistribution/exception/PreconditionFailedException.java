@@ -20,6 +20,6 @@
 
 package eu.europa.ec.dgc.revocationdistribution.exception;
 
-public class PreconditionFailedException extends RuntimeException{
+public class PreconditionFailedException extends RuntimeException {
 
 }

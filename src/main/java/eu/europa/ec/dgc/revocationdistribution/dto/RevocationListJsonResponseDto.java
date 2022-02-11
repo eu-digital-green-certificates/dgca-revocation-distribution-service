@@ -29,7 +29,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-public class RevocationListJsonResponseDto implements Serializable{
+public class RevocationListJsonResponseDto implements Serializable {
 
     List<RevocationListJsonResponseItemDto> items;
 

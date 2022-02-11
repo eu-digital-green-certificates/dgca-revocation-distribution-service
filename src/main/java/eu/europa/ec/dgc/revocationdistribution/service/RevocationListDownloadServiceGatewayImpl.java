@@ -51,14 +51,13 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty("dgc.gateway.connector.enabled")
 public class RevocationListDownloadServiceGatewayImpl {
 
-    private final  DgcGatewayRevocationListDownloadConnector dgcGatewayRevocationListDownloadConnector;
+    private final DgcGatewayRevocationListDownloadConnector dgcGatewayRevocationListDownloadConnector;
 
     private final InfoService infoService;
 
     private final RevocationListService revocationListservice;
 
     private final GeneratorService generatorService;
-
 
 
     private ZonedDateTime lastUpdatedBatchDate;
@@ -72,7 +71,7 @@ public class RevocationListDownloadServiceGatewayImpl {
         if (lastUpdatedString != null)
             try {
                 lastUpdatedBatchDate = ZonedDateTime.parse(lastUpdatedString);
-            }catch(DateTimeParseException e) {
+            } catch (DateTimeParseException e) {
                 log.error("Could not parse loaded last Updated timestamp: {}", lastUpdatedString);
             }
     }
@@ -89,22 +88,22 @@ public class RevocationListDownloadServiceGatewayImpl {
 
         DgcGatewayRevocationListDownloadIterator revocationListIterator;
 
-        if(lastUpdatedBatchDate != null) {
+        if (lastUpdatedBatchDate != null) {
             revocationListIterator =
                 dgcGatewayRevocationListDownloadConnector.getRevocationListDownloadIterator(lastUpdatedBatchDate);
-        } else{
+        } else {
             revocationListIterator = dgcGatewayRevocationListDownloadConnector.getRevocationListDownloadIterator();
         }
 
         List<String> deletedBatchIds = new ArrayList<>();
         List<String> goneBatchIds = new ArrayList<>();
 
-        while(revocationListIterator.hasNext()) {
-            List<RevocationBatchListDto.RevocationBatchListItemDto> batchListItems =  revocationListIterator.next();
+        while (revocationListIterator.hasNext()) {
+            List<RevocationBatchListDto.RevocationBatchListItemDto> batchListItems = revocationListIterator.next();
 
             log.info(batchListItems.toString());
 
-            for(RevocationBatchListDto.RevocationBatchListItemDto batchListItem : batchListItems) {
+            for (RevocationBatchListDto.RevocationBatchListItemDto batchListItem : batchListItems) {
                 if (batchListItem.getDeleted()) {
                     deletedBatchIds.add(batchListItem.getBatchId());
                 } else {
@@ -115,7 +114,7 @@ public class RevocationListDownloadServiceGatewayImpl {
                         log.info(revocationBatchDto.toString());
                         revocationListservice.updateRevocationListBatch(batchListItem.getBatchId(), revocationBatchDto);
 
-                    } catch(RevocationBatchGoneException e) {
+                    } catch (RevocationBatchGoneException e) {
                         goneBatchIds.add(batchListItem.getBatchId());
                     } catch (RevocationBatchDownloadException | RevocationBatchParseException e) {
                         log.error("Batch download failed");
@@ -138,8 +137,8 @@ public class RevocationListDownloadServiceGatewayImpl {
         log.info("Revocation list download finished");
     }
 
-    private void saveLastUpdated(){
-        log.info("Save last updated date: {}",lastUpdatedBatchDate);
+    private void saveLastUpdated() {
+        log.info("Save last updated date: {}", lastUpdatedBatchDate);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
         infoService.setValueForKey(InfoService.LAST_UPDATED_KEY, dateTimeFormatter.format(lastUpdatedBatchDate));
     }

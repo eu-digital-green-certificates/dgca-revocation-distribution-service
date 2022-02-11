@@ -27,7 +27,7 @@ import lombok.Value;
 
 @Value
 @AllArgsConstructor
-public  class ChunkMetaViewDto {
+public class ChunkMetaViewDto {
 
     String rowId;
 

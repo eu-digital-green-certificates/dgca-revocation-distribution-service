@@ -62,6 +62,7 @@ public class RevocationListController {
 
     /**
      * Http Method for getting the revocation list.
+     *
      * @return
      */
     @GetMapping(path = "lists", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -75,7 +76,7 @@ public class RevocationListController {
         }
 
         Optional<RevocationListJsonEntity> revocationListJsonEntity = revocationListService.getRevocationListJsonData(currentEtag);
-        if(!revocationListJsonEntity.isPresent()) {
+        if (!revocationListJsonEntity.isPresent()) {
             return ResponseEntity.notFound().build();
         }
 
@@ -85,6 +86,7 @@ public class RevocationListController {
 
     /**
      * Http Method for getting the all partitions a kid.
+     *
      * @return
      */
     @GetMapping(path = "lists/{kid}/partitions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -93,7 +95,7 @@ public class RevocationListController {
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
     ) {
-        
+
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
@@ -121,6 +123,7 @@ public class RevocationListController {
 
     /**
      * Http Method for getting the a partition of a kid.
+     *
      * @return
      */
     @GetMapping(path = "lists/{kid}/partitions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -132,7 +135,7 @@ public class RevocationListController {
     ) {
 
         kid = transformBase64Url(kid);
-        
+
         String currentEtag = checkEtag(ifMatch);
 
         PartitionResponseDto result;
@@ -144,7 +147,7 @@ public class RevocationListController {
             } catch (DateTimeParseException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            result = revocationListService.getPartitionsByKidAndId(currentEtag, kid, id );// ifModifiedDateTime);
+            result = revocationListService.getPartitionsByKidAndId(currentEtag, kid, id);// ifModifiedDateTime);
         } else {
             result = revocationListService.getPartitionsByKidAndId(currentEtag, kid, id);
         }
@@ -156,29 +159,29 @@ public class RevocationListController {
 
     /**
      * Http Method for getting the data of a partition.
+     *
      * @return gzip file containing data
      */
     @PostMapping(path = "lists/{kid}/partitions/{id}/slices",
         consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces ="application/gzip")
+        produces = "application/gzip")
     public ResponseEntity<byte[]> getPartitionChunksData(
         @PathVariable String kid,
         @PathVariable String id,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
-        @Valid @RequestBody(required = false)  List<String> reqestedChunksList
+        @Valid @RequestBody(required = false) List<String> reqestedChunksList
     ) {
 
         kid = transformBase64Url(kid);
-        
+
         String currentEtag = checkEtag(ifMatch);
 
         byte[] result;
 
-        if (reqestedChunksList == null){
+        if (reqestedChunksList == null) {
 
             result = revocationListService.getAllChunkDataFromPartition(currentEtag, kid, id);
-        }
-        else {
+        } else {
             result = revocationListService.getAllChunkDataFromPartitionWithFilter(currentEtag, kid, id, reqestedChunksList);
         }
 
@@ -187,20 +190,20 @@ public class RevocationListController {
 
     /**
      * Http Method for getting the slice data.
+     *
      * @return gzip file containing slice data
      */
-    @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices", produces ="application/gzip")
+    @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices", produces = "application/gzip")
     public ResponseEntity<byte[]> getChunk(
         @PathVariable String kid,
         @PathVariable String id,
         @PathVariable String cid,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch
     ) {
-        
+
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
-
 
 
         byte[] result = revocationListService.getChunkData(currentEtag, kid, id, cid);
@@ -210,29 +213,29 @@ public class RevocationListController {
 
     /**
      * Http Method for getting the data of a partition.
+     *
      * @return gzip file containing data
      */
     @PostMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices",
         consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces ="application/gzip")
+        produces = "application/gzip")
     public ResponseEntity<byte[]> getPartitionChunks(
         @PathVariable String kid,
         @PathVariable String id,
         @PathVariable String cid,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
-        @Valid @RequestBody(required = false)  List<String> reqestedSliceList
+        @Valid @RequestBody(required = false) List<String> reqestedSliceList
     ) {
-        
+
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
 
         byte[] result;
 
-        if (reqestedSliceList == null){
+        if (reqestedSliceList == null) {
             result = revocationListService.getChunkData(currentEtag, kid, id, cid);
-        }
-        else {
+        } else {
             result = revocationListService.getAllSliceDataForChunkWithFilter(currentEtag, kid, id, cid, reqestedSliceList);
         }
 
@@ -240,13 +243,13 @@ public class RevocationListController {
     }
 
 
-
     /**
      * Http Method for getting the slice data.
+     *
      * @return gzip file containing slice data
      */
     @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices/{sid}",
-        produces ="application/gzip")
+        produces = "application/gzip")
     public ResponseEntity<byte[]> getSlice(
         @PathVariable String kid,
         @PathVariable String id,
@@ -255,21 +258,21 @@ public class RevocationListController {
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
     ) {
-        
+
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
 
         byte[] result = revocationListService.getSliceData(currentEtag, kid, id, cid, sid);
 
-        if (result== null) {
+        if (result == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         return ResponseEntity.ok(result);
     }
-    
-     /**
+
+    /**
      * Method to transform a base64url object
      * returns a base64 object from a base64url object
      */
@@ -278,8 +281,8 @@ public class RevocationListController {
     }
 
     /**
-     *
      * Method to check Etag Header
+     *
      * @param etag to check
      * @return etag without quotes
      * @throws PreconditionFailedException

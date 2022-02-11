@@ -41,7 +41,7 @@ import org.springframework.data.annotation.Immutable;
 @Immutable
 public class KidViewEntity {
 
-     public static final List<String> TYPES_NAMES = new ArrayList<>(List.of( "UCI", "SIGNATURE", "COUNTRYCODEUCI"));
+    public static final List<String> TYPES_NAMES = new ArrayList<>(List.of("UCI", "SIGNATURE", "COUNTRYCODEUCI"));
 
     /**
      * The KID of the Key used to sign the CMS.
@@ -63,13 +63,13 @@ public class KidViewEntity {
     private String storageMode;
 
     /**
-     *  The creation date of the entity
+     * The creation date of the entity
      */
     @Column(name = "lastupdated")
     private ZonedDateTime lastUpdated;
 
     /**
-     *  The expiration date of the entity
+     * The expiration date of the entity
      */
     @Column(name = "expired")
     private ZonedDateTime expired;

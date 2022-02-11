@@ -12,13 +12,21 @@ import java.security.NoSuchAlgorithmException;
 
 public interface BloomFilter {
     float getP();
+
     int getK();
+
     long getM();
+
     int getN();
+
     int getCurrentN();
+
     void add(byte[] element) throws NoSuchAlgorithmException, IOException;
+
     boolean mightContain(byte[] element) throws NoSuchAlgorithmException, IOException;
+
     void readFrom(InputStream inputStream);
+
     void writeTo(OutputStream outputStream) throws IOException;
-    
+
 }

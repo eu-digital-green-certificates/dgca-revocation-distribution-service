@@ -46,12 +46,13 @@ public class LookupController {
 
     /**
      * Http Method for getting the revocation list.
+     *
      * @return
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<String>> lockupRevocation(
-        @Valid @RequestBody(required = false)  List<String> revocationCheckTokenList
-    ){
+        @Valid @RequestBody(required = false) List<String> revocationCheckTokenList
+    ) {
         if (revocationCheckTokenList.isEmpty()) {
             return ResponseEntity.ok(new ArrayList<>());
         }
@@ -63,7 +64,7 @@ public class LookupController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping(path= "/key", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/key", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getKey() {
         PublicKey result;
         String hash = "Pu3LWoDPQv3lH53fcYmCOb12mHPd354tAXdWJDQns1U%3d";

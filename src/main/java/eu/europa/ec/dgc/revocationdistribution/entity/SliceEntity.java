@@ -78,14 +78,14 @@ public class SliceEntity {
     private String hash;
 
     /**
-     *  The creation date of the entity.
+     * The creation date of the entity.
      */
     @Column(name = "lastupdated")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "UTC")
     private ZonedDateTime lastUpdated;
 
     /**
-     *  The expiration date of the entity.
+     * The expiration date of the entity.
      */
     @Column(name = "expired")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "UTC")
@@ -100,7 +100,7 @@ public class SliceEntity {
     /**
      * Indicates if the slice needs to be deleted on etag change.
      */
-    @Column(name= "to_be_deleted")
+    @Column(name = "to_be_deleted")
     private boolean toBeDeleted;
 
 }

@@ -47,7 +47,7 @@ public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationS
         if (hashes.length <= 0)
             return null;
 
-        BloomFilter bloomFilter = new BloomFilterImpl(hashes.length,properties.getBloomFilter().getProbRate());
+        BloomFilter bloomFilter = new BloomFilterImpl(hashes.length, properties.getBloomFilter().getProbRate());
 
         SliceDataDto sliceDataDto = new SliceDataDto();
 
@@ -59,7 +59,7 @@ public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationS
                 byte[] hashBytes = helperFunctions.getBytesFromHexString(hash);
                 bloomFilter.add(hashBytes);
             } catch (NoSuchAlgorithmException | IOException | DecoderException e) {
-                log.error("Could not add hash to bloom filter: {}",hash);
+                log.error("Could not add hash to bloom filter: {}", hash);
             }
         }
 
@@ -67,7 +67,7 @@ public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationS
 
         try {
             bloomFilter.writeTo(baos);
-        } catch (IOException e){
+        } catch (IOException e) {
             log.error("Could not get bloom filter binary data.");
             return null;
         }
@@ -76,7 +76,7 @@ public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationS
 
         try {
             sliceDataDto.getMetaData().setHash(helperFunctions.calculateHash(sliceDataDto.getBinaryData()));
-        } catch (NoSuchAlgorithmException e){
+        } catch (NoSuchAlgorithmException e) {
             log.error("Could calculate hash for binary data.");
             return null;
         }

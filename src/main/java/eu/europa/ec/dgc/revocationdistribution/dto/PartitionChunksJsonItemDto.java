@@ -28,12 +28,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PartitionChunksJsonItemDto implements Serializable{
+public class PartitionChunksJsonItemDto implements Serializable {
 
-        private String type;
+    private String type;
 
-        private String version;
+    private String version;
 
-        private String hash;
+    private String hash;
 
 }

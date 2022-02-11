@@ -22,6 +22,6 @@ package eu.europa.ec.dgc.revocationdistribution.repository;
 
 import eu.europa.ec.dgc.revocationdistribution.entity.KidViewEntity;
 
-public interface KidViewRepository extends ReadOnlyRepository<KidViewEntity, String>{
+public interface KidViewRepository extends ReadOnlyRepository<KidViewEntity, String> {
 
 }

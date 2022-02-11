@@ -32,16 +32,16 @@ import eu.europa.ec.dgc.revocationdistribution.exception.TokenValidationExceptio
 import eu.europa.ec.dgc.revocationdistribution.repository.HashesRepository;
 import feign.FeignException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
 import java.security.PublicKey;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import io.jsonwebtoken.Jwt;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.util.encoders.Hex;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -56,7 +56,6 @@ public class LookupService {
     private final IssuanceDgciRestClient issuanceDgciRestClient;
 
     private final HashesRepository hashesRepository;
-
 
 
     public List<RevocationCheckTokenPayload> validateRevocationCheckTokens(List<String> revocationCheckTokens)
@@ -95,23 +94,30 @@ public class LookupService {
         List<String> hashes = tokenPayloads.stream().map(RevocationCheckTokenPayload::getPayload)
             .flatMap(List::stream).collect(Collectors.toList());
 
-        return  hashesRepository.getHashesPresentInListAndDb(hashes);
+        return hashesRepository.getHashesPresentInListAndDb(hashes);
 
     }
 
 
-    public PublicKey downloadPublicKey(String hash){
+    public PublicKey downloadPublicKey(String hash) {
         ResponseEntity<DidDocument> responseEntity;
         DidDocument didDocument;
 
         try {
-            String urlEncodedHash = Base64URL.encode(Base64.getDecoder().decode(hash)).toString();
+            String urlEncodedHash = Base64URL.encode(Hex.decode(hash)).toString();
             responseEntity = issuanceDgciRestClient.getDgciByHash(urlEncodedHash);
         } catch (IllegalArgumentException e) {
             log.error("Encoding of dgci hash for public key request failed.");
             throw new TokenValidationException("Token verification failed: Wrong format of DGCI hash for public key",
                 HttpStatus.BAD_REQUEST.value());
         } catch (FeignException e) {
+            if (e.status() == HttpStatus.NOT_FOUND.value()) {
+                log.error("Download of dgdi failed. {}",
+                    e.status());
+                throw new TokenValidationException("Token verification failed: Public key not found.",
+                    HttpStatus.BAD_REQUEST.value());
+            }
+
             log.error("Download of dgdi failed. {}",
                 e.status());
             throw new TokenValidationException("Token verification failed due to Server Error",
@@ -133,7 +139,7 @@ public class LookupService {
         DidAuthentication didAuth = didDocument.getAuthentication().get(0);
 
         try {
-         return  ECKey.parse(didAuth.getPublicKeyJsw().toString()).toPublicKey();
+            return ECKey.parse(didAuth.getPublicKeyJsw().toString()).toPublicKey();
         } catch (ParseException | JOSEException e) {
             log.error("Parsing of publicKey failed. {}", e);
             throw new TokenValidationException("Token verification failed: Public key could not be parsed",

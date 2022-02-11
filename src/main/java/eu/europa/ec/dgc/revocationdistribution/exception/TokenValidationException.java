@@ -20,7 +20,7 @@
 
 package eu.europa.ec.dgc.revocationdistribution.exception;
 
-public class TokenValidationException extends RuntimeException{
+public class TokenValidationException extends RuntimeException {
     public int getStatus() {
         return status;
     }

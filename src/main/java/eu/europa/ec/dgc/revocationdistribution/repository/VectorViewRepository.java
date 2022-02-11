@@ -25,11 +25,11 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface VectorViewRepository extends ReadOnlyRepository<VectorViewEntity, String>{
+public interface VectorViewRepository extends ReadOnlyRepository<VectorViewEntity, String> {
 
     List<VectorViewEntity> findAllByKidAndId(String kid, String id);
 
     @Query("SELECT DISTINCT v.id FROM VectorViewEntity v WHERE v.kid = :kid")
-    List<String> findDistinctIdsByKid(@Param("kid") String kId);
+    List<String> findDistinctIdsByKid(@Param("kid") String kid);
 
 }

@@ -29,7 +29,7 @@ import lombok.Setter;
 @Setter
 public class ChangeListItem {
 
-    public ChangeListItem (KidViewEntity kve, String oldStorageMode){
+    public ChangeListItem(KidViewEntity kve, String oldStorageMode) {
         this.kidId = kve.getKid();
         this.lastUpdated = kve.getLastUpdated();
         this.expired = kve.getExpired();

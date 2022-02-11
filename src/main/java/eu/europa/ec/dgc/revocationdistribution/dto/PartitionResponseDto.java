@@ -42,8 +42,8 @@ public class PartitionResponseDto {
     ZonedDateTime lastUpdated;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "UTC")
-     ZonedDateTime expired;
+    ZonedDateTime expired;
 
-     Map<String, Map<String,PartitionChunksJsonItemDto>> chunks;
+    Map<String, Map<String, PartitionChunksJsonItemDto>> chunks;
 
 }

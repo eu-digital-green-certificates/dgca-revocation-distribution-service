@@ -30,8 +30,8 @@ public class BloomFilterImpl implements BloomFilter, Serializable {
     private float probRate;
     private AtomicIntegerArray data;
     private final static int NUM_BITS = 8;
-    private final static byte NUM_BYTES=Integer.BYTES;
-    private final static byte NUM_BIT_FORMAT = (NUM_BYTES*NUM_BITS);
+    private final static byte NUM_BYTES = Integer.BYTES;
+    private final static byte NUM_BIT_FORMAT = (NUM_BYTES * NUM_BITS);
 
     //@Serial
     private static final long serialVersionUID = 7526472295622776147L;
@@ -43,10 +43,10 @@ public class BloomFilterImpl implements BloomFilter, Serializable {
         this.readFromStream(dis);
     }
 
-    public BloomFilterImpl(int size, byte numberOfHashes,int numberOfElements) {
+    public BloomFilterImpl(int size, byte numberOfHashes, int numberOfElements) {
         super();
 
-        if (numberOfHashes <= 0 || size<=0) {
+        if (numberOfHashes <= 0 || size <= 0) {
             throw new IllegalArgumentException("numberOfElements <=0, numberOfHashes <= 0, probRate <= 1");
         }
 
@@ -54,49 +54,49 @@ public class BloomFilterImpl implements BloomFilter, Serializable {
             throw new IllegalArgumentException("numberOfHashes cannot be 0");
         }
 
-        size = (size / NUM_BYTES)+(size % NUM_BYTES);  
+        size = (size / NUM_BYTES) + (size % NUM_BYTES);
 
         long heapFreeSize = Runtime.getRuntime().freeMemory();
 
-        if(heapFreeSize<(long)size*NUM_BYTES) {
+        if (heapFreeSize < (long) size * NUM_BYTES) {
             throw new IllegalArgumentException("Heap size not big enough");
         }
         this.definedElementAmount = numberOfElements;
-        this.numBits = (long)size*NUM_BIT_FORMAT;
+        this.numBits = (long) size * NUM_BIT_FORMAT;
         this.numberOfHashes = numberOfHashes;
-        this.probRate = (float) Math.pow(1 - Math.exp(-numberOfHashes / (float)( (float)(this.numBits / NUM_BITS) / numberOfElements)), numberOfHashes);
+        this.probRate = (float) Math.pow(1 - Math.exp(-numberOfHashes / ((float) (this.numBits / NUM_BITS) / numberOfElements)), numberOfHashes);
         this.data = new AtomicIntegerArray(size);
     }
 
     public BloomFilterImpl(int numberOfElements, float probRate) {
         super();
-        if (numberOfElements <= 0  || probRate > 1 || probRate <= 0) {
+        if (numberOfElements <= 0 || probRate > 1 || probRate <= 0) {
             throw new IllegalArgumentException("numberOfElements <=0, probRate <= 1");
         }
         // n: numberOfElements
         // m: numberOfBits -> ceil((n * log(p)) / log(1 / pow(2, log(2))));
-        this.numBits = (long) (Math.ceil((numberOfElements * Math.log((double)probRate)) / Math.log(1 / Math.pow(2, Math.log(2)))));
-         
-        int bytes = (int)(this.numBits / NUM_BITS)+1;
-        int size  = (bytes / NUM_BYTES)+(bytes % NUM_BYTES);  
+        this.numBits = (long) (Math.ceil((numberOfElements * Math.log(probRate)) / Math.log(1 / Math.pow(2, Math.log(2)))));
+
+        int bytes = (int) (this.numBits / NUM_BITS) + 1;
+        int size = (bytes / NUM_BYTES) + (bytes % NUM_BYTES);
         this.numBits = size * NUM_BIT_FORMAT;
         long heapFreeSize = Runtime.getRuntime().freeMemory();
 
-        if (size<=0) {
+        if (size <= 0) {
             throw new IllegalArgumentException("Size can not be 0");
         }
 
-        if (heapFreeSize < (long)size*NUM_BYTES) {
+        if (heapFreeSize < (long) size * NUM_BYTES) {
             throw new IllegalArgumentException("Heap size not big enough");
         }
-        
+
         this.definedElementAmount = numberOfElements;
-        this.numberOfHashes = (byte)Math.max(1, (int) Math.round((double) this.numBits / numberOfElements * Math.log(2)));
-        
-        if(numberOfHashes<0) {
+        this.numberOfHashes = (byte) Math.max(1, (int) Math.round((double) this.numBits / numberOfElements * Math.log(2)));
+
+        if (numberOfHashes < 0) {
             throw new IllegalArgumentException("Number of Hashes to high. Please check the Probalistic Rate (limit arround 1.0E-38)");
         }
-        
+
         this.probRate = probRate;
         this.data = new AtomicIntegerArray(size);
     }
@@ -108,16 +108,16 @@ public class BloomFilterImpl implements BloomFilter, Serializable {
     @Override
     public void add(byte[] element) throws NoSuchAlgorithmException, IOException {
         for (int i = 0; i < this.numberOfHashes; i++) {
-            long index = this.calcIndex(element, i,this.numBits).longValue();
-            int bytepos = (int)index/NUM_BIT_FORMAT;
+            long index = this.calcIndex(element, i, this.numBits).longValue();
+            int bytepos = (int) index / NUM_BIT_FORMAT;
             index -= bytepos * NUM_BIT_FORMAT;
-            Integer pattern = Integer.MIN_VALUE>>>index-1;
-            this.data.set(bytepos,this.data.get(bytepos) | pattern);
+            Integer pattern = Integer.MIN_VALUE >>> index - 1;
+            this.data.set(bytepos, this.data.get(bytepos) | pattern);
         }
         currentElementAmount++;
-        
-        if(currentElementAmount >= definedElementAmount) {
-          Logger.getGlobal().warning("Filter is filled. All other Elements may result in a higher False Positve Rate than defined!");
+
+        if (currentElementAmount >= definedElementAmount) {
+            Logger.getGlobal().warning("Filter is filled. All other Elements may result in a higher False Positve Rate than defined!");
         }
     }
 
@@ -125,15 +125,14 @@ public class BloomFilterImpl implements BloomFilter, Serializable {
     public boolean mightContain(byte[] element) throws NoSuchAlgorithmException, IOException {
         boolean result = true;
         for (int i = 0; i < this.numberOfHashes; i++) {
-            long index = this.calcIndex(element, i,this.numBits).longValue();
-            int bytepos = (int)index/NUM_BIT_FORMAT;
+            long index = this.calcIndex(element, i, this.numBits).longValue();
+            int bytepos = (int) index / NUM_BIT_FORMAT;
             index -= bytepos * NUM_BIT_FORMAT;
-            long pattern = Integer.MIN_VALUE>>>index-1;
+            long pattern = Integer.MIN_VALUE >>> index - 1;
             if ((this.data.get(bytepos) & pattern) == pattern) {
-                 result&=true;
-            }
-            else {
-                result &=false;
+                result &= true;
+            } else {
+                result &= false;
                 break;
             }
         }
@@ -178,7 +177,7 @@ public class BloomFilterImpl implements BloomFilter, Serializable {
         dataOutputStream.writeFloat(this.probRate);
         dataOutputStream.writeInt(this.definedElementAmount);
         dataOutputStream.writeInt(this.currentElementAmount);
-        dataOutputStream.writeInt(this.getData().length());        
+        dataOutputStream.writeInt(this.getData().length());
         for (int i = 0; i < this.getData().length(); i++) {
             dataOutputStream.writeInt(this.getData().get(i));
         }
@@ -258,13 +257,13 @@ public class BloomFilterImpl implements BloomFilter, Serializable {
     }
 
     private void readObject(
-            ObjectInputStream inputStream
+        ObjectInputStream inputStream
     ) throws ClassNotFoundException, IOException {
         inputStream.defaultReadObject();
     }
 
     private void writeObject(
-            ObjectOutputStream outputStream
+        ObjectOutputStream outputStream
     ) throws IOException {
         outputStream.defaultWriteObject();
     }

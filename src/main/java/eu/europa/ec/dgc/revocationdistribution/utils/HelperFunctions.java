@@ -37,7 +37,7 @@ public class HelperFunctions {
         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
 
-    public String getDateTimeString(ZonedDateTime dateTime){
+    public String getDateTimeString(ZonedDateTime dateTime) {
         return dateTimeFormatter.withZone(ZoneId.of("UTC")).format(dateTime);
     }
 
@@ -54,11 +54,12 @@ public class HelperFunctions {
 
     /**
      * Gets the byte array from a hex representation string.
+     *
      * @param hex
      * @return the byte data.
      */
     public byte[] getBytesFromHexString(String hex) {
-       return Hex.decode(hex);
+        return Hex.decode(hex);
     }
 
 }

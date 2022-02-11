@@ -35,7 +35,7 @@ public interface PartitionRepository extends JpaRepository<PartitionEntity, Stri
 
     @Modifying
     @Query("UPDATE PartitionEntity p SET p.toBeDeleted = true WHERE p.kid in :kids")
-    void setToBeDeletedForKids(@Param("kids") List<String> kIds);
+    void setToBeDeletedForKids(@Param("kids") List<String> kids);
 
 
     Optional<PartitionEntity> findOneByEtagAndKidAndId(String etag, String kid, String id);

@@ -56,12 +56,12 @@ public class OpenApiConfig {
             version = "dev";
         }
         return new OpenAPI()
-                .info(new Info()
-                        .title("EU Digital COVID Certificate Revocation Distribution Service")
-                        .description("The API provides the endpoints for retrieving the revocation list")
-                        .version(version)
-                        .license(new License()
-                                .name("Apache 2.0")
-                                .url("https://www.apache.org/licenses/LICENSE-2.0")));
+            .info(new Info()
+                .title("EU Digital COVID Certificate Revocation Distribution Service")
+                .description("The API provides the endpoints for retrieving the revocation list")
+                .version(version)
+                .license(new License()
+                    .name("Apache 2.0")
+                    .url("https://www.apache.org/licenses/LICENSE-2.0")));
     }
 }

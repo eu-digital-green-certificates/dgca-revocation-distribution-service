@@ -33,7 +33,6 @@ public class DgcConfigProperties {
     private final BloomFilterConfig bloomFilter = new BloomFilterConfig();
 
 
-
     @Getter
     @Setter
     public static class GatewayDownload {

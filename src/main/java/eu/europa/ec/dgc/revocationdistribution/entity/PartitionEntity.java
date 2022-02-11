@@ -90,14 +90,14 @@ public class PartitionEntity {
     private String z;
 
     /**
-     *  The creation date of the entity.
+     * The creation date of the entity.
      */
     @Column(name = "lastupdated")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "UTC")
     private ZonedDateTime lastUpdated;
 
     /**
-     *  The expiration date of the entity.
+     * The expiration date of the entity.
      */
     @Column(name = "expired")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "UTC")
@@ -108,12 +108,12 @@ public class PartitionEntity {
      */
     @Type(type = "jsonb")
     @Column(name = "chunks_json_data", columnDefinition = "jsonb")
-    private Map<String, Map<String,PartitionChunksJsonItemDto>> chunks;
+    private Map<String, Map<String, PartitionChunksJsonItemDto>> chunks;
 
     /**
      * Indicates if the partition needs to be deleted on etag change.
      */
-    @Column(name= "to_be_deleted")
+    @Column(name = "to_be_deleted")
     private boolean toBeDeleted;
 
 }
