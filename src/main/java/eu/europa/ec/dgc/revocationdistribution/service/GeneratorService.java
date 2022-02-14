@@ -290,7 +290,7 @@ public class GeneratorService {
                 log.error("Kid and/or id does not match: kid: {} , {} id {}, {}", kid, mve.getKid(), id, mve.getId());
             } else {
 
-                SliceDataDto sliceDataDto = sliceCalculationService.calculateChunk(mve.getHashes());
+                SliceDataDto sliceDataDto = sliceCalculationService.calculateSlice(mve.getHashes());
                 if (sliceDataDto != null) {
                     Map<String, PartitionChunksJsonItemDto> chunkItemsMap;
 

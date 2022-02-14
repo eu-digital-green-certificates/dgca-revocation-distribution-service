@@ -24,6 +24,6 @@ import eu.europa.ec.dgc.revocationdistribution.dto.SliceDataDto;
 
 public interface SliceCalculationService {
 
-    SliceDataDto calculateChunk(String[] hashes);
+    SliceDataDto calculateSlice(String[] hashes);
 
 }

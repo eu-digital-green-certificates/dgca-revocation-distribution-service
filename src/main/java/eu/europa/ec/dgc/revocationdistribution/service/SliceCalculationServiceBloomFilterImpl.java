@@ -43,7 +43,7 @@ public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationS
     private final HelperFunctions helperFunctions;
 
     @Override
-    public SliceDataDto calculateChunk(String[] hashes) {
+    public SliceDataDto calculateSlice(String[] hashes) {
         if (hashes.length <= 0)
             return null;
 
