@@ -20,8 +20,10 @@
 
 package eu.europa.ec.dgc.revocationdistribution.service;
 
+
 import eu.europa.ec.dgc.bloomfilter.BloomFilter;
 import eu.europa.ec.dgc.bloomfilter.BloomFilterImpl;
+import eu.europa.ec.dgc.bloomfilter.exception.FilterException;
 import eu.europa.ec.dgc.revocationdistribution.config.DgcConfigProperties;
 import eu.europa.ec.dgc.revocationdistribution.dto.SliceDataDto;
 import eu.europa.ec.dgc.revocationdistribution.utils.HelperFunctions;
@@ -58,8 +60,8 @@ public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationS
             try {
                 byte[] hashBytes = helperFunctions.getBytesFromHexString(hash);
                 bloomFilter.add(hashBytes);
-            } catch (NoSuchAlgorithmException | IOException | DecoderException e) {
-                log.error("Could not add hash to bloom filter: {}", hash);
+            } catch (NoSuchAlgorithmException | IOException | DecoderException | FilterException e) {
+                log.error("Could not add hash to bloom filter: {} , {}", hash, e.getMessage());
             }
         }
 
@@ -67,8 +69,8 @@ public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationS
 
         try {
             bloomFilter.writeTo(baos);
-        } catch (IOException e) {
-            log.error("Could not get bloom filter binary data.");
+        } catch (IOException | FilterException e) {
+            log.error("Could not get bloom filter binary data: {}", e.getMessage());
             return null;
         }
 
@@ -77,7 +79,7 @@ public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationS
         try {
             sliceDataDto.getMetaData().setHash(helperFunctions.calculateHash(sliceDataDto.getBinaryData()));
         } catch (NoSuchAlgorithmException e) {
-            log.error("Could calculate hash for binary data.");
+            log.error("Could not calculate hash for binary data.");
             return null;
         }
 

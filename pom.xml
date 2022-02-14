@@ -42,6 +42,7 @@
 		<shedlock.version>4.30.0</shedlock.version>
 		<nimbusds.version>9.9.2</nimbusds.version>
 		<dgc.lib.version>1.1.12</dgc.lib.version>
+		<dgc.bloomfilter.version>0.0.0-09cb38e</dgc.bloomfilter.version>
 		<sap.cloud.sdk.version>3.57.0</sap.cloud.sdk.version>
 		<h2.version>2.1.210</h2.version>
 		<slf4j.version>1.7.32</slf4j.version>
@@ -169,6 +170,11 @@
 			<groupId>eu.europa.ec.dgc</groupId>
 			<artifactId>dgc-lib</artifactId>
 			<version>${dgc.lib.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.europa.ec.dgc</groupId>
+			<artifactId>bloomfilter</artifactId>
+			<version>${dgc.bloomfilter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
