@@ -26,7 +26,7 @@ import eu.europa.ec.dgc.revocationdistribution.dto.RevocationCheckTokenPayload;
 import eu.europa.ec.dgc.revocationdistribution.exception.TokenValidationException;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.security.SignatureException;
 import java.security.PublicKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -45,8 +45,14 @@ public class RevocationCheckTokenParser {
      * @return RevocationCheckTokenPayload
      */
     public RevocationCheckTokenPayload parseToken(String jwtCompact, PublicKey publicKey) {
+
+
+
         try {
-            Jwt token = Jwts.parser().setSigningKey(publicKey).parse(jwtCompact);
+
+
+            Jwt token = Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(jwtCompact);
+
 
             String payloadJson = objectMapper.writeValueAsString(token.getBody());
             return objectMapper.readValue(payloadJson, RevocationCheckTokenPayload.class);
