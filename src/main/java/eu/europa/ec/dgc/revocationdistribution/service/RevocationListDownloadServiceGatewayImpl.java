@@ -95,6 +95,11 @@ public class RevocationListDownloadServiceGatewayImpl {
             revocationListIterator = dgcGatewayRevocationListDownloadConnector.getRevocationListDownloadIterator();
         }
 
+        if (!revocationListIterator.hasNext()) {
+            log.info("There was no new data loaded from the Gateway. Download finished without calculation of data.");
+            return;
+        }
+
         List<String> deletedBatchIds = new ArrayList<>();
         List<String> goneBatchIds = new ArrayList<>();
 
