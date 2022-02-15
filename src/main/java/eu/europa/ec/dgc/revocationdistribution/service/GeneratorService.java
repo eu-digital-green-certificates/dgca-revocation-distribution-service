@@ -114,9 +114,6 @@ public class GeneratorService {
 
         cleanupData();
 
-        if (sliceCalculationServiceHashList.isPresent()){
-            log.info("HashListCalculation is active");
-        }
 
         log.info("Finished generation of new data set.");
     }
