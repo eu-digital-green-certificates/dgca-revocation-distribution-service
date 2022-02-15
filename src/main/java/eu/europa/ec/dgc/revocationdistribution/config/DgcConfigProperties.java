@@ -31,6 +31,7 @@ public class DgcConfigProperties {
 
     private final GatewayDownload revocationListDownload = new GatewayDownload();
     private final BloomFilterConfig bloomFilter = new BloomFilterConfig();
+    private final HashListConfig hashList = new HashListConfig();
 
 
     @Getter
@@ -44,8 +45,16 @@ public class DgcConfigProperties {
     @Setter
     public static class BloomFilterConfig {
         private boolean enabled;
-        private String type;
+        private String type = "bloom_filter";
         private String version;
         private float probRate;
+    }
+
+    @Getter
+    @Setter
+    public static class HashListConfig {
+        private boolean enabled;
+        private String type = "hash_list";
+        private String version;
     }
 }

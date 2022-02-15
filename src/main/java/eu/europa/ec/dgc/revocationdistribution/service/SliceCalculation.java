@@ -22,7 +22,7 @@ package eu.europa.ec.dgc.revocationdistribution.service;
 
 import eu.europa.ec.dgc.revocationdistribution.dto.SliceDataDto;
 
-public interface SliceCalculationService {
+public interface SliceCalculation {
 
     SliceDataDto calculateSlice(String[] hashes);
 

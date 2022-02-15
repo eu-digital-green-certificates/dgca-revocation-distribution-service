@@ -26,6 +26,7 @@ import eu.europa.ec.dgc.bloomfilter.BloomFilterImpl;
 import eu.europa.ec.dgc.bloomfilter.exception.FilterException;
 import eu.europa.ec.dgc.revocationdistribution.config.DgcConfigProperties;
 import eu.europa.ec.dgc.revocationdistribution.dto.SliceDataDto;
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import eu.europa.ec.dgc.revocationdistribution.utils.HelperFunctions;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,7 +40,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationService {
+public class SliceCalculationBloomFilterImpl implements SliceCalculation {
 
     private final DgcConfigProperties properties;
     private final HelperFunctions helperFunctions;
@@ -53,7 +54,7 @@ public class SliceCalculationServiceBloomFilterImpl implements SliceCalculationS
 
         SliceDataDto sliceDataDto = new SliceDataDto();
 
-        sliceDataDto.getMetaData().setType(properties.getBloomFilter().getType());
+        sliceDataDto.getMetaData().setType(SliceType.BLOOMFILTER.name());
         sliceDataDto.getMetaData().setVersion(properties.getBloomFilter().getVersion());
 
         for (String hash : hashes) {

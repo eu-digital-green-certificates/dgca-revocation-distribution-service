@@ -68,7 +68,7 @@ public class GeneratorService {
 
     private final InfoService infoService;
 
-    private final SliceCalculationService sliceCalculationService;
+    private final SliceCalculationBloomFilterImpl sliceCalculationService;
 
     private final PointViewRepository pointViewRepository;
 
@@ -106,8 +106,6 @@ public class GeneratorService {
         oldEtag = etag;
         etag = UUID.randomUUID().toString();
 
-        List<KidViewEntity> kidViewEntityList = kidViewRepository.findAll();
-
         ChangeList changeList = generateList();
 
         handleChangeList(changeList);
@@ -115,6 +113,10 @@ public class GeneratorService {
         infoService.setNewEtag(etag);
 
         cleanupData();
+
+        if (sliceCalculationServiceHashList.isPresent()){
+            log.info("HashListCalculation is active");
+        }
 
         log.info("Finished generation of new data set.");
     }
