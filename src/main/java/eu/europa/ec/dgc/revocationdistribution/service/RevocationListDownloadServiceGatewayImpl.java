@@ -97,7 +97,6 @@ public class RevocationListDownloadServiceGatewayImpl {
 
         if (!revocationListIterator.hasNext()) {
             log.info("There was no new data loaded from the Gateway. Download finished without calculation of data.");
-            return;
         }
 
         List<String> deletedBatchIds = new ArrayList<>();
@@ -105,8 +104,6 @@ public class RevocationListDownloadServiceGatewayImpl {
 
         while (revocationListIterator.hasNext()) {
             List<RevocationBatchListDto.RevocationBatchListItemDto> batchListItems = revocationListIterator.next();
-
-            log.info(batchListItems.toString());
 
             for (RevocationBatchListDto.RevocationBatchListItemDto batchListItem : batchListItems) {
                 if (batchListItem.getDeleted()) {
@@ -116,8 +113,10 @@ public class RevocationListDownloadServiceGatewayImpl {
 
                         RevocationBatchDto revocationBatchDto =
                             dgcGatewayRevocationListDownloadConnector.getRevocationListBatchById(batchListItem.getBatchId());
-                        log.info(revocationBatchDto.toString());
+                        log.trace(revocationBatchDto.toString());
+
                         revocationListservice.updateRevocationListBatch(batchListItem.getBatchId(), revocationBatchDto);
+                        log.info("Downloaded batch: {}", batchListItem.getBatchId());
 
                     } catch (RevocationBatchGoneException e) {
                         goneBatchIds.add(batchListItem.getBatchId());

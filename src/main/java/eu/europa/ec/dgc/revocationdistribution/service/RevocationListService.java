@@ -70,13 +70,20 @@ public class RevocationListService {
 
         saveBatchList(batchId, revocationBatchDto);
 
-        for (RevocationBatchDto.BatchEntryDto hash : revocationBatchDto.getEntries()) {
-            saveHash(batchId, hash, revocationBatchDto.getKid());
-        }
+        List<HashesEntity> hashes = new ArrayList<>();
 
+        for (RevocationBatchDto.BatchEntryDto hash : revocationBatchDto.getEntries()) {
+            try{
+                 hashes.add(getHashEntity(batchId, hash, revocationBatchDto.getKid()));
+            } catch (IndexOutOfBoundsException e) {
+                log.error("Error calculating x,y,z. Hash value length is to short: {}",
+                    hash.getHash().getBytes(StandardCharsets.UTF_8).length);
+            }
+        }
+        hashesRepository.saveAll(hashes);
     }
 
-    @Transactional
+
     private void saveBatchList(String batchId, RevocationBatchDto revocationBatchDto) {
         BatchListEntity batchListEntity = new BatchListEntity();
 
@@ -89,9 +96,10 @@ public class RevocationListService {
         batchListRepository.save(batchListEntity);
     }
 
-    @Transactional
-    private void saveHash(String batchId, RevocationBatchDto.BatchEntryDto hash, String kid) {
-        try {
+
+    private HashesEntity getHashEntity(String batchId, RevocationBatchDto.BatchEntryDto hash, String kid)
+        throws IndexOutOfBoundsException {
+
             String hexHash = decodeBase64Hash(hash.getHash());
             HashesEntity hashesEntity = new HashesEntity();
             hashesEntity.setHash(hexHash);
@@ -102,12 +110,7 @@ public class RevocationListService {
             hashesEntity.setBatchId(batchId);
             hashesEntity.setUpdated(true);
 
-            hashesRepository.save(hashesEntity);
-
-        } catch (IndexOutOfBoundsException e) {
-            log.error("Error calculating x,y,z. Hash value length is to short: {}",
-                hash.getHash().getBytes(StandardCharsets.UTF_8).length);
-        }
+            return hashesEntity;
     }
 
     @Transactional

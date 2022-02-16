@@ -106,12 +106,16 @@ public class GeneratorService {
         oldEtag = etag;
         etag = UUID.randomUUID().toString();
 
+        log.info("Generate new List");
         ChangeList changeList = generateList();
 
+        log.info("Handle Changes");
         handleChangeList(changeList);
 
+        log.info("Update Etag");
         infoService.setNewEtag(etag);
 
+        log.info("Cleanup Data");
         cleanupData();
 
 
@@ -163,7 +167,7 @@ public class GeneratorService {
 
         revocationListService.saveRevocationListJson(revocationListJsonEntity);
 
-        log.info(itemsMap.values().toString());
+        log.trace(itemsMap.values().toString());
         return changeList;
     }
 
@@ -185,7 +189,6 @@ public class GeneratorService {
         //handle created kIds
         generatePattern(changeList.getCreated());
     }
-
 
     private void markDataForRemoval(List<String> kIds) {
         if (!kIds.isEmpty()) {
@@ -371,6 +374,7 @@ public class GeneratorService {
         return new ArrayList<>();
     }
 
+    @Transactional
     private void cleanupData() {
         // set all entries in hashes table to updated false
         revocationListService.setAllHashesUpdatedStatesToFalse();

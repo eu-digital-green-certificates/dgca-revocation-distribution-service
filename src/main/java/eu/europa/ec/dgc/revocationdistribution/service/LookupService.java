@@ -112,13 +112,13 @@ public class LookupService {
                 HttpStatus.BAD_REQUEST.value());
         } catch (FeignException e) {
             if (e.status() == HttpStatus.NOT_FOUND.value()) {
-                log.error("Download of dgdi failed. {}",
+                log.error("Download of dgci failed. {}",
                     e.status());
                 throw new TokenValidationException("Token verification failed: Public key not found.",
                     HttpStatus.BAD_REQUEST.value());
             }
 
-            log.error("Download of dgdi failed. {}",
+            log.error("Download of dgci failed. {}",
                 e.status());
             throw new TokenValidationException("Token verification failed due to Server Error",
                 HttpStatus.INTERNAL_SERVER_ERROR.value());
