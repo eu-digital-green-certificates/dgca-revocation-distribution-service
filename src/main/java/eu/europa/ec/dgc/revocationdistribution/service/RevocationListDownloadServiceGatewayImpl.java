@@ -28,6 +28,7 @@ import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchDownloadExcep
 import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchGoneException;
 import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchParseException;
 import eu.europa.ec.dgc.gateway.connector.iterator.DgcGatewayRevocationListDownloadIterator;
+import eu.europa.ec.dgc.revocationdistribution.config.DgcConfigProperties;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -52,6 +53,8 @@ import org.springframework.stereotype.Component;
 public class RevocationListDownloadServiceGatewayImpl {
 
     private final DgcGatewayRevocationListDownloadConnector dgcGatewayRevocationListDownloadConnector;
+
+    private final DgcConfigProperties properties;
 
     private final InfoService infoService;
 
@@ -86,6 +89,10 @@ public class RevocationListDownloadServiceGatewayImpl {
     public void downloadRevocationList() {
         log.info("Revocation list download started");
 
+        int timeInterval = properties.getRevocationListDownload().getTimeInterval();
+
+        ZonedDateTime abortTime =  ZonedDateTime.now().plusSeconds((timeInterval/1000)/2);
+
         DgcGatewayRevocationListDownloadIterator revocationListIterator;
 
         if (lastUpdatedBatchDate != null) {
@@ -102,7 +109,7 @@ public class RevocationListDownloadServiceGatewayImpl {
         List<String> deletedBatchIds = new ArrayList<>();
         List<String> goneBatchIds = new ArrayList<>();
 
-        while (revocationListIterator.hasNext()) {
+        while (revocationListIterator.hasNext() && abortTime.isAfter(ZonedDateTime.now()) ) {
             List<RevocationBatchListDto.RevocationBatchListItemDto> batchListItems = revocationListIterator.next();
 
             for (RevocationBatchListDto.RevocationBatchListItemDto batchListItem : batchListItems) {
@@ -125,6 +132,10 @@ public class RevocationListDownloadServiceGatewayImpl {
                     }
                 }
                 lastUpdatedBatchDate = batchListItem.getDate();
+
+                if (abortTime.isBefore(ZonedDateTime.now())) {
+                    break;
+                }
             }
         }
 
@@ -135,6 +146,8 @@ public class RevocationListDownloadServiceGatewayImpl {
         if (!goneBatchIds.isEmpty()) {
             revocationListservice.deleteBatchListItemsByIds(goneBatchIds);
         }
+        //Delete expired.
+
         saveLastUpdated();
         generatorService.generateNewDataSet();
 
