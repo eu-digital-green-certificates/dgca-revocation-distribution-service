@@ -31,13 +31,10 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+
 @RequiredArgsConstructor
-@EnableFeignClients
 public class IssuanceDgciRestClientConfig {
 
 
