@@ -12,8 +12,8 @@ CREATE OR REPLACE VIEW public.kid_view
                     WHEN configuration_1.key = 'COORDINATELIMIT'::text THEN 'COORDINATE'::text
                     ELSE NULL::text
                 END AS storage_mode,
-            to_number(configuration_1.value, '99999'::text) AS minlimit,
-            to_number(configuration_1.value2, '99999'::text) AS maxlimit
+             to_number(configuration_1.value, '999999999999'::text) AS minlimit,
+             to_number(configuration_1.value2, '999999999999'::text) AS maxlimit
            FROM public.configuration configuration_1
           WHERE configuration_1.key = ANY (ARRAY['POINTLIMIT'::text, 'VECTORLIMIT'::text, 'COORDINATELIMIT'::text])
         )
