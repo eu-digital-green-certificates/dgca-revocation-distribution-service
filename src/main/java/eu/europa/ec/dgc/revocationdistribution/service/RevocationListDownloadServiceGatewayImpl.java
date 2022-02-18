@@ -104,6 +104,7 @@ public class RevocationListDownloadServiceGatewayImpl {
 
         if (!revocationListIterator.hasNext()) {
             log.info("There was no new data loaded from the Gateway. Download finished without calculation of data.");
+            return;
         }
 
         List<String> deletedBatchIds = new ArrayList<>();
