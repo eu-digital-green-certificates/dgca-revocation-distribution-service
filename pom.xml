@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
-	<groupId>europa.ec.dgc</groupId>
+	<groupId>eu.europa.ec.dgc</groupId>
 	<artifactId>dgca-revocation-distribution-service</artifactId>
 	<version>latest</version>
 	<name>dgca-revocation-distribution-service</name>
@@ -41,12 +41,13 @@
 		<okhttp.version>4.9.1</okhttp.version>
 		<shedlock.version>4.30.0</shedlock.version>
 		<nimbusds.version>9.9.2</nimbusds.version>
-		<dgc.lib.version>1.1.12</dgc.lib.version>
+		<dgc.lib.version>1.1.13</dgc.lib.version>
+		<dgc.bloomfilter.version>0.0.0-09cb38e</dgc.bloomfilter.version>
 		<sap.cloud.sdk.version>3.57.0</sap.cloud.sdk.version>
 		<h2.version>2.1.210</h2.version>
 		<slf4j.version>1.7.32</slf4j.version>
 		<log4j2.version>2.17.1</log4j2.version>
-		<jjwt.version>0.9.1</jjwt.version>
+		<jjwt.version>0.11.2</jjwt.version>
 		<!-- plugins -->
 		<plugin.checkstyle.version>3.1.2</plugin.checkstyle.version>
 		<plugin.sonar.version>3.9.0.2155</plugin.sonar.version>
@@ -169,6 +170,11 @@
 			<groupId>eu.europa.ec.dgc</groupId>
 			<artifactId>dgc-lib</artifactId>
 			<version>${dgc.lib.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.europa.ec.dgc</groupId>
+			<artifactId>bloomfilter</artifactId>
+			<version>${dgc.bloomfilter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -299,8 +305,20 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt</artifactId>
-			<version>${jjwt.version}</version>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.2</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+			<version>0.11.2</version>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 
@@ -382,7 +400,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--
+<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
@@ -406,7 +424,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			-->
+-->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>

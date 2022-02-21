@@ -1,6 +1,6 @@
 <h1 align="center">
     EU Digital COVID Certificate Revocation Distribution Service
-
+</h1>
 <p align="center">
     <a href="/../../commits/" title="Last Commit"><img src="https://img.shields.io/github/last-commit/eu-digital-green-certificates/dgca-revocation-distribution-service?style=flat"></a>
     <a href="/../../issues" title="Open Issues"><img src="https://img.shields.io/github/issues/eu-digital-green-certificates/dgca-revocation-distribution-service?style=flat"></a>

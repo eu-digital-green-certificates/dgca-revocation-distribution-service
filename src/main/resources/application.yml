@@ -1,8 +1,8 @@
 logging:
   level:
     default: TRACE
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql: TRACE
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql: INFO
 server:
   port: 8080
 spring:
