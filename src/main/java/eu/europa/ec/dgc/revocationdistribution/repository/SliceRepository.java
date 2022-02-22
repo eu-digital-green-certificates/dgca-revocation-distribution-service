@@ -31,9 +31,11 @@ import org.springframework.data.repository.query.Param;
 public interface SliceRepository extends JpaRepository<SliceEntity, String> {
 
 
-    Optional<SliceEntity> findOneByEtagAndKidAndIdAndChunkAndHash(String etag, String kid, String id, String cid, String sid);
+    Optional<SliceEntity> findOneByEtagAndKidAndIdAndChunkAndHash(
+        String etag, String kid, String id, String cid, String sid);
 
-    Optional<SliceEntity> findOneByEtagAndKidAndIdIsNullAndChunkAndHash(String etag, String kid, String cid, String sid);
+    Optional<SliceEntity> findOneByEtagAndKidAndIdIsNullAndChunkAndHash(
+        String etag, String kid, String cid, String sid);
 
     List<SliceEntity> findAllByEtagAndKidAndIdAndChunk(String etag, String kid, String id, String cid);
 
@@ -51,7 +53,9 @@ public interface SliceRepository extends JpaRepository<SliceEntity, String> {
 
     List<SliceEntity> findAllByEtagAndKidAndIdAndChunkIn(String etag, String kid, String id, List<String> chunks);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkAndHashIn(String etag, String kid, String cid, List<String> hashes);
+    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkAndHashIn(
+        String etag, String kid, String cid, List<String> hashes);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkAndHashIn(String etag, String kid, String id, String cid, List<String> hashes);
+    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkAndHashIn(
+        String etag, String kid, String id, String cid, List<String> hashes);
 }

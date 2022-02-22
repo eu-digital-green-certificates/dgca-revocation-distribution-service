@@ -52,20 +52,23 @@ public class HashesEntity {
     private String kid;
 
     /**
-     * The first byte of the hash
+     * The first byte of the hash.
      */
+    @SuppressWarnings("checkstyle:membername")
     @Column(name = "x", nullable = false, length = 1, columnDefinition = "CHAR")
     private char x;
 
     /**
-     * The second byte of the hash
+     * The second byte of the hash.
      */
+    @SuppressWarnings("checkstyle:membername")
     @Column(name = "y", nullable = false, length = 1, columnDefinition = "CHAR")
     private char y;
 
     /**
-     * The third byte of the hash
+     * The third byte of the hash.
      */
+    @SuppressWarnings("checkstyle:membername")
     @Column(name = "z", nullable = false, length = 1, columnDefinition = "CHAR")
     private char z;
 

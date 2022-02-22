@@ -75,18 +75,21 @@ public class PartitionEntity {
      * x parameter of chunk.
      */
     @Column(name = "x", nullable = true)
+    @SuppressWarnings("checkstyle:membername")
     private String x;
 
     /**
-     * x parameter of chunk.
+     * y parameter of chunk.
      */
     @Column(name = "y", nullable = true)
+    @SuppressWarnings("checkstyle:membername")
     private String y;
 
     /**
-     * x parameter of chunk.
+     * z parameter of chunk.
      */
     @Column(name = "z", nullable = true)
+    @SuppressWarnings("checkstyle:membername")
     private String z;
 
     /**

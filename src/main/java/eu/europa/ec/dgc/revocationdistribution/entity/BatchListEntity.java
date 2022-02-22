@@ -77,7 +77,7 @@ public class BatchListEntity {
     private String kid;
 
     /**
-     * The creation date of the entity
+     * The creation date of the entity.
      */
     @Column(name = "created_at")
     private ZonedDateTime createdAt;

@@ -55,10 +55,19 @@ public class RevocationListJsonEntity {
 
 
     /**
-     * The creation date of the entity
+     * The creation date of the entity.
      */
     @Column(name = "created_at")
     private ZonedDateTime createdAt;
+
+
+    /**
+     * The raw json data for the revocation list.
+     */
+    @Type(type = "jsonb")
+    @Column(name = "json_data", columnDefinition = "jsonb")
+    private List<RevocationListJsonResponseDto.RevocationListJsonResponseItemDto> jsonData;
+
 
     @PrePersist
     private void prePersistFunction() {
@@ -67,11 +76,4 @@ public class RevocationListJsonEntity {
             createdAt = ZonedDateTime.now();
         }
     }
-
-
-    @Type(type = "jsonb")
-    @Column(name = "json_data", columnDefinition = "jsonb")
-    private List<RevocationListJsonResponseDto.RevocationListJsonResponseItemDto> jsonData;
-
-
 }

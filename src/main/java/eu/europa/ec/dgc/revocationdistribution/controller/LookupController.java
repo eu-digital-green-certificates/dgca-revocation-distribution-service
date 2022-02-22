@@ -45,9 +45,9 @@ public class LookupController {
     private final LookupService lookupService;
 
     /**
-     * Http Method for getting the revocation list.
-     *
-     * @return
+     * Http Method for locking up the revocation state for a list of revokaation check tokens.
+     * @param revocationCheckTokenList The List of tokens to check the state for.
+     * @return the revocation status of the given certificates.
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<String>> lockupRevocation(
@@ -63,15 +63,6 @@ public class LookupController {
         List<String> result = lookupService.checkForRevocation(tokenPayloads);
         return ResponseEntity.ok(result);
     }
-
-    @GetMapping(path = "/key", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getKey() {
-        PublicKey result;
-        String hash = "Pu3LWoDPQv3lH53fcYmCOb12mHPd354tAXdWJDQns1U%3d";
-        result = lookupService.downloadPublicKey(hash);
-        return ResponseEntity.ok(result.toString());
-    }
-
 
 }
 

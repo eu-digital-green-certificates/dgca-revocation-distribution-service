@@ -48,8 +48,9 @@ public class SliceCalculationHashListImpl implements SliceCalculation {
 
     @Override
     public SliceDataDto calculateSlice(String[] hashes) {
-        if (hashes.length <= 0)
+        if (hashes.length <= 0) {
             return null;
+        }
 
         BloomFilter bloomFilter = new BloomFilterImpl(hashes.length, properties.getBloomFilter().getProbRate());
 
@@ -64,7 +65,7 @@ public class SliceCalculationHashListImpl implements SliceCalculation {
             try {
                 byte[] hashBytes = helperFunctions.getBytesFromHexString(hash);
                 baos.write(hashBytes, 0, NUMBER_OF_BYTES_TO_STORE);
-            } catch ( DecoderException e) {
+            } catch (DecoderException e) {
                 log.error("Could not add hash to hash list: {} , {}", hash, e.getMessage());
             }
         }

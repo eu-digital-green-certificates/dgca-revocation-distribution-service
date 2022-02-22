@@ -62,12 +62,12 @@ public class RevocationListController {
 
     /**
      * Http Method for getting the revocation list.
-     *
-     * @return
+     * @param ifNoneMatch if present, it is checked, if new data is available since the last response with this etag.
+     * @return revocation list as json
      */
     @GetMapping(path = "lists", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RevocationListJsonResponseDto.RevocationListJsonResponseItemDto>> getRevocationList(
-        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = true) String ifNoneMatch) {
+        @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, defaultValue = "") String ifNoneMatch) {
 
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);
 
@@ -75,7 +75,9 @@ public class RevocationListController {
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
 
-        Optional<RevocationListJsonEntity> revocationListJsonEntity = revocationListService.getRevocationListJsonData(currentEtag);
+        Optional<RevocationListJsonEntity> revocationListJsonEntity =
+            revocationListService.getRevocationListJsonData(currentEtag);
+
         if (!revocationListJsonEntity.isPresent()) {
             return ResponseEntity.notFound().build();
         }
@@ -86,8 +88,9 @@ public class RevocationListController {
 
     /**
      * Http Method for getting the all partitions a kid.
-     *
-     * @return
+     * @param ifMatch must match the actual revocation list / available data set
+     * @param kid the kid for which the partitions are requested.
+     * @return a list of partitions meta data
      */
     @GetMapping(path = "lists/{kid}/partitions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PartitionResponseDto>> getPartitionListForKid(
@@ -122,9 +125,12 @@ public class RevocationListController {
     }
 
     /**
-     * Http Method for getting the a partition of a kid.
+     * Http Method for getting a particular partition of a kid.
+     * @param ifMatch must match the actual revocation list / available data set
+     * @param kid the kid for which the partitions are requested.
+     * @param id the id of the requested partition
      *
-     * @return
+     * @return the partition meta data.
      */
     @GetMapping(path = "lists/{kid}/partitions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PartitionResponseDto> getPartitionForKid(
@@ -158,9 +164,12 @@ public class RevocationListController {
 
 
     /**
-     * Http Method for getting the data of a partition.
+     * Http Method for getting the  binary data of a partition.
+     * @param ifMatch must match the actual revocation list / available data set
+     * @param kid the kid for which the partitions are requested.
+     * @param id the id of the requested partition
      *
-     * @return gzip file containing data
+     * @return gzip file containing binary slice data of the partition.
      */
     @PostMapping(path = "lists/{kid}/partitions/{id}/slices",
         consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -182,16 +191,21 @@ public class RevocationListController {
 
             result = revocationListService.getAllChunkDataFromPartition(currentEtag, kid, id);
         } else {
-            result = revocationListService.getAllChunkDataFromPartitionWithFilter(currentEtag, kid, id, reqestedChunksList);
+            result = revocationListService.getAllChunkDataFromPartitionWithFilter(
+                currentEtag, kid, id, reqestedChunksList);
         }
 
         return ResponseEntity.ok(result);
     }
 
     /**
-     * Http Method for getting the slice data.
+     * Http Method for getting the slice data of a chunk.
+     * @param ifMatch must match the actual revocation list / available data set
+     * @param kid the kid for which the partitions are requested
+     * @param id the id of the requested partition
+     * @param cid the id of the requested chunk
      *
-     * @return gzip file containing slice data
+     * @return gzip file containing binary slice data of a chunk
      */
     @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices", produces = "application/gzip")
     public ResponseEntity<byte[]> getChunk(
@@ -212,9 +226,14 @@ public class RevocationListController {
     }
 
     /**
-     * Http Method for getting the data of a partition.
+     * Http Method for getting a selection of slice data of a chunk.
+     * @param ifMatch must match the actual revocation list / available data set
+     * @param kid the kid for which the partitions are requested
+     * @param id the id of the requested partition
+     * @param cid the id of the requested chunk
+     * @param reqestedSliceList list of slices to download
      *
-     * @return gzip file containing data
+     * @return gzip file containing binary slice data of a chunk
      */
     @PostMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices",
         consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -236,7 +255,8 @@ public class RevocationListController {
         if (reqestedSliceList == null) {
             result = revocationListService.getChunkData(currentEtag, kid, id, cid);
         } else {
-            result = revocationListService.getAllSliceDataForChunkWithFilter(currentEtag, kid, id, cid, reqestedSliceList);
+            result = revocationListService.getAllSliceDataForChunkWithFilter(
+                currentEtag, kid, id, cid, reqestedSliceList);
         }
 
         return ResponseEntity.ok(result);
@@ -244,9 +264,14 @@ public class RevocationListController {
 
 
     /**
-     * Http Method for getting the slice data.
+     * Http Method for getting specific slice data.
+     * @param ifMatch must match the actual revocation list / available data set
+     * @param kid the kid for which the partitions are requested
+     * @param id the id of the requested partition
+     * @param cid the id of the requested chunk
+     * @param sid the id of the slice to download
      *
-     * @return gzip file containing slice data
+     * @return gzip file containing binary slice data
      */
     @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices/{sid}",
         produces = "application/gzip")
@@ -273,7 +298,7 @@ public class RevocationListController {
     }
 
     /**
-     * Method to transform a base64url object
+     * Method to transform a base64url object.
      * returns a base64 object from a base64url object
      */
     private String transformBase64Url(String kid) {
@@ -281,11 +306,11 @@ public class RevocationListController {
     }
 
     /**
-     * Method to check Etag Header
+     * Method to check Etag Header.
      *
      * @param etag to check
      * @return etag without quotes
-     * @throws PreconditionFailedException
+     * @throws PreconditionFailedException is thrown when the given etag don't match the current one.
      */
     private String checkEtag(String etag) throws PreconditionFailedException {
         String currentEtag = infoService.getValueForKey(InfoService.CURRENT_ETAG);

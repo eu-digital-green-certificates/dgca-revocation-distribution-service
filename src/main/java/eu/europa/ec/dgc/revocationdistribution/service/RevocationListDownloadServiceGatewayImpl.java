@@ -52,7 +52,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty("dgc.gateway.connector.enabled")
 public class RevocationListDownloadServiceGatewayImpl {
 
-    private final DgcGatewayRevocationListDownloadConnector dgcGatewayRevocationListDownloadConnector;
+    private final DgcGatewayRevocationListDownloadConnector dgcGatewayDownloadConnector;
 
     private final DgcConfigProperties properties;
 
@@ -71,12 +71,13 @@ public class RevocationListDownloadServiceGatewayImpl {
 
         String lastUpdatedString = infoService.getValueForKey(InfoService.LAST_UPDATED_KEY);
 
-        if (lastUpdatedString != null)
+        if (lastUpdatedString != null) {
             try {
                 lastUpdatedBatchDate = ZonedDateTime.parse(lastUpdatedString);
             } catch (DateTimeParseException e) {
                 log.error("Could not parse loaded last Updated timestamp: {}", lastUpdatedString);
             }
+        }
     }
 
 
@@ -91,15 +92,15 @@ public class RevocationListDownloadServiceGatewayImpl {
 
         int timeInterval = properties.getRevocationListDownload().getTimeInterval();
 
-        ZonedDateTime abortTime =  ZonedDateTime.now().plusSeconds((timeInterval/1000)/2);
+        ZonedDateTime abortTime =  ZonedDateTime.now().plusSeconds((timeInterval / 1000) / 2);
 
         DgcGatewayRevocationListDownloadIterator revocationListIterator;
 
         if (lastUpdatedBatchDate != null) {
             revocationListIterator =
-                dgcGatewayRevocationListDownloadConnector.getRevocationListDownloadIterator(lastUpdatedBatchDate);
+                dgcGatewayDownloadConnector.getRevocationListDownloadIterator(lastUpdatedBatchDate);
         } else {
-            revocationListIterator = dgcGatewayRevocationListDownloadConnector.getRevocationListDownloadIterator();
+            revocationListIterator = dgcGatewayDownloadConnector.getRevocationListDownloadIterator();
         }
 
         if (!revocationListIterator.hasNext()) {
@@ -110,7 +111,7 @@ public class RevocationListDownloadServiceGatewayImpl {
         List<String> deletedBatchIds = new ArrayList<>();
         List<String> goneBatchIds = new ArrayList<>();
 
-        while (revocationListIterator.hasNext() && abortTime.isAfter(ZonedDateTime.now()) ) {
+        while (revocationListIterator.hasNext() && abortTime.isAfter(ZonedDateTime.now())) {
             List<RevocationBatchListDto.RevocationBatchListItemDto> batchListItems = revocationListIterator.next();
 
             for (RevocationBatchListDto.RevocationBatchListItemDto batchListItem : batchListItems) {
@@ -120,7 +121,8 @@ public class RevocationListDownloadServiceGatewayImpl {
                     try {
 
                         RevocationBatchDto revocationBatchDto =
-                            dgcGatewayRevocationListDownloadConnector.getRevocationListBatchById(batchListItem.getBatchId());
+                            dgcGatewayDownloadConnector.getRevocationListBatchById(batchListItem.getBatchId());
+
                         log.trace(revocationBatchDto.toString());
 
                         revocationListservice.updateRevocationListBatch(batchListItem.getBatchId(), revocationBatchDto);

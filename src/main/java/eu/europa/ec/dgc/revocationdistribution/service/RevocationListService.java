@@ -65,6 +65,13 @@ public class RevocationListService {
     private final PartitionListMapper partitionListMapper;
     private final SliceRepository sliceRepository;
 
+
+    /**
+     * Updates the hashes of the batch in the database.
+     *
+     * @param batchId            The id of the batch processed.
+     * @param revocationBatchDto The batch data of the processed batch.
+     */
     @Transactional
     public void updateRevocationListBatch(String batchId, RevocationBatchDto revocationBatchDto) {
 
@@ -73,8 +80,8 @@ public class RevocationListService {
         List<HashesEntity> hashes = new ArrayList<>();
 
         for (RevocationBatchDto.BatchEntryDto hash : revocationBatchDto.getEntries()) {
-            try{
-                 hashes.add(getHashEntity(batchId, hash, revocationBatchDto.getKid()));
+            try {
+                hashes.add(getHashEntity(batchId, hash, revocationBatchDto.getKid()));
             } catch (IndexOutOfBoundsException e) {
                 log.error("Error calculating x,y,z. Hash value length is to short: {}",
                     hash.getHash().getBytes(StandardCharsets.UTF_8).length);
@@ -84,82 +91,96 @@ public class RevocationListService {
     }
 
 
-    private void saveBatchList(String batchId, RevocationBatchDto revocationBatchDto) {
-        BatchListEntity batchListEntity = new BatchListEntity();
-
-        batchListEntity.setBatchId(batchId);
-        batchListEntity.setExpires(revocationBatchDto.getExpires());
-        batchListEntity.setCountry(revocationBatchDto.getCountry());
-        batchListEntity.setType(BatchListEntity.RevocationHashType.valueOf(revocationBatchDto.getHashType().name()));
-        batchListEntity.setKid(revocationBatchDto.getKid());
-
-        batchListRepository.save(batchListEntity);
-    }
-
-
-    private HashesEntity getHashEntity(String batchId, RevocationBatchDto.BatchEntryDto hash, String kid)
-        throws IndexOutOfBoundsException {
-
-            String hexHash = decodeBase64Hash(hash.getHash());
-            HashesEntity hashesEntity = new HashesEntity();
-            hashesEntity.setHash(hexHash);
-            hashesEntity.setX(hexHash.charAt(0));
-            hashesEntity.setY(hexHash.charAt(1));
-            hashesEntity.setZ(hexHash.charAt(2));
-            hashesEntity.setKid(kid);
-            hashesEntity.setBatchId(batchId);
-            hashesEntity.setUpdated(true);
-
-            return hashesEntity;
-    }
-
+    /**
+     * Deletes alle batch entities in the given list from the DB.
+     *
+     * @param batchIds Ids of the Batch list items to be deleted
+     */
     @Transactional
     public void deleteBatchListItemsByIds(List<String> batchIds) {
         batchListRepository.deleteByBatchIdIn(batchIds);
     }
 
-    private String decodeBase64Hash(String b64Hash) {
-        byte[] decodedBytes = Base64.getDecoder().decode(b64Hash);
-
-        return Hex.toHexString(decodedBytes);
-    }
-
+    /**
+     * Saves a  revocation list entity in the db.
+     *
+     * @param revocationListJsonEntity the entity to be saved
+     */
     public void saveRevocationListJson(RevocationListJsonEntity revocationListJsonEntity) {
         revocationListJsonRepository.save(revocationListJsonEntity);
     }
 
+    /**
+     * Gets the revocation list meta data for an etag.
+     *
+     * @param currentEtag Etag for which the revocation list meta data should be returned
+     * @return revocation list meta data if present
+     */
     public Optional<RevocationListJsonEntity> getRevocationListJsonData(String currentEtag) {
         return revocationListJsonRepository.findById(currentEtag);
     }
 
+    /**
+     * Sets all hashes updated states to false.
+     */
     @Transactional
     public void setAllHashesUpdatedStatesToFalse() {
         hashesRepository.setAllUpdatedStatesToFalse();
     }
 
+    /**
+     * Deletes all hashes without a batch id.
+     */
     @Transactional
     public void deleteAllOrphanedHashes() {
         hashesRepository.deleteAllOrphanedHashes();
     }
 
+    /**
+     * Deletes all revocation lists meta data, except the one belonging to the given etag.
+     *
+     * @param currendEtag the etag of the data that should not be deleted.
+     */
     @Transactional
     public void deleteAllOutdatedJsonLists(String currendEtag) {
         revocationListJsonRepository.deleteAllOutdatedEntries(currendEtag);
     }
 
-
+    /**
+     * Gets all partition meta data of a kid filtered by date.
+     *
+     * @param kidId           the kid of the partition.
+     * @param ifModifiedSince Only newer dater should be returned.
+     * @return the partition meta data
+     */
     public List<PartitionResponseDto> getPartitionsByKidAndDate(String kidId, ZonedDateTime ifModifiedSince) {
         return new ArrayList<>();
     }
 
-
+    /**
+     * Gets all partition meta data of a kid.
+     *
+     * @param kid  the kid of the partition.
+     * @param etag the etag of the data set.
+     * @return the partition meta data
+     */
     public List<PartitionResponseDto> getPartitionsByKid(String etag, String kid) {
 
-        return partitionRepository.findAllByEtagAndKid(etag, kid).stream().map(partitionListMapper::map).collect(Collectors.toList());
+        return partitionRepository.findAllByEtagAndKid(etag, kid).stream()
+            .map(partitionListMapper::map).collect(Collectors.toList());
     }
 
-
-    public PartitionResponseDto getPartitionsByKidAndId(String etag, String kid, String id) throws DataNotFoundException {
+    /**
+     * Gets a partition meta data.
+     *
+     * @param etag the etag of the data set.
+     * @param kid  the kid of the partition.
+     * @param id   the id of the partition
+     * @return the partition meta data
+     * @throws DataNotFoundException thrown if no data was found
+     */
+    public PartitionResponseDto getPartitionsByKidAndId(String etag, String kid, String id)
+        throws DataNotFoundException {
 
         Optional<PartitionEntity> partition;
 
@@ -176,8 +197,16 @@ public class RevocationListService {
         return partitionListMapper.map(partition.get());
     }
 
-
-    public byte[] getAllChunkDataFromPartition(String etag, String kid, String id) {
+    /**
+     * Gets all slice binary data of a partition.
+     *
+     * @param etag the etag of the data set.
+     * @param kid  the kid of the partition.
+     * @param id   the id of the partition
+     * @return the partition binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
+    public byte[] getAllChunkDataFromPartition(String etag, String kid, String id) throws DataNotFoundException {
         List<SliceEntity> sliceEntityList;
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
@@ -194,11 +223,23 @@ public class RevocationListService {
         return createTarForSlices(sliceEntityList);
     }
 
+
+    /**
+     * Gets all slice binary data of a partition with filter. Only the binary slice data of the slices,
+     * which ids are part of the filter are returned.
+     *
+     * @param etag   the etag of the data set.
+     * @param kid    the kid of the partition.
+     * @param id     the id of the partition
+     * @param filter only the slices, which ids are part of the filter are returned.
+     * @return the partition binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
     public byte[] getAllChunkDataFromPartitionWithFilter(
         String etag,
         String kid,
         String id,
-        List<String> filter) {
+        List<String> filter) throws DataNotFoundException {
 
         List<SliceEntity> sliceEntityList;
         if (id.equalsIgnoreCase("null")) {
@@ -216,7 +257,16 @@ public class RevocationListService {
 
     }
 
-
+    /**
+     * Gets all slice binary data of a chunk.
+     *
+     * @param etag the etag of the data set.
+     * @param kid  the kid of the partition.
+     * @param id   the id of the partition
+     * @param cid  the id of the chunk
+     * @return the chunk binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
     public byte[] getChunkData(String etag, String kid, String id, String cid) throws DataNotFoundException {
         List<SliceEntity> sliceEntityList;
         if (id.equalsIgnoreCase("null")) {
@@ -234,7 +284,18 @@ public class RevocationListService {
         return createTarForSlices(sliceEntityList);
     }
 
-
+    /**
+     * Gets all slice binary data of a chunk with filter. Only the binary slice data of the slices,
+     * which ids are part of the filter are returned.
+     *
+     * @param etag   the etag of the data set.
+     * @param kid    the kid of the partition.
+     * @param id     the id of the partition
+     * @param cid    the id of the chunk
+     * @param filter only the slices, which ids are part of the filter are returned.
+     * @return the chunk binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
     public byte[] getAllSliceDataForChunkWithFilter(
         String etag,
         String kid,
@@ -259,6 +320,17 @@ public class RevocationListService {
     }
 
 
+    /**
+     * Gets the slice binary data for a specific slice.
+     *
+     * @param etag the etag of the data set.
+     * @param kid  the kid of the partition.
+     * @param id   the id of the partition
+     * @param cid  the id of the chunk
+     * @param sid  the id of the slice
+     * @return the chunk binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
     public byte[] getSliceData(String etag, String kid, String id, String cid, String sid)
         throws DataNotFoundException {
 
@@ -282,8 +354,44 @@ public class RevocationListService {
     }
 
 
-    private byte[] createTarForSlices(List<SliceEntity> sliceEntityList) {
+    private String decodeBase64Hash(String b64Hash) {
+        byte[] decodedBytes = Base64.getDecoder().decode(b64Hash);
 
+        return Hex.toHexString(decodedBytes);
+    }
+
+
+    private void saveBatchList(String batchId, RevocationBatchDto revocationBatchDto) {
+        BatchListEntity batchListEntity = new BatchListEntity();
+
+        batchListEntity.setBatchId(batchId);
+        batchListEntity.setExpires(revocationBatchDto.getExpires());
+        batchListEntity.setCountry(revocationBatchDto.getCountry());
+        batchListEntity.setType(BatchListEntity.RevocationHashType.valueOf(revocationBatchDto.getHashType().name()));
+        batchListEntity.setKid(revocationBatchDto.getKid());
+
+        batchListRepository.save(batchListEntity);
+    }
+
+
+    private HashesEntity getHashEntity(String batchId, RevocationBatchDto.BatchEntryDto hash, String kid)
+        throws IndexOutOfBoundsException {
+
+        String hexHash = decodeBase64Hash(hash.getHash());
+        HashesEntity hashesEntity = new HashesEntity();
+        hashesEntity.setHash(hexHash);
+        hashesEntity.setX(hexHash.charAt(0));
+        hashesEntity.setY(hexHash.charAt(1));
+        hashesEntity.setZ(hexHash.charAt(2));
+        hashesEntity.setKid(kid);
+        hashesEntity.setBatchId(batchId);
+        hashesEntity.setUpdated(true);
+
+        return hashesEntity;
+    }
+
+
+    private byte[] createTarForSlices(List<SliceEntity> sliceEntityList) {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
@@ -311,8 +419,5 @@ public class RevocationListService {
         }
 
         return byteArrayOutputStream.toByteArray();
-
     }
-
-
 }

@@ -27,6 +27,7 @@ import lombok.Value;
 
 @Value
 @AllArgsConstructor
+@SuppressWarnings("checkstyle:membername")
 public class ChunkMetaViewDto {
 
     String rowId;

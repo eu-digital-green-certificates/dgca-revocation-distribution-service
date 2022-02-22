@@ -28,6 +28,7 @@ import lombok.Value;
 
 @Value
 @AllArgsConstructor
+@SuppressWarnings("checkstyle:membername")
 public class PartitionResponseDto {
 
     String kid;
