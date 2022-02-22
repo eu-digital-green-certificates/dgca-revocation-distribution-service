@@ -29,6 +29,7 @@ public class TokenValidationException extends RuntimeException {
 
     /**
      * Constructor for TokenValidationException. Status is set to 500 Server Error.
+     *
      * @param message Massage of the exception.
      * @param inner Inner exception information
      */
@@ -40,6 +41,7 @@ public class TokenValidationException extends RuntimeException {
 
     /**
      * Constructor for TokenValidationException. Status is set to 500 Server Error.
+     *
      * @param message Massage of the exception.
      */
     public TokenValidationException(String message) {
@@ -50,6 +52,7 @@ public class TokenValidationException extends RuntimeException {
 
     /**
      * Constructor for TokenValidationException.
+     *
      * @param message Massage of the exception.
      * @param inner Inner exception information
      * @param status The Http status code reason.
@@ -61,6 +64,7 @@ public class TokenValidationException extends RuntimeException {
 
     /**
      * Constructor for TokenValidationException.
+     *
      * @param message Massage of the exception.
      * @param status The Http status code reason.
      */

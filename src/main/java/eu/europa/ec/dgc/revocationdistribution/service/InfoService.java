@@ -40,6 +40,7 @@ public class InfoService {
 
     /**
      *  Gets a value for the given key from the db.
+     *
      * @param key the key, for which the value should be returned
      * @return the value or null if not found in db
      */
@@ -55,6 +56,7 @@ public class InfoService {
 
     /**
      * Saves the value for a given key in the db.
+     *
      * @param key key of the value to save.
      * @param value the value to save
      */
@@ -65,6 +67,7 @@ public class InfoService {
 
     /**
      * Updates the current etag by calling the stored procedure in the db.
+     *
      * The procedure also updates the revocation dataset in the db
      * @param etag the new etag value to be set
      */
