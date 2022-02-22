@@ -19,16 +19,11 @@
 
 ## About
 
-TBD
+This distribution service distributes the revocation list data gathered by the EU DCC Gateway to the DCCA Verifier Apps to check the revocation status. The Service supports currently Bloomfilter to ensure the maximum data privacy. Other distribution formats can be integrated if wished by implementing the 
 
 ## Development
 
-TBD
-
-
-## Documentation
-
-TBD
+The installation of the revocation service requires an already preinstalled postgres database where the database [scripts](https://github.com/eu-digital-green-certificates/dgca-revocation-distribution-service/tree/main/src/main/resources/db/sql) are already applied. 
 
 
 ## Support and feedback
