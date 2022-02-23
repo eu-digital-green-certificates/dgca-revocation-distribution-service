@@ -23,7 +23,10 @@ CREATE OR REPLACE VIEW public.kid_view
     a.lastupdated,
     a.expired,
     a.updated
-   FROM ( SELECT hashes.kid,
+   FROM ( SELECT
+            case when hashes.kid isNull then 'UNKNOWN_KID'
+              	 else hashes.kid
+            END as kid,
             count(*) AS c,
             array_to_string(array_agg(DISTINCT batch_list.type), ','::text) AS hashtypes,
             bool_or(hashes.updated) AS updated,

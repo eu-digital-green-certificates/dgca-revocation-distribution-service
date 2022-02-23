@@ -5,7 +5,9 @@
 CREATE OR REPLACE VIEW public.point_view
  AS
  SELECT row_number() OVER ()::text AS row_id,
-    hashes.kid,
+    case when hashes.kid isNull then 'UNKNOWN_KID'
+      	 else hashes.kid
+    END as kid,
     max(date_trunc('minute'::text, batch_list.expires))::timestamp with time zone AS expired,
     max(hashes.last_updated) AS lastupdated,
     array_agg(DISTINCT hashes.hash) AS hashes,
