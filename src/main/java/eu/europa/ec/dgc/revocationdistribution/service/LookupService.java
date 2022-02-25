@@ -36,6 +36,7 @@ import io.jsonwebtoken.Jwt;
 import java.security.PublicKey;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -107,7 +108,7 @@ public class LookupService {
         List<String> hashes = tokenPayloads.stream().map(RevocationCheckTokenPayload::getPayload)
             .flatMap(List::stream).collect(Collectors.toList());
 
-        return hashesRepository.getHashesPresentInListAndDb(hashes);
+        return hashesRepository.getHashesPresentInListAndDbAndNotExpired(hashes, ZonedDateTime.now());
 
     }
 

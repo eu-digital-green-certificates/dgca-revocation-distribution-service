@@ -76,13 +76,13 @@ public class RevocationListService {
     @Transactional
     public void updateRevocationListBatch(String batchId, RevocationBatchDto revocationBatchDto) {
 
-        saveBatchList(batchId, revocationBatchDto);
+        BatchListEntity batchListEntity =  saveBatchList(batchId, revocationBatchDto);
 
         List<HashesEntity> hashes = new ArrayList<>();
 
         for (RevocationBatchDto.BatchEntryDto hash : revocationBatchDto.getEntries()) {
             try {
-                hashes.add(getHashEntity(batchId, hash, revocationBatchDto.getKid()));
+                hashes.add(getHashEntity(batchListEntity, hash, revocationBatchDto.getKid()));
             } catch (IndexOutOfBoundsException e) {
                 log.error("Error calculating x,y,z. Hash value length is to short: {}",
                     hash.getHash().getBytes(StandardCharsets.UTF_8).length);
@@ -420,7 +420,7 @@ public class RevocationListService {
     }
 
 
-    private void saveBatchList(String batchId, RevocationBatchDto revocationBatchDto) {
+    private BatchListEntity saveBatchList(String batchId, RevocationBatchDto revocationBatchDto) {
         BatchListEntity batchListEntity = new BatchListEntity();
 
         batchListEntity.setBatchId(batchId);
@@ -429,11 +429,11 @@ public class RevocationListService {
         batchListEntity.setType(BatchListEntity.RevocationHashType.valueOf(revocationBatchDto.getHashType().name()));
         batchListEntity.setKid(revocationBatchDto.getKid());
 
-        batchListRepository.save(batchListEntity);
+        return batchListRepository.save(batchListEntity);
     }
 
 
-    private HashesEntity getHashEntity(String batchId, RevocationBatchDto.BatchEntryDto hash, String kid)
+    private HashesEntity getHashEntity(BatchListEntity batch, RevocationBatchDto.BatchEntryDto hash, String kid)
         throws IndexOutOfBoundsException {
 
         String hexHash = decodeBase64Hash(hash.getHash());
@@ -443,7 +443,7 @@ public class RevocationListService {
         hashesEntity.setY(hexHash.charAt(1));
         hashesEntity.setZ(hexHash.charAt(2));
         hashesEntity.setKid(kid);
-        hashesEntity.setBatchId(batchId);
+        hashesEntity.setBatch(batch);
         hashesEntity.setUpdated(true);
 
         return hashesEntity;
