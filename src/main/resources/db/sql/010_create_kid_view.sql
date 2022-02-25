@@ -12,8 +12,8 @@ CREATE OR REPLACE VIEW public.kid_view
                     WHEN configuration_1.key = 'COORDINATELIMIT'::text THEN 'COORDINATE'::text
                     ELSE NULL::text
                 END AS storage_mode,
-             to_number(configuration_1.value, '999999999999'::text) AS minlimit,
-             to_number(configuration_1.value2, '999999999999'::text) AS maxlimit
+            to_number(configuration_1.value, '999999999999'::text) AS minlimit,
+            to_number(configuration_1.value2, '999999999999'::text) AS maxlimit
            FROM public.configuration configuration_1
           WHERE configuration_1.key = ANY (ARRAY['POINTLIMIT'::text, 'VECTORLIMIT'::text, 'COORDINATELIMIT'::text])
         )
@@ -24,9 +24,10 @@ CREATE OR REPLACE VIEW public.kid_view
     a.expired,
     a.updated
    FROM ( SELECT
-            case when hashes.kid isNull then 'UNKNOWN_KID'
-              	 else hashes.kid
-            END as kid,
+                CASE
+                    WHEN hashes.kid IS NULL THEN 'UNKNOWN_KID'::character varying
+                    ELSE hashes.kid
+                END AS kid,
             count(*) AS c,
             array_to_string(array_agg(DISTINCT batch_list.type), ','::text) AS hashtypes,
             bool_or(hashes.updated) AS updated,

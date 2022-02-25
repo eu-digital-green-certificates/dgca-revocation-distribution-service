@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION public.set_last_updated_function()
 AS $BODY$
 BEGIN
   NEW.last_updated := NOW();
-
+  NEW.updated := true;
   RETURN NEW;
 END;
 $BODY$;
