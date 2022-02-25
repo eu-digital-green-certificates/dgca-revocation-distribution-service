@@ -161,6 +161,7 @@ public class RevocationListController {
     /**
      * Http Method for getting the  binary data of a partition.
      * @param ifMatch must match the actual revocation list / available data set
+     * @param ifModifiedSince only data newer than this date is returned
      * @param kid the kid for which the partitions are requested.
      * @param id the id of the requested partition
      *
@@ -173,6 +174,7 @@ public class RevocationListController {
         @PathVariable String kid,
         @PathVariable String id,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
+        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince,
         @Valid @RequestBody(required = false) List<String> reqestedChunksList
     ) {
 
@@ -182,20 +184,37 @@ public class RevocationListController {
 
         byte[] result;
 
-        if (reqestedChunksList == null) {
+        if (ifModifiedSince != null) {
+            ZonedDateTime ifModifiedDateTime;
+            try {
+                ifModifiedDateTime = ZonedDateTime.parse(ifModifiedSince);
+            } catch (DateTimeParseException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            if (reqestedChunksList == null) {
 
-            result = revocationListService.getAllChunkDataFromPartition(currentEtag, kid, id);
+                result = revocationListService.getAllChunkDataFromPartitionSinceDate(
+                    currentEtag, kid, id, ifModifiedDateTime);
+            } else {
+                result = revocationListService.getAllChunkDataFromPartitionWithFilterSinceDate(
+                    currentEtag, kid, id, reqestedChunksList, ifModifiedDateTime);
+            }
         } else {
-            result = revocationListService.getAllChunkDataFromPartitionWithFilter(
-                currentEtag, kid, id, reqestedChunksList);
-        }
+            if (reqestedChunksList == null) {
 
+                result = revocationListService.getAllChunkDataFromPartition(currentEtag, kid, id);
+            } else {
+                result = revocationListService.getAllChunkDataFromPartitionWithFilter(
+                    currentEtag, kid, id, reqestedChunksList);
+            }
+        }
         return ResponseEntity.ok(result);
     }
 
     /**
      * Http Method for getting the slice data of a chunk.
      * @param ifMatch must match the actual revocation list / available data set
+     * @param ifModifiedSince only data newer than this date is returned
      * @param kid the kid for which the partitions are requested
      * @param id the id of the requested partition
      * @param cid the id of the requested chunk
@@ -207,15 +226,27 @@ public class RevocationListController {
         @PathVariable String kid,
         @PathVariable String id,
         @PathVariable String cid,
-        @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch
+        @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
+        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
     ) {
 
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
 
+        byte[] result;
 
-        byte[] result = revocationListService.getChunkData(currentEtag, kid, id, cid);
+        if (ifModifiedSince != null) {
+            ZonedDateTime ifModifiedDateTime;
+            try {
+                ifModifiedDateTime = ZonedDateTime.parse(ifModifiedSince);
+            } catch (DateTimeParseException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            result = revocationListService.getChunkDataSinceDate(currentEtag, kid, id, cid, ifModifiedDateTime);
+        } else {
+            result = revocationListService.getChunkData(currentEtag, kid, id, cid);
+        }
 
         return ResponseEntity.ok(result);
     }
@@ -223,6 +254,7 @@ public class RevocationListController {
     /**
      * Http Method for getting a selection of slice data of a chunk.
      * @param ifMatch must match the actual revocation list / available data set
+     * @param ifModifiedSince only data newer than this date is returned
      * @param kid the kid for which the partitions are requested
      * @param id the id of the requested partition
      * @param cid the id of the requested chunk
@@ -238,6 +270,7 @@ public class RevocationListController {
         @PathVariable String id,
         @PathVariable String cid,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
+        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince,
         @Valid @RequestBody(required = false) List<String> reqestedSliceList
     ) {
 
@@ -247,11 +280,26 @@ public class RevocationListController {
 
         byte[] result;
 
-        if (reqestedSliceList == null) {
-            result = revocationListService.getChunkData(currentEtag, kid, id, cid);
+        if (ifModifiedSince != null) {
+            ZonedDateTime ifModifiedDateTime;
+            try {
+                ifModifiedDateTime = ZonedDateTime.parse(ifModifiedSince);
+            } catch (DateTimeParseException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            if (reqestedSliceList == null) {
+                result = revocationListService.getChunkDataSinceDate(currentEtag, kid, id, cid, ifModifiedDateTime);
+            } else {
+                result = revocationListService.getAllSliceDataForChunkWithFilterSinceDate(
+                    currentEtag, kid, id, cid, reqestedSliceList, ifModifiedDateTime);
+            }
         } else {
-            result = revocationListService.getAllSliceDataForChunkWithFilter(
-                currentEtag, kid, id, cid, reqestedSliceList);
+            if (reqestedSliceList == null) {
+                result = revocationListService.getChunkData(currentEtag, kid, id, cid);
+            } else {
+                result = revocationListService.getAllSliceDataForChunkWithFilter(
+                    currentEtag, kid, id, cid, reqestedSliceList);
+            }
         }
 
         return ResponseEntity.ok(result);
@@ -261,6 +309,7 @@ public class RevocationListController {
     /**
      * Http Method for getting specific slice data.
      * @param ifMatch must match the actual revocation list / available data set
+     * @param ifModifiedSince only newer data than this date is returned
      * @param kid the kid for which the partitions are requested
      * @param id the id of the requested partition
      * @param cid the id of the requested chunk
@@ -283,10 +332,18 @@ public class RevocationListController {
 
         String currentEtag = checkEtag(ifMatch);
 
-        byte[] result = revocationListService.getSliceData(currentEtag, kid, id, cid, sid);
+        byte[] result;
 
-        if (result == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if (ifModifiedSince != null) {
+            ZonedDateTime ifModifiedDateTime;
+            try {
+                ifModifiedDateTime = ZonedDateTime.parse(ifModifiedSince);
+            } catch (DateTimeParseException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            result = revocationListService.getSliceDataSinceDate(currentEtag, kid, id, cid, sid, ifModifiedDateTime);
+        } else {
+            result = revocationListService.getSliceData(currentEtag, kid, id, cid, sid);
         }
 
         return ResponseEntity.ok(result);

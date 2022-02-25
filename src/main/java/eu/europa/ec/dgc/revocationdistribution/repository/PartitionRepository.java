@@ -53,4 +53,8 @@ public interface PartitionRepository extends JpaRepository<PartitionEntity, Stri
 
     Optional<PartitionEntity> findOneByEtagAndKidAndIdIsNullAndLastUpdatedAfter(
         String etag, String kid, ZonedDateTime ifModifiedSince);
+
+    Long countByEtagAndKidAndId(String etag, String kid, String id);
+
+    Long countByEtagAndKidAndIdIsNull(String etag, String kid);
 }

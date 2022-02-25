@@ -226,6 +226,7 @@ public class RevocationListService {
      * @param etag the etag of the data set.
      * @param kid  the kid of the partition.
      * @param id   the id of the partition
+     * @param ifModifiedSince only data after this dae are returned
      * @return the partition meta data
      * @throws DataNotFoundException thrown if no data was found
      * @throws DataNotChangedException thrown if no data changed after date
@@ -246,9 +247,17 @@ public class RevocationListService {
         }
 
         if (partition.isEmpty()) {
-            //check if there is data at all. -> throws exception if not
-            getPartitionsByKidAndId(etag, kid, id);
+            Long count;
 
+            if (id.equalsIgnoreCase("null")) {
+                count = partitionRepository.countByEtagAndKidAndIdIsNull(etag, kid);
+            } else {
+                count = partitionRepository.countByEtagAndKidAndId(etag, kid, id);
+            }
+
+            if (count == 0) {
+                throw new DataNotFoundException();
+            }
             throw new DataNotChangedException();
         }
         return partitionListMapper.map(partition.get());
@@ -280,6 +289,55 @@ public class RevocationListService {
         }
 
         return createTarForSlices(sliceEntityList);
+    }
+
+
+    /**
+     * Gets all slice binary data of a partition since a date.
+     *
+     * @param etag the etag of the data set.
+     * @param kid  the kid of the partition.
+     * @param id   the id of the partition
+     * @param ifModifiedDateTime only data after this date are returned
+     * @return the partition binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
+    public byte[] getAllChunkDataFromPartitionSinceDate(
+        String etag,
+        String kid,
+        String id,
+        ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
+
+        List<SliceEntity> sliceEntityList;
+
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndLastUpdatedAfter(
+                etag, kid, ifModifiedDateTime);
+
+        } else {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndLastUpdatedAfter(
+                etag, kid, id, ifModifiedDateTime);
+        }
+
+        if (sliceEntityList.isEmpty()) {
+            Long count;
+
+            if (id.equalsIgnoreCase("null")) {
+                count = sliceRepository.countByEtagAndKidAndIdIsNull(etag, kid);
+            } else {
+                count = sliceRepository.countByEtagAndKidAndId(etag, kid, id);
+            }
+
+            if (count == 0) {
+                throw new DataNotFoundException();
+            }
+
+            throw new DataNotChangedException();
+        }
+
+        return createTarForSlices(sliceEntityList);
+
     }
 
 
@@ -317,6 +375,55 @@ public class RevocationListService {
     }
 
     /**
+     * Gets all slice binary data of a partition with filter. Only the binary slice data of the slices,
+     * which ids are part of the filter  and are newer then the modified since date are returned.
+     *
+     * @param etag   the etag of the data set.
+     * @param kid    the kid of the partition.
+     * @param id     the id of the partition
+     * @param filter only the slices, which ids are part of the filter are returned.
+     * @param ifModifiedDateTime only data after this date are returned
+     * @return the partition binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
+
+    public byte[] getAllChunkDataFromPartitionWithFilterSinceDate(
+        String etag,
+        String kid,
+        String id,
+        List<String> filter,
+        ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
+
+        List<SliceEntity> sliceEntityList;
+        if (id.equalsIgnoreCase("null")) {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkInAndLastUpdatedAfter(
+                etag, kid, filter, ifModifiedDateTime);
+
+        } else {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkInAndLastUpdatedAfter(
+                etag, kid, id, filter, ifModifiedDateTime);
+        }
+
+        if (sliceEntityList.isEmpty()) {
+            Long count;
+
+            if (id.equalsIgnoreCase("null")) {
+                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunkIn(etag, kid, filter);
+            } else {
+                count = sliceRepository.countByEtagAndKidAndIdAndChunkIn(etag, kid, id, filter);
+            }
+
+            if (count == 0) {
+                throw new DataNotFoundException();
+            }
+            throw new DataNotChangedException();
+        }
+
+        return createTarForSlices(sliceEntityList);
+
+    }
+
+    /**
      * Gets all slice binary data of a chunk.
      *
      * @param etag the etag of the data set.
@@ -344,6 +451,55 @@ public class RevocationListService {
     }
 
     /**
+     * Gets all slice binary data of a chunk. Only newer date since the modified since date are returned.
+     *
+     * @param etag the etag of the data set.
+     * @param kid  the kid of the partition.
+     * @param id   the id of the partition
+     * @param cid  the id of the chunk
+     * @param ifModifiedDateTime only data after this dae are returned
+     * @return the chunk binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
+
+    public byte[] getChunkDataSinceDate(
+        String etag,
+        String kid,
+        String id,
+        String cid,
+        ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
+
+        List<SliceEntity> sliceEntityList;
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndLastUpdatedAfter(
+                etag, kid, cid, ifModifiedDateTime);
+
+        } else {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndLastUpdatedAfter(
+                etag, kid, id, cid, ifModifiedDateTime);
+        }
+
+        if (sliceEntityList.isEmpty()) {
+            Long count;
+
+            if (id.equalsIgnoreCase("null")) {
+                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunk(etag, kid, cid);
+            } else {
+                count = sliceRepository.countByEtagAndKidAndIdAndChunk(etag, kid, id, cid);
+            }
+
+            if (count == 0) {
+                throw new DataNotFoundException();
+            }
+            throw new DataNotChangedException();
+        }
+
+        return createTarForSlices(sliceEntityList);
+
+    }
+
+    /**
      * Gets all slice binary data of a chunk with filter. Only the binary slice data of the slices,
      * which ids are part of the filter are returned.
      *
@@ -363,6 +519,7 @@ public class RevocationListService {
         List<String> filter) throws DataNotFoundException {
 
         List<SliceEntity> sliceEntityList;
+
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
             sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndHashIn(etag, kid, cid, filter);
@@ -373,6 +530,58 @@ public class RevocationListService {
 
         if (sliceEntityList.isEmpty()) {
             throw new DataNotFoundException();
+        }
+
+        return createTarForSlices(sliceEntityList);
+    }
+
+    /**
+     * Gets all slice binary data of a chunk with filter. Only the binary slice data of the slices,
+     * which ids are part of the filter are returned.
+     *
+     * @param etag   the etag of the data set.
+     * @param kid    the kid of the partition.
+     * @param id     the id of the partition
+     * @param cid    the id of the chunk
+     * @param filter only the slices, which ids are part of the filter are returned.
+     * @param ifModifiedDateTime only data after this dae are returned
+     * @return the chunk binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
+    public byte[] getAllSliceDataForChunkWithFilterSinceDate(
+        String etag,
+        String kid,
+        String id,
+        String cid,
+        List<String> filter,
+        ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
+
+        List<SliceEntity> sliceEntityList;
+
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndHashInAndLastUpdatedAfter(
+                etag, kid, cid, filter, ifModifiedDateTime);
+
+        } else {
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndHashInAndLastUpdatedAfter(
+                etag, kid, id, cid, filter, ifModifiedDateTime);
+        }
+
+        if (sliceEntityList.isEmpty()) {
+            Long count;
+
+            if (id.equalsIgnoreCase("null")) {
+                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunkAndHashIn(etag, kid, cid, filter);
+            } else {
+                count = sliceRepository.countByEtagAndKidAndIdAndChunkAndHashIn(etag, kid, id, cid, filter);
+            }
+
+            if (count == 0) {
+                throw new DataNotFoundException();
+            }
+
+            throw new DataNotChangedException();
         }
 
         return createTarForSlices(sliceEntityList);
@@ -410,6 +619,60 @@ public class RevocationListService {
         sliceEntityList.add(sliceEntity.get());
 
         return createTarForSlices(sliceEntityList);
+    }
+
+    /**
+     * Gets the slice binary data for a specific slice if the data is newer than the modified since date.
+     *
+     * @param etag the etag of the data set.
+     * @param kid  the kid of the partition.
+     * @param id   the id of the partition
+     * @param cid  the id of the chunk
+     * @param sid  the id of the slice
+     * @param ifModifiedDateTime only data after this dae are returned
+     * @return the chunk binary slice data
+     * @throws DataNotFoundException thrown if no data was found
+     */
+    public byte[] getSliceDataSinceDate(
+        String etag,
+        String kid,
+        String id,
+        String cid,
+        String sid,
+        ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
+
+        Optional<SliceEntity> sliceEntity;
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdIsNullAndChunkAndHashAndLastUpdatedAfter(
+                etag, kid, cid, sid, ifModifiedDateTime);
+
+        } else {
+            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdAndChunkAndHashAndLastUpdatedAfter(
+                etag, kid, id, cid, sid, ifModifiedDateTime);
+        }
+
+        if (!sliceEntity.isPresent()) {
+            Long count;
+
+            if (id.equalsIgnoreCase("null")) {
+                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunkAndHash(etag, kid, cid, sid);
+            } else {
+                count = sliceRepository.countByEtagAndKidAndIdAndChunkAndHash(etag, kid, id, cid, sid);
+            }
+
+            if (count == 0) {
+                throw new DataNotFoundException();
+            }
+            throw new DataNotChangedException();
+        }
+
+        List<SliceEntity> sliceEntityList = new ArrayList<>();
+        sliceEntityList.add(sliceEntity.get());
+
+        return createTarForSlices(sliceEntityList);
+
+
     }
 
 
