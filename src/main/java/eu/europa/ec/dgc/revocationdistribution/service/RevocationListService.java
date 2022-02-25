@@ -28,6 +28,7 @@ import eu.europa.ec.dgc.revocationdistribution.entity.HashesEntity;
 import eu.europa.ec.dgc.revocationdistribution.entity.PartitionEntity;
 import eu.europa.ec.dgc.revocationdistribution.entity.RevocationListJsonEntity;
 import eu.europa.ec.dgc.revocationdistribution.entity.SliceEntity;
+import eu.europa.ec.dgc.revocationdistribution.exception.DataNotChangedException;
 import eu.europa.ec.dgc.revocationdistribution.exception.DataNotFoundException;
 import eu.europa.ec.dgc.revocationdistribution.mapper.PartitionListMapper;
 import eu.europa.ec.dgc.revocationdistribution.repository.BatchListRepository;
@@ -147,27 +148,48 @@ public class RevocationListService {
     }
 
     /**
-     * Gets all partition meta data of a kid filtered by date.
+     * Gets all partition metadata of a kid filtered by date.
      *
-     * @param kidId           the kid of the partition.
-     * @param ifModifiedSince Only newer dater should be returned.
+     * @param kid             the kid of the partition.
+     * @param etag            the etag of the data set.
+     * @param ifModifiedSince Only newer data should be returned.
      * @return the partition meta data
+     * @throws DataNotFoundException thrown if no data was found
+     * @throws DataNotChangedException thrown if no data changed after date
      */
-    public List<PartitionResponseDto> getPartitionsByKidAndDate(String kidId, ZonedDateTime ifModifiedSince) {
-        return new ArrayList<>();
+    public List<PartitionResponseDto> getPartitionsByKidAndDate(
+        String etag, String kid, ZonedDateTime ifModifiedSince) throws DataNotFoundException, DataNotChangedException {
+
+        List<PartitionResponseDto> partitions =  partitionRepository.findAllByEtagAndKidAndLastUpdatedAfter(
+            etag, kid, ifModifiedSince).stream().map(partitionListMapper::map).collect(Collectors.toList());
+
+        if (partitions.isEmpty()) {
+            //check if there is data at all. -> throws exception if not
+            getPartitionsByKid(etag, kid);
+            throw new DataNotChangedException();
+        }
+
+        return partitions;
     }
 
     /**
-     * Gets all partition meta data of a kid.
+     * Gets all partition metadata of a kid.
      *
      * @param kid  the kid of the partition.
      * @param etag the etag of the data set.
      * @return the partition meta data
+     * @throws DataNotFoundException thrown if no data was found
      */
-    public List<PartitionResponseDto> getPartitionsByKid(String etag, String kid) {
+    public List<PartitionResponseDto> getPartitionsByKid(String etag, String kid) throws DataNotFoundException {
 
-        return partitionRepository.findAllByEtagAndKid(etag, kid).stream()
+        List<PartitionResponseDto> partitions = partitionRepository.findAllByEtagAndKid(etag, kid).stream()
             .map(partitionListMapper::map).collect(Collectors.toList());
+
+        if (partitions.isEmpty()) {
+            throw new DataNotFoundException();
+        }
+
+        return partitions;
     }
 
     /**
@@ -196,6 +218,43 @@ public class RevocationListService {
         }
         return partitionListMapper.map(partition.get());
     }
+
+
+    /**
+     * Gets a partition meta data.
+     *
+     * @param etag the etag of the data set.
+     * @param kid  the kid of the partition.
+     * @param id   the id of the partition
+     * @return the partition meta data
+     * @throws DataNotFoundException thrown if no data was found
+     * @throws DataNotChangedException thrown if no data changed after date
+     */
+    public PartitionResponseDto getPartitionsByKidAndIdAndDate(
+        String etag, String kid, String id, ZonedDateTime ifModifiedSince)
+        throws DataNotFoundException {
+
+        Optional<PartitionEntity> partition;
+
+        if (id.equalsIgnoreCase("null")) {
+            log.info("id is null");
+            partition =
+                partitionRepository.findOneByEtagAndKidAndIdIsNullAndLastUpdatedAfter(etag, kid, ifModifiedSince);
+        } else {
+            partition =
+                partitionRepository.findOneByEtagAndKidAndIdAndLastUpdatedAfter(etag, kid, id, ifModifiedSince);
+        }
+
+        if (partition.isEmpty()) {
+            //check if there is data at all. -> throws exception if not
+            getPartitionsByKidAndId(etag, kid, id);
+
+            throw new DataNotChangedException();
+        }
+        return partitionListMapper.map(partition.get());
+    }
+
+
 
     /**
      * Gets all slice binary data of a partition.

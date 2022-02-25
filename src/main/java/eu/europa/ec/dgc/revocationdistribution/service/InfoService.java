@@ -67,8 +67,8 @@ public class InfoService {
 
     /**
      * Updates the current etag by calling the stored procedure in the db.
+     * The procedure also updates the revocation dataset in the db.
      *
-     * The procedure also updates the revocation dataset in the db
      * @param etag the new etag value to be set
      */
     public void setNewEtag(String etag) {

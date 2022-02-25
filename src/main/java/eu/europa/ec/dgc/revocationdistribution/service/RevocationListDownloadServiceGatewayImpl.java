@@ -143,10 +143,12 @@ public class RevocationListDownloadServiceGatewayImpl {
         }
 
         if (!deletedBatchIds.isEmpty()) {
+            log.info("Deleted batches: {}", deletedBatchIds);
             revocationListservice.deleteBatchListItemsByIds(deletedBatchIds);
         }
 
         if (!goneBatchIds.isEmpty()) {
+            log.info("Gone Batches: {}", goneBatchIds);
             revocationListservice.deleteBatchListItemsByIds(goneBatchIds);
         }
         //Delete expired.

@@ -21,6 +21,8 @@
 package eu.europa.ec.dgc.revocationdistribution.repository;
 
 import eu.europa.ec.dgc.revocationdistribution.entity.PartitionEntity;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,6 +35,9 @@ public interface PartitionRepository extends JpaRepository<PartitionEntity, Stri
 
     List<PartitionEntity> findAllByEtagAndKid(String etag, String kid);
 
+    List<PartitionEntity> findAllByEtagAndKidAndLastUpdatedAfter(
+        String etag, String kid, ZonedDateTime ifModifiedSince);
+
     @Modifying
     @Query("UPDATE PartitionEntity p SET p.toBeDeleted = true WHERE p.kid in :kids")
     void setToBeDeletedForKids(@Param("kids") List<String> kids);
@@ -41,4 +46,11 @@ public interface PartitionRepository extends JpaRepository<PartitionEntity, Stri
     Optional<PartitionEntity> findOneByEtagAndKidAndId(String etag, String kid, String id);
 
     Optional<PartitionEntity> findOneByEtagAndKidAndIdIsNull(String etag, String kid);
+
+
+    Optional<PartitionEntity> findOneByEtagAndKidAndIdAndLastUpdatedAfter(
+        String etag, String kid, String id, ZonedDateTime ifModifiedSince);
+
+    Optional<PartitionEntity> findOneByEtagAndKidAndIdIsNullAndLastUpdatedAfter(
+        String etag, String kid, ZonedDateTime ifModifiedSince);
 }

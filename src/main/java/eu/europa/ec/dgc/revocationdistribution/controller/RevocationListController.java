@@ -112,13 +112,9 @@ public class RevocationListController {
             } catch (DateTimeParseException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            result = revocationListService.getPartitionsByKidAndDate(kid, ifModifiedDateTime);
+            result = revocationListService.getPartitionsByKidAndDate(currentEtag, kid, ifModifiedDateTime);
         } else {
             result = revocationListService.getPartitionsByKid(currentEtag, kid);
-        }
-
-        if (result.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
 
         return ResponseEntity.ok(result);
@@ -153,11 +149,10 @@ public class RevocationListController {
             } catch (DateTimeParseException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            result = revocationListService.getPartitionsByKidAndId(currentEtag, kid, id);// ifModifiedDateTime);
+            result = revocationListService.getPartitionsByKidAndIdAndDate(currentEtag, kid, id, ifModifiedDateTime);
         } else {
             result = revocationListService.getPartitionsByKidAndId(currentEtag, kid, id);
         }
-
 
         return ResponseEntity.ok(result);
     }

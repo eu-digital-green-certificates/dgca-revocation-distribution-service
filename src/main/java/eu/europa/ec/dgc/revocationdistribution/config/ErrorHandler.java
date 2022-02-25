@@ -20,6 +20,7 @@
 
 package eu.europa.ec.dgc.revocationdistribution.config;
 
+import eu.europa.ec.dgc.revocationdistribution.exception.DataNotChangedException;
 import eu.europa.ec.dgc.revocationdistribution.exception.DataNotFoundException;
 import eu.europa.ec.dgc.revocationdistribution.exception.PreconditionFailedException;
 import eu.europa.ec.dgc.revocationdistribution.exception.TokenValidationException;
@@ -62,6 +63,19 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
     }
+
+    /**
+     * Handles {@link DataNotChangedException} when a validation failed.
+     *
+     * @param e the thrown {@link DataNotFoundException}
+     * @return A ResponseEntity with a ErrorMessage inside.
+     */
+    @ExceptionHandler(DataNotChangedException.class)
+    public ResponseEntity<Object> handleException(DataNotChangedException e) {
+        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+    }
+
+
 
     /**
      * Handles {@link TokenValidationException} when a validation failed.
