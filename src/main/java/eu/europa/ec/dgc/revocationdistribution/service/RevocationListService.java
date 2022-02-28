@@ -676,6 +676,16 @@ public class RevocationListService {
     }
 
 
+    /**
+     * Gets all Batch ids that are expired from the DB.
+     *
+     * @return List of expired batches
+     */
+    public List<String> getExpiredBatchIds() {
+        return batchListRepository.findAllByExpiresBefore(ZonedDateTime.now());
+    }
+
+
     private String decodeBase64Hash(String b64Hash) {
         byte[] decodedBytes = Base64.getDecoder().decode(b64Hash);
 
@@ -742,4 +752,7 @@ public class RevocationListService {
 
         return byteArrayOutputStream.toByteArray();
     }
+
+
+
 }

@@ -35,6 +35,7 @@ public class InfoService {
 
     public static final  String LAST_UPDATED_KEY = "LASTUPDATED";
     public static final  String CURRENT_ETAG = "CURRENTETAG";
+    public static final String NEEDS_CALCULATION_KEY = "NEEDSCALCULATION";
 
     private final InfoRepository infoRepository;
 

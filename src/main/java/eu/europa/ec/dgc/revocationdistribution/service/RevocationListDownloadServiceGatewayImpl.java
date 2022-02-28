@@ -90,6 +90,8 @@ public class RevocationListDownloadServiceGatewayImpl {
     public void downloadRevocationList() {
         log.info("Revocation list download started");
 
+        boolean needsCalculation = getNeedsCalculation();
+
         int timeInterval = properties.getRevocationListDownload().getTimeInterval();
 
         ZonedDateTime abortTime =  ZonedDateTime.now().plusSeconds((timeInterval / 1000) / 2);
@@ -103,9 +105,10 @@ public class RevocationListDownloadServiceGatewayImpl {
             revocationListIterator = dgcGatewayDownloadConnector.getRevocationListDownloadIterator();
         }
 
-        if (!revocationListIterator.hasNext()) {
-            log.info("There was no new data loaded from the Gateway. Download finished without calculation of data.");
-            return;
+        if (revocationListIterator.hasNext()) {
+            needsCalculation = true;
+        } else {
+            log.info("There was no new data loaded from the Gateway.");
         }
 
         List<String> deletedBatchIds = new ArrayList<>();
@@ -151,10 +154,25 @@ public class RevocationListDownloadServiceGatewayImpl {
             log.info("Gone Batches: {}", goneBatchIds);
             revocationListservice.deleteBatchListItemsByIds(goneBatchIds);
         }
-        //Delete expired.
+
+        List<String> expiredBatchIds = revocationListservice.getExpiredBatchIds();
+        if (!expiredBatchIds.isEmpty()) {
+            log.info("Delete expired batches: {}", expiredBatchIds);
+            revocationListservice.deleteBatchListItemsByIds(expiredBatchIds);
+            needsCalculation = true;
+        }
 
         saveLastUpdated();
-        generatorService.generateNewDataSet();
+
+        saveNeedsCalculation(needsCalculation);
+
+        if (needsCalculation) {
+            generatorService.generateNewDataSet();
+        } else {
+            log.info("No recalculation of data needed.");
+        }
+
+        saveNeedsCalculation(false);
 
         log.info("Revocation list download finished");
     }
@@ -163,6 +181,15 @@ public class RevocationListDownloadServiceGatewayImpl {
         log.info("Save last updated date: {}", lastUpdatedBatchDate);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
         infoService.setValueForKey(InfoService.LAST_UPDATED_KEY, dateTimeFormatter.format(lastUpdatedBatchDate));
+    }
+
+    private boolean getNeedsCalculation() {
+        String needsCalculationString = infoService.getValueForKey(InfoService.NEEDS_CALCULATION_KEY);
+        return Boolean.parseBoolean(needsCalculationString);
+    }
+
+    private void saveNeedsCalculation(boolean needsCalculation) {
+        infoService.setValueForKey(InfoService.NEEDS_CALCULATION_KEY, Boolean.toString(needsCalculation));
     }
 
 }

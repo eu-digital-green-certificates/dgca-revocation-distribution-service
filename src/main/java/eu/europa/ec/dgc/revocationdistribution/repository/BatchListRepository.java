@@ -21,11 +21,17 @@
 package eu.europa.ec.dgc.revocationdistribution.repository;
 
 import eu.europa.ec.dgc.revocationdistribution.entity.BatchListEntity;
+import java.time.ZonedDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface BatchListRepository extends JpaRepository<BatchListEntity, String> {
 
     void deleteByBatchIdIn(List<String> batchIds);
 
+
+    @Query("SELECT b.batchId FROM BatchListEntity b WHERE b.expires < :checkTime")
+    List<String> findAllByExpiresBefore(@Param("checkTime") ZonedDateTime checkTime);
 }
