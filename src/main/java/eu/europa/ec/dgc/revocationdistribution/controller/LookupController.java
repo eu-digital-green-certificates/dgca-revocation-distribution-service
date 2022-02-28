@@ -22,7 +22,11 @@ package eu.europa.ec.dgc.revocationdistribution.controller;
 
 import eu.europa.ec.dgc.revocationdistribution.dto.RevocationCheckTokenPayload;
 import eu.europa.ec.dgc.revocationdistribution.service.LookupService;
-import java.security.PublicKey;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
@@ -30,7 +34,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,12 +48,44 @@ public class LookupController {
     private final LookupService lookupService;
 
     /**
-     * Http Method for locking up the revocation state for a list of revokaation check tokens.
+     * Http Method for looking up the revocation state for a list of revocation check tokens.
      * @param revocationCheckTokenList The List of tokens to check the state for.
      * @return the revocation status of the given certificates.
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<String>> lockupRevocation(
+    @Operation(
+        summary = "Locks up the revocation state for a list of revocation check tokens.",
+        description = "This method returns a list of hashes, which check got a positive result for revocation. "
+            + "The certificates to be checked, must be provided as list of revocation check tokens (JWT tokens) in "
+            + "the request boddy.",
+        tags = {"Revocation Lookup"},
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = false,
+            content = @Content(array = @ArraySchema(
+                schema = @Schema(implementation = String.class, name = "JWT token")))
+        ),
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Returns all a list of all hashes from the request tokens, that are revoked.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = String.class)))),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Returned on wrong or missing request parameters.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = String.class))),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Returned if public key could not be found.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = String.class)))
+        }
+    )
+    public ResponseEntity<List<String>> lookupRevocation(
         @Valid @RequestBody(required = false) List<String> revocationCheckTokenList
     ) {
         if (revocationCheckTokenList.isEmpty()) {

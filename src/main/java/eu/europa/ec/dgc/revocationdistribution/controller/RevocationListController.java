@@ -27,6 +27,14 @@ import eu.europa.ec.dgc.revocationdistribution.entity.RevocationListJsonEntity;
 import eu.europa.ec.dgc.revocationdistribution.exception.PreconditionFailedException;
 import eu.europa.ec.dgc.revocationdistribution.service.InfoService;
 import eu.europa.ec.dgc.revocationdistribution.service.RevocationListService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
@@ -54,8 +62,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RevocationListController {
 
-    private static final String API_VERSION_HEADER = "X-VERSION";
-
     private final InfoService infoService;
     private final RevocationListService revocationListService;
 
@@ -66,6 +72,33 @@ public class RevocationListController {
      * @return revocation list as json
      */
     @GetMapping(path = "lists", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+        summary = "Returns an overview about all available revocation lists.",
+        description = "This method returns an over about available revocation lists for each KID. The response "
+            + "contains for all available KIDs the last modification date, the used hash types etc.",
+        tags = {"Revocation Lists"},
+        parameters = {
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "IF-NONE-MATCH",
+                description = "When the eTag matches the current Tag, there is a 304 response.",
+                required = false,
+                schema = @Schema(implementation = String.class))
+        },
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Returns the overview about available lists.",
+                headers = @Header(name = HttpHeaders.ETAG, description = "ETAG of the current data set"),
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema =
+                    @Schema(implementation = RevocationListJsonResponseDto.RevocationListJsonResponseItemDto.class)))),
+            @ApiResponse(
+                responseCode = "304",
+                description = "Not modified.")
+        }
+    )
     public ResponseEntity<List<RevocationListJsonResponseDto.RevocationListJsonResponseItemDto>> getRevocationList(
         @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, defaultValue = "") String ifNoneMatch) {
 
@@ -93,6 +126,43 @@ public class RevocationListController {
      * @return a list of partitions meta data
      */
     @GetMapping(path = "lists/{kid}/partitions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+        summary = "Returns for the selected kid all Partitions.",
+        description = "Returns a list of all available partitions for a kid.",
+        tags = {"Revocation Lists"},
+        parameters = {
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Match",
+                description = "When eTag matches (received from /lists), the call will be executed.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Modified-Since",
+                description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "kid",
+                description = "The kid, for which the partition should be returned.",
+                required = true,
+                schema = @Schema(implementation = String.class))
+        },
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Returns a list of partitions for the kid.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema =
+                    @Schema(implementation = PartitionResponseDto.class)))),
+            @ApiResponse( responseCode = "304",description = "Not modified."),
+            @ApiResponse( responseCode = "404",description = "Data not found."),
+            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+        }
+    )
     public ResponseEntity<List<PartitionResponseDto>> getPartitionListForKid(
         @PathVariable String kid,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
@@ -129,6 +199,48 @@ public class RevocationListController {
      * @return the partition meta data.
      */
     @GetMapping(path = "lists/{kid}/partitions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+        summary = "Returns for the selected kid a Partition.",
+        description = "Returns a Partition by Id.",
+        tags = {"Revocation Lists"},
+        parameters = {
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Match",
+                description = "When eTag matches (received from /lists), the call will be executed.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Modified-Since",
+                description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "kid",
+                description = "The kid, for which the partition should be returned.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "id",
+                description = "The id of the partition within the kid.",
+                required = true,
+                schema = @Schema(implementation = String.class))
+        },
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Returns the partitions for the kid.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = PartitionResponseDto.class))),
+            @ApiResponse( responseCode = "304",description = "Not modified."),
+            @ApiResponse( responseCode = "404",description = "Data not found."),
+            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+        }
+    )
     public ResponseEntity<PartitionResponseDto> getPartitionForKid(
         @PathVariable String kid,
         @PathVariable String id,
@@ -170,6 +282,53 @@ public class RevocationListController {
     @PostMapping(path = "lists/{kid}/partitions/{id}/slices",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = "application/gzip")
+    @Operation(
+        summary = "Returns all slice data for the selected partition.",
+        description = "Returns all slices binary data in a gzip file for a partition. The result set can be filtered "
+            + "by a provided whitelist in the request body.",
+        tags = {"Revocation Lists"},
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = false,
+            content = @Content(array = @ArraySchema(
+                schema = @Schema(implementation = String.class, name = "Slice id (sid)")))
+        ),
+        parameters = {
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Match",
+                description = "When eTag matches (received from /lists), the call will be executed.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Modified-Since",
+                description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "kid",
+                description = "The kid, for which the data should be returned.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "id",
+                description = "The id of the partition.",
+                required = true,
+                schema = @Schema(implementation = String.class))
+        },
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Returns the binary slice data as gzip file.",
+                content = @Content(
+                    mediaType = "application/gzip")),
+            @ApiResponse( responseCode = "304",description = "Not modified."),
+            @ApiResponse( responseCode = "404",description = "Data not found."),
+            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+        }
+    )
     public ResponseEntity<byte[]> getPartitionChunksData(
         @PathVariable String kid,
         @PathVariable String id,
@@ -222,6 +381,53 @@ public class RevocationListController {
      * @return gzip file containing binary slice data of a chunk
      */
     @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices", produces = "application/gzip")
+    @Operation(
+        summary = "Returns all slice data for the selected chunk.",
+        description = "Returns all slices binary data in a gzip file for the selected chunk. ",
+        tags = {"Revocation Lists"},
+        parameters = {
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Match",
+                description = "When eTag matches (received from /lists), the call will be executed.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Modified-Since",
+                description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "kid",
+                description = "The kid, for which the data should be returned.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "id",
+                description = "The id of the partition.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "cid",
+                description = "The id of the chunk.",
+                required = true,
+                schema = @Schema(implementation = String.class))
+        },
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Returns the binary slice data as gzip file.",
+                content = @Content(
+                    mediaType = "application/gzip")),
+            @ApiResponse( responseCode = "304",description = "Not modified."),
+            @ApiResponse( responseCode = "404",description = "Data not found."),
+            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+        }
+    )
     public ResponseEntity<byte[]> getChunk(
         @PathVariable String kid,
         @PathVariable String id,
@@ -265,6 +471,59 @@ public class RevocationListController {
     @PostMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = "application/gzip")
+    @Operation(
+        summary = "Returns all slice data for the selected chunk.",
+        description = "Returns all slices binary data in a gzip file for a selected chunk. "
+            + "The result set can be filtered by a provided whitelist in the request body.",
+        tags = {"Revocation Lists"},
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = false,
+            content = @Content(array = @ArraySchema(
+                schema = @Schema(implementation = String.class, name = "Slice id (sid)")))
+        ),
+        parameters = {
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Match",
+                description = "When eTag matches (received from /lists), the call will be executed.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Modified-Since",
+                description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "kid",
+                description = "The kid, for which the data should be returned.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "id",
+                description = "The id of the partition.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "cid",
+                description = "The id of the chunk.",
+                required = true,
+                schema = @Schema(implementation = String.class))
+        },
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Returns the binary slice data as gzip file.",
+                content = @Content(
+                    mediaType = "application/gzip")),
+            @ApiResponse( responseCode = "304",description = "Not modified."),
+            @ApiResponse( responseCode = "404",description = "Data not found."),
+            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+        }
+    )
     public ResponseEntity<byte[]> getPartitionChunks(
         @PathVariable String kid,
         @PathVariable String id,
@@ -319,6 +578,59 @@ public class RevocationListController {
      */
     @GetMapping(path = "lists/{kid}/partitions/{id}/chunks/{cid}/slices/{sid}",
         produces = "application/gzip")
+    @Operation(
+        summary = "Returns the slice data for the selected slice.",
+        description = "Returns the slices binary data in a gzip file for a selected slice.",
+        tags = {"Revocation Lists"},
+        parameters = {
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Match",
+                description = "When eTag matches (received from /lists), the call will be executed.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name = "If-Modified-Since",
+                description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "kid",
+                description = "The kid, for which the data should be returned.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "id",
+                description = "The id of the partition.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "cid",
+                description = "The id of the chunk.",
+                required = true,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.PATH,
+                name = "sid",
+                description = "The id of the slice.",
+                required = true,
+                schema = @Schema(implementation = String.class))
+        },
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Returns the binary slice data as gzip file.",
+                content = @Content(
+                    mediaType = "application/gzip")),
+            @ApiResponse( responseCode = "304",description = "Not modified."),
+            @ApiResponse( responseCode = "404",description = "Data not found."),
+            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+        }
+    )
     public ResponseEntity<byte[]> getSlice(
         @PathVariable String kid,
         @PathVariable String id,
