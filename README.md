@@ -23,7 +23,7 @@ This distribution service distributes the revocation list data gathered by the E
 
 ## Development
 
-The installation of the revocation service requires an already preinstalled postgres database where the database [scripts](https://github.com/eu-digital-green-certificates/dgca-revocation-distribution-service/tree/main/src/main/resources/db/sql) are already applied. 
+The installation of the revocation service requires an already preinstalled postgres database. The tables, views etc. will than be created via liquibase.
 
 
 ## Support and feedback
