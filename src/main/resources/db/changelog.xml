@@ -5,4 +5,20 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
+    <include file="db/changelog/001_create_batch_list_table.sql"/>
+    <include file="db/changelog/002_create_configuration_table.sql"/>
+    <include file="db/changelog/003_create_last_updated_trigger_function.sql"/>
+    <include file="db/changelog/004_create_hashes_table.sql"/>
+    <include file="db/changelog/005_create_info_table.sql"/>
+    <include file="db/changelog/006_create_partitions_table.sql"/>
+    <include file="db/changelog/007_create_revocation_list_json_table.sql"/>
+    <include file="db/changelog/008_create_slices_table.sql"/>
+    <include file="db/changelog/009_create_coordinate_view.sql"/>
+    <include file="db/changelog/010_create_kid_view.sql"/>
+    <include file="db/changelog/011_create_point_view.sql"/>
+    <include file="db/changelog/012_create_vector_view.sql"/>
+    <include file="db/changelog/013_create_set_new_etag_function.sql"/>
+    <include file="db/changelog/014_load_boundaries_configuration.sql"/>
+    <include file="db/changelog/015_create_schedlock_table.sql"/>
+
 </databaseChangeLog>

@@ -29,6 +29,11 @@ import lombok.Setter;
 @Setter
 public class ChangeListItem {
 
+    /**
+     * Constructor to create a new Change List item with the data from a kid view entity.
+     * @param kve The kid view entity to get the data from.
+     * @param oldStorageMode The old storage mode [POINT, VECTOR, COORDINATE] of the item, if present.
+     */
     public ChangeListItem(KidViewEntity kve, String oldStorageMode) {
         this.kidId = kve.getKid();
         this.lastUpdated = kve.getLastUpdated();

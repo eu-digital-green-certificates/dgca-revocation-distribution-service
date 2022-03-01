@@ -56,7 +56,7 @@ public abstract class AbstractChunkMetaViewEntity {
     private String[] hashes;
 
     /**
-     * Id of chunk
+     * The partition id of the chunk.
      */
     @Nullable
     @Column(name = "partition_id")
@@ -67,6 +67,7 @@ public abstract class AbstractChunkMetaViewEntity {
      */
     @Nullable
     @Column(name = "x")
+    @SuppressWarnings("checkstyle:membername")
     private String x;
 
     /**
@@ -74,6 +75,7 @@ public abstract class AbstractChunkMetaViewEntity {
      */
     @Nullable
     @Column(name = "y")
+    @SuppressWarnings("checkstyle:membername")
     private String y;
 
     /**

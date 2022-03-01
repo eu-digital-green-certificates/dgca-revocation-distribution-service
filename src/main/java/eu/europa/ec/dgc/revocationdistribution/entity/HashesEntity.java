@@ -23,6 +23,8 @@ package eu.europa.ec.dgc.revocationdistribution.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -52,28 +54,32 @@ public class HashesEntity {
     private String kid;
 
     /**
-     * The first byte of the hash
+     * The first byte of the hash.
      */
+    @SuppressWarnings("checkstyle:membername")
     @Column(name = "x", nullable = false, length = 1, columnDefinition = "CHAR")
     private char x;
 
     /**
-     * The second byte of the hash
+     * The second byte of the hash.
      */
+    @SuppressWarnings("checkstyle:membername")
     @Column(name = "y", nullable = false, length = 1, columnDefinition = "CHAR")
     private char y;
 
     /**
-     * The third byte of the hash
+     * The third byte of the hash.
      */
+    @SuppressWarnings("checkstyle:membername")
     @Column(name = "z", nullable = false, length = 1, columnDefinition = "CHAR")
     private char z;
 
     /**
      * ID of the Batch.
      */
-    @Column(name = "batch_id", length = 36)
-    private String batchId;
+    @OneToOne()
+    @JoinColumn(name = "batch_id")
+    private BatchListEntity batch;
 
     /**
      * Update status of the hash value.

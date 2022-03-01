@@ -51,32 +51,38 @@ public class KidViewEntity {
     private String kid;
 
     /**
-     * Type of Revocation Hashes.
+     * Types of revocation hashes stored as comma separated string.
      */
     @Column(name = "hashtypes")
     private String typesString;
 
     /**
-     * One of the storage modes (POINT, VECTOR; COORDINATE)
+     * One of the storage modes (POINT, VECTOR; COORDINATE).
      */
     @Column(name = "storage_mode")
     private String storageMode;
 
     /**
-     * The creation date of the entity
+     * The creation date of the entity.
      */
     @Column(name = "lastupdated")
     private ZonedDateTime lastUpdated;
 
     /**
-     * The expiration date of the entity
+     * The expiration date of the entity.
      */
     @Column(name = "expired")
     private ZonedDateTime expired;
 
+    /**
+     * Indicates if the dataset gets updated.
+     */
     @Column(name = "updated")
     private boolean updated;
 
+    /*
+     * Types of revocation hashes stored as list.
+     */
     @Transient
     private List<String> types;
 

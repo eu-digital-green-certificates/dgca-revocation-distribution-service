@@ -33,11 +33,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class InfoService {
 
-    public final static String LAST_UPDATED_KEY = "LASTUPDATED";
-    public final static String CURRENT_ETAG = "CURRENTETAG";
+    public static final  String LAST_UPDATED_KEY = "LASTUPDATED";
+    public static final  String CURRENT_ETAG = "CURRENTETAG";
+    public static final String NEEDS_CALCULATION_KEY = "NEEDSCALCULATION";
 
     private final InfoRepository infoRepository;
 
+    /**
+     *  Gets a value for the given key from the db.
+     *
+     * @param key the key, for which the value should be returned
+     * @return the value or null if not found in db
+     */
     public String getValueForKey(String key) {
         Optional<InfoEntity> optionalValue = infoRepository.findById(key);
 
@@ -48,11 +55,23 @@ public class InfoService {
         }
     }
 
+    /**
+     * Saves the value for a given key in the db.
+     *
+     * @param key key of the value to save.
+     * @param value the value to save
+     */
     public void setValueForKey(String key, String value) {
         InfoEntity infoEntity = new InfoEntity(key, value);
         infoRepository.save(infoEntity);
     }
 
+    /**
+     * Updates the current etag by calling the stored procedure in the db.
+     * The procedure also updates the revocation dataset in the db.
+     *
+     * @param etag the new etag value to be set
+     */
     public void setNewEtag(String etag) {
         infoRepository.setNewEtag(etag);
     }

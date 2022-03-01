@@ -1,8 +1,7 @@
--- FUNCTION: public.set_new_etag(text)
+--liquibase formatted sql
+--changeset slaurenz:create-new-etag-function splitStatements:false
 
--- DROP FUNCTION IF EXISTS public.set_new_etag(text);
-
-CREATE OR REPLACE FUNCTION public.set_new_etag(
+CREATE OR REPLACE FUNCTION set_new_etag(
 	new_etag text)
     RETURNS integer
     LANGUAGE 'plpgsql'
@@ -34,5 +33,3 @@ AS $BODY$
 	END;
 $BODY$;
 
-ALTER FUNCTION public.set_new_etag(text)
-    OWNER TO postgres;

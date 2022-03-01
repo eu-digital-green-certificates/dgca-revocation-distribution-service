@@ -21,6 +21,7 @@
 package eu.europa.ec.dgc.revocationdistribution.repository;
 
 import eu.europa.ec.dgc.revocationdistribution.entity.HashesEntity;
+import java.time.ZonedDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -34,10 +35,15 @@ public interface HashesRepository extends JpaRepository<HashesEntity, String> {
     void setAllUpdatedStatesToFalse();
 
     @Modifying
-    @Query("DELETE HashesEntity h WHERE  h.batchId = null")
+    @Query("DELETE HashesEntity h WHERE  h.batch = null")
     void deleteAllOrphanedHashes();
 
     @Query("SELECT h.id FROM HashesEntity h WHERE h.id IN :hashes")
     List<String> getHashesPresentInListAndDb(@Param("hashes") List<String> hashes);
+
+    @Query("SELECT h.id FROM HashesEntity h INNER JOIN h.batch b WHERE h.id IN :hashes AND b.expires > :checkTime")
+    List<String> getHashesPresentInListAndDbAndNotExpired(
+        @Param("hashes") List<String> hashes,
+        @Param("checkTime") ZonedDateTime checkTime);
 
 }

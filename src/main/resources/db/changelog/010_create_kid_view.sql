@@ -1,8 +1,7 @@
--- View: public.kid_view
+--liquibase formatted sql
+--changeset slaurenz:create-kid-view
 
--- DROP VIEW public.kid_view;
-
-CREATE OR REPLACE VIEW public.kid_view
+CREATE OR REPLACE VIEW kid_view
  AS
  WITH configuration AS (
          SELECT
@@ -12,9 +11,9 @@ CREATE OR REPLACE VIEW public.kid_view
                     WHEN configuration_1.key = 'COORDINATELIMIT'::text THEN 'COORDINATE'::text
                     ELSE NULL::text
                 END AS storage_mode,
-             to_number(configuration_1.value, '999999999999'::text) AS minlimit,
-             to_number(configuration_1.value2, '999999999999'::text) AS maxlimit
-           FROM public.configuration configuration_1
+            to_number(configuration_1.value, '999999999999'::text) AS minlimit,
+            to_number(configuration_1.value2, '999999999999'::text) AS maxlimit
+           FROM configuration configuration_1
           WHERE configuration_1.key = ANY (ARRAY['POINTLIMIT'::text, 'VECTORLIMIT'::text, 'COORDINATELIMIT'::text])
         )
  SELECT a.kid,
@@ -23,7 +22,11 @@ CREATE OR REPLACE VIEW public.kid_view
     a.lastupdated,
     a.expired,
     a.updated
-   FROM ( SELECT hashes.kid,
+   FROM ( SELECT
+                CASE
+                    WHEN hashes.kid IS NULL THEN 'UNKNOWN_KID'::character varying
+                    ELSE hashes.kid
+                END AS kid,
             count(*) AS c,
             array_to_string(array_agg(DISTINCT batch_list.type), ','::text) AS hashtypes,
             bool_or(hashes.updated) AS updated,
@@ -35,6 +38,4 @@ CREATE OR REPLACE VIEW public.kid_view
     configuration
   WHERE a.c::numeric >= configuration.minlimit AND a.c::numeric <= configuration.maxlimit;
 
-ALTER TABLE public.kid_view
-    OWNER TO postgres;
 

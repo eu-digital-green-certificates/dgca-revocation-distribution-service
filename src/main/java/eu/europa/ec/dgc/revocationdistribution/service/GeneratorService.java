@@ -100,6 +100,9 @@ public class GeneratorService {
         }
     }
 
+    /**
+     *  The function generates a new dataset for the revocation service.
+     */
     public void generateNewDataSet() {
         log.info("Started generation of new data set.");
 
@@ -122,6 +125,8 @@ public class GeneratorService {
         log.info("Finished generation of new data set.");
     }
 
+
+
     private ChangeList generateList() {
         ChangeList changeList = new ChangeList();
 
@@ -143,7 +148,6 @@ public class GeneratorService {
                 }
             } else {
                 if (kve.isUpdated()) {
-                    RevocationListJsonResponseItemDto oldItem;
                     RevocationListJsonResponseItemDto item;
                     item = new RevocationListJsonResponseItemDto();
                     item.setKid(kve.getKid());
@@ -151,7 +155,10 @@ public class GeneratorService {
                     item.setHashTypes(kve.getTypes());
                     item.setMode(kve.getStorageMode());
                     item.setExpires(kve.getExpired());
+
+                    RevocationListJsonResponseItemDto oldItem;
                     oldItem = itemsMap.put(item.getKid(), item);
+
                     if (oldItem != null) {
                         changeList.getUpdated().add(new ChangeListItem(kve, oldItem.getMode()));
                     } else {
@@ -190,10 +197,10 @@ public class GeneratorService {
         generatePattern(changeList.getCreated());
     }
 
-    private void markDataForRemoval(List<String> kIds) {
-        if (!kIds.isEmpty()) {
-            partitionRepository.setToBeDeletedForKids(kIds);
-            sliceRepository.setToBeDeletedForKids(kIds);
+    private void markDataForRemoval(List<String> kids) {
+        if (!kids.isEmpty()) {
+            partitionRepository.setToBeDeletedForKids(kids);
+            sliceRepository.setToBeDeletedForKids(kids);
         }
     }
 

@@ -28,6 +28,7 @@ import lombok.Value;
 
 @Value
 @AllArgsConstructor
+@SuppressWarnings("checkstyle:membername")
 public class PartitionResponseDto {
 
     String kid;
@@ -38,7 +39,7 @@ public class PartitionResponseDto {
 
     String y;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", timezone = "UTC")
     ZonedDateTime lastUpdated;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "UTC")

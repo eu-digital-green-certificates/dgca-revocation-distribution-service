@@ -55,7 +55,7 @@ public class HelperFunctions {
     /**
      * Gets the byte array from a hex representation string.
      *
-     * @param hex
+     * @param hex encoded string to be decoded.
      * @return the byte data.
      */
     public byte[] getBytesFromHexString(String hex) {

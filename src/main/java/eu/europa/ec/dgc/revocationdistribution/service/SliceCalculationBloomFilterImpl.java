@@ -47,8 +47,9 @@ public class SliceCalculationBloomFilterImpl implements SliceCalculation {
 
     @Override
     public SliceDataDto calculateSlice(String[] hashes) {
-        if (hashes.length <= 0)
+        if (hashes.length <= 0) {
             return null;
+        }
 
         BloomFilter bloomFilter = new BloomFilterImpl(hashes.length, properties.getBloomFilter().getProbRate());
 

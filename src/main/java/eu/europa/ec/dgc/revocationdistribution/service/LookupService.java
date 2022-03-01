@@ -36,6 +36,7 @@ import io.jsonwebtoken.Jwt;
 import java.security.PublicKey;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,7 +58,14 @@ public class LookupService {
 
     private final HashesRepository hashesRepository;
 
-
+    /**
+     * Validates the given recocationCheckTokes. Therefore it checks the format and signature. For the signature check
+     * the public key of the certificate is downloaded.
+     *
+     * @param revocationCheckTokens list of revocation check tokens to be validated
+     * @return List of token payload
+     * @throws TokenValidationException is thrown when one of the tokens could not be validated
+     */
     public List<RevocationCheckTokenPayload> validateRevocationCheckTokens(List<String> revocationCheckTokens)
         throws TokenValidationException {
         List<RevocationCheckTokenPayload> tokenPayloads = new ArrayList<>();
@@ -88,18 +96,30 @@ public class LookupService {
         return tokenPayloads;
     }
 
+    /**
+     * Checks if the revocation status of the given tokens.
+     *
+     * @param tokenPayloads tokens to be checked
+     * @return list of revoked tokens an empty list meens none of the provided certificates / token are revoked.
+     */
 
     public List<String> checkForRevocation(List<RevocationCheckTokenPayload> tokenPayloads) {
 
         List<String> hashes = tokenPayloads.stream().map(RevocationCheckTokenPayload::getPayload)
             .flatMap(List::stream).collect(Collectors.toList());
 
-        return hashesRepository.getHashesPresentInListAndDb(hashes);
+        return hashesRepository.getHashesPresentInListAndDbAndNotExpired(hashes, ZonedDateTime.now());
 
     }
 
-
-    public PublicKey downloadPublicKey(String hash) {
+    /**
+     * Downloads the public key of a dcc from the issuance service.
+     *
+     * @param hash of the cert, for which the public key is downloaded
+     * @return Public key of the certificate
+     * @throws TokenValidationException is thrown if the public key could not be determined
+     */
+    private PublicKey downloadPublicKey(String hash) throws TokenValidationException {
         ResponseEntity<DidDocument> responseEntity;
         DidDocument didDocument;
 
@@ -145,7 +165,5 @@ public class LookupService {
             throw new TokenValidationException("Token verification failed: Public key could not be parsed",
                 HttpStatus.BAD_REQUEST.value());
         }
-
     }
-
 }

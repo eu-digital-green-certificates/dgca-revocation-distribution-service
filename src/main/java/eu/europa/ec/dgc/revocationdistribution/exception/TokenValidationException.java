@@ -27,23 +27,47 @@ public class TokenValidationException extends RuntimeException {
 
     private final int status;
 
+    /**
+     * Constructor for TokenValidationException. Status is set to 500 Server Error.
+     *
+     * @param message Massage of the exception.
+     * @param inner Inner exception information
+     */
     public TokenValidationException(String message, Throwable inner) {
 
         super(message, inner);
         status = 500;
     }
 
+    /**
+     * Constructor for TokenValidationException. Status is set to 500 Server Error.
+     *
+     * @param message Massage of the exception.
+     */
     public TokenValidationException(String message) {
 
         super(message);
         status = 500;
     }
 
+    /**
+     * Constructor for TokenValidationException.
+     *
+     * @param message Massage of the exception.
+     * @param inner Inner exception information
+     * @param status The Http status code reason.
+     */
     public TokenValidationException(String message, Throwable inner, int status) {
         super(message, inner);
         this.status = status;
     }
 
+    /**
+     * Constructor for TokenValidationException.
+     *
+     * @param message Massage of the exception.
+     * @param status The Http status code reason.
+     */
     public TokenValidationException(String message, int status) {
         super(message);
         this.status = status;
