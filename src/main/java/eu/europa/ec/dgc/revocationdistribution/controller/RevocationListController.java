@@ -158,9 +158,9 @@ public class RevocationListController {
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     array = @ArraySchema(schema =
                     @Schema(implementation = PartitionResponseDto.class)))),
-            @ApiResponse( responseCode = "304",description = "Not modified."),
-            @ApiResponse( responseCode = "404",description = "Data not found."),
-            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+            @ApiResponse(responseCode = "304",description = "Not modified."),
+            @ApiResponse(responseCode = "404",description = "Data not found."),
+            @ApiResponse(responseCode = "412",description = "Pre-Condition Failed.")
         }
     )
     public ResponseEntity<List<PartitionResponseDto>> getPartitionListForKid(
@@ -236,9 +236,9 @@ public class RevocationListController {
                 content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = PartitionResponseDto.class))),
-            @ApiResponse( responseCode = "304",description = "Not modified."),
-            @ApiResponse( responseCode = "404",description = "Data not found."),
-            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+            @ApiResponse(responseCode = "304",description = "Not modified."),
+            @ApiResponse(responseCode = "404",description = "Data not found."),
+            @ApiResponse(responseCode = "412",description = "Pre-Condition Failed.")
         }
     )
     public ResponseEntity<PartitionResponseDto> getPartitionForKid(
@@ -324,9 +324,9 @@ public class RevocationListController {
                 description = "Returns the binary slice data as gzip file.",
                 content = @Content(
                     mediaType = "application/gzip")),
-            @ApiResponse( responseCode = "304",description = "Not modified."),
-            @ApiResponse( responseCode = "404",description = "Data not found."),
-            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+            @ApiResponse(responseCode = "304",description = "Not modified."),
+            @ApiResponse(responseCode = "404",description = "Data not found."),
+            @ApiResponse(responseCode = "412",description = "Pre-Condition Failed.")
         }
     )
     public ResponseEntity<byte[]> getPartitionChunksData(
@@ -423,9 +423,9 @@ public class RevocationListController {
                 description = "Returns the binary slice data as gzip file.",
                 content = @Content(
                     mediaType = "application/gzip")),
-            @ApiResponse( responseCode = "304",description = "Not modified."),
-            @ApiResponse( responseCode = "404",description = "Data not found."),
-            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+            @ApiResponse(responseCode = "304",description = "Not modified."),
+            @ApiResponse(responseCode = "404",description = "Data not found."),
+            @ApiResponse(responseCode = "412",description = "Pre-Condition Failed.")
         }
     )
     public ResponseEntity<byte[]> getChunk(
@@ -519,9 +519,9 @@ public class RevocationListController {
                 description = "Returns the binary slice data as gzip file.",
                 content = @Content(
                     mediaType = "application/gzip")),
-            @ApiResponse( responseCode = "304",description = "Not modified."),
-            @ApiResponse( responseCode = "404",description = "Data not found."),
-            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+            @ApiResponse(responseCode = "304",description = "Not modified."),
+            @ApiResponse(responseCode = "404",description = "Data not found."),
+            @ApiResponse(responseCode = "412",description = "Pre-Condition Failed.")
         }
     )
     public ResponseEntity<byte[]> getPartitionChunks(
@@ -626,9 +626,9 @@ public class RevocationListController {
                 description = "Returns the binary slice data as gzip file.",
                 content = @Content(
                     mediaType = "application/gzip")),
-            @ApiResponse( responseCode = "304",description = "Not modified."),
-            @ApiResponse( responseCode = "404",description = "Data not found."),
-            @ApiResponse( responseCode = "412",description = "Pre-Condition Failed.")
+            @ApiResponse(responseCode = "304",description = "Not modified."),
+            @ApiResponse(responseCode = "404",description = "Data not found."),
+            @ApiResponse(responseCode = "412",description = "Pre-Condition Failed.")
         }
     )
     public ResponseEntity<byte[]> getSlice(
