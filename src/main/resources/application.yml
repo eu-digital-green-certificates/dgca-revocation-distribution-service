@@ -21,10 +21,6 @@ spring:
     change-log: classpath:db/changelog.xml
     database-change-log-table: RD_CHANGELOG
     database-change-log-lock-table: RD_CHANGELOG_LOCK
-  h2:
-    console:
-      enabled: false
-      path: /h2-console
   task:
     scheduling:
       pool:

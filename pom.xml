@@ -32,7 +32,6 @@
 		<spring.test.version>5.3.12</spring.test.version>
 		<spring.security.version>5.6.0</spring.security.version>
 		<lombok.version>1.18.22</lombok.version>
-		<liquibase.version>4.6.2</liquibase.version>
 		<springdoc.version>1.6.0</springdoc.version>
 		<mapstruct.version>1.4.2.Final</mapstruct.version>
 		<junit.version>5.8.1</junit.version>
@@ -44,7 +43,6 @@
 		<dgc.lib.version>1.1.13</dgc.lib.version>
 		<dgc.bloomfilter.version>0.0.0-09cb38e</dgc.bloomfilter.version>
 		<sap.cloud.sdk.version>3.57.0</sap.cloud.sdk.version>
-		<h2.version>2.1.210</h2.version>
 		<slf4j.version>1.7.32</slf4j.version>
 		<log4j2.version>2.17.1</log4j2.version>
 		<jjwt.version>0.11.2</jjwt.version>
@@ -151,11 +149,6 @@
 				<version>${springdoc.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-core</artifactId>
-				<version>${liquibase.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>com.sap.cloud.sdk</groupId>
 				<artifactId>sdk-bom</artifactId>
 				<version>${sap.cloud.sdk.version}</version>
@@ -231,12 +224,6 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>${springdoc.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>${h2.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
