@@ -1,8 +1,7 @@
--- View: public.coordinate_view
+--liquibase formatted sql
+--changeset slaurenz:create-coordinate-view
 
--- DROP VIEW public.coordinate_view;
-
-CREATE OR REPLACE VIEW public.coordinate_view
+CREATE OR REPLACE VIEW coordinate_view
  AS
  SELECT row_number() OVER ()::text AS row_id,
         CASE
@@ -22,6 +21,4 @@ CREATE OR REPLACE VIEW public.coordinate_view
   GROUP BY hashes.kid, hashes.x, hashes.y, hashes.z, (date_trunc('minute'::text, batch_list.expires))
   ORDER BY hashes.kid, (concat(hashes.x, hashes.y)), (hashes.z::text), (date_trunc('minute'::text, batch_list.expires));
 
-ALTER TABLE public.coordinate_view
-    OWNER TO postgres;
 

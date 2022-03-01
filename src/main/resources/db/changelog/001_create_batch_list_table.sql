@@ -1,8 +1,7 @@
--- Table: public.batch_list
+--liquibase formatted sql
+--changeset slaurenz:create-batch-list-table
 
--- DROP TABLE IF EXISTS public.batch_list;
-
-CREATE TABLE IF NOT EXISTS public.batch_list
+CREATE TABLE IF NOT EXISTS batch_list
 (
     batch_id character varying(36) COLLATE pg_catalog."default" NOT NULL,
     country character varying(2) COLLATE pg_catalog."default" NOT NULL,
@@ -14,8 +13,6 @@ CREATE TABLE IF NOT EXISTS public.batch_list
 )
 WITH (
     OIDS = FALSE
-)
-TABLESPACE pg_default;
+);
 
-ALTER TABLE IF EXISTS public.batch_list
-    OWNER to postgres;
+

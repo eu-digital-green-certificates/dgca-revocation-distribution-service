@@ -1,8 +1,7 @@
--- Table: public.shedlock_rd
+--liquibase formatted sql
+--changeset slaurenz:create-shedlock-table
 
--- DROP TABLE IF EXISTS public.shedlock_rd;
-
-CREATE TABLE IF NOT EXISTS public.shedlock_rd
+CREATE TABLE IF NOT EXISTS shedlock_rd
 (
     id BIGSERIAL,
     lock_until timestamp without time zone NOT NULL,
@@ -14,8 +13,4 @@ CREATE TABLE IF NOT EXISTS public.shedlock_rd
 )
 WITH (
     OIDS = FALSE
-)
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.shedlock_rd
-    OWNER to postgres;
+);

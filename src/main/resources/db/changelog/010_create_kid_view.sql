@@ -1,8 +1,7 @@
--- View: public.kid_view
+--liquibase formatted sql
+--changeset slaurenz:create-kid-view
 
--- DROP VIEW public.kid_view;
-
-CREATE OR REPLACE VIEW public.kid_view
+CREATE OR REPLACE VIEW kid_view
  AS
  WITH configuration AS (
          SELECT
@@ -14,7 +13,7 @@ CREATE OR REPLACE VIEW public.kid_view
                 END AS storage_mode,
             to_number(configuration_1.value, '999999999999'::text) AS minlimit,
             to_number(configuration_1.value2, '999999999999'::text) AS maxlimit
-           FROM public.configuration configuration_1
+           FROM configuration configuration_1
           WHERE configuration_1.key = ANY (ARRAY['POINTLIMIT'::text, 'VECTORLIMIT'::text, 'COORDINATELIMIT'::text])
         )
  SELECT a.kid,
@@ -39,6 +38,4 @@ CREATE OR REPLACE VIEW public.kid_view
     configuration
   WHERE a.c::numeric >= configuration.minlimit AND a.c::numeric <= configuration.maxlimit;
 
-ALTER TABLE public.kid_view
-    OWNER TO postgres;
 

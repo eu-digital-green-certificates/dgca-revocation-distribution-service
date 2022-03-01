@@ -1,8 +1,7 @@
--- Table: public.slices
+--liquibase formatted sql
+--changeset slaurenz:create-slices-table
 
--- DROP TABLE IF EXISTS public.slices;
-
-CREATE TABLE IF NOT EXISTS public.slices
+CREATE TABLE IF NOT EXISTS slices
 (
     db_id BIGSERIAL,
     etag text COLLATE pg_catalog."default" NOT NULL,
@@ -18,8 +17,4 @@ CREATE TABLE IF NOT EXISTS public.slices
 )
 WITH (
     OIDS = FALSE
-)
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.slices
-    OWNER to postgres;
+);
