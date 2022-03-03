@@ -21,9 +21,12 @@
 package eu.europa.ec.dgc.revocationdistribution.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -60,7 +63,7 @@ public class SliceEntity {
     private String kid;
 
     /**
-     * Id .
+     * Id.
      */
     @Column(name = "partition_id")
     private String id;
@@ -72,7 +75,7 @@ public class SliceEntity {
     private String chunk;
 
     /**
-     * chunk of slice.
+     * hash of slice.
      */
     @Column(name = "hash")
     private String hash;
@@ -96,6 +99,13 @@ public class SliceEntity {
      */
     @Column(name = "slice_binary_data")
     private byte[] binaryData;
+
+    /**
+     * The type of the binary data e.g. BLOOMFILTER or VARHASHLIST
+     */
+    @Column(name = "data_type")
+    @Enumerated(EnumType.STRING)
+    private SliceType dataType;
 
     /**
      * Indicates if the slice needs to be deleted on etag change.

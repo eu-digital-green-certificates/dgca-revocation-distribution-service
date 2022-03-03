@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS slices
     expired timestamp with time zone,
     lastupdated timestamp with time zone,
     to_be_deleted boolean,
+    data_type text COLLATE pg_catalog."default",
     slice_binary_data bytea,
     CONSTRAINT slices_pkey PRIMARY KEY (db_id)
 )

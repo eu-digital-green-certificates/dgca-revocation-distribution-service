@@ -21,9 +21,13 @@
 package eu.europa.ec.dgc.revocationdistribution.service;
 
 import eu.europa.ec.dgc.revocationdistribution.dto.SliceDataDto;
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 
 public interface SliceCalculation {
 
+    SliceType getSliceType();
+
     SliceDataDto calculateSlice(String[] hashes);
+
 
 }

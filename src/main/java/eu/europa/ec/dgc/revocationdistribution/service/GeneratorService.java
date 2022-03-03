@@ -34,6 +34,7 @@ import eu.europa.ec.dgc.revocationdistribution.mapper.PointViewMapper;
 import eu.europa.ec.dgc.revocationdistribution.mapper.VectorViewMapper;
 import eu.europa.ec.dgc.revocationdistribution.model.ChangeList;
 import eu.europa.ec.dgc.revocationdistribution.model.ChangeListItem;
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import eu.europa.ec.dgc.revocationdistribution.repository.CoordinateViewRepository;
 import eu.europa.ec.dgc.revocationdistribution.repository.KidViewRepository;
 import eu.europa.ec.dgc.revocationdistribution.repository.PartitionRepository;
@@ -313,7 +314,8 @@ public class GeneratorService {
                     chunksJson.put(mve.getChunk(), chunkItemsMap);
 
                     saveSlice(mve.getKid(), id, mve.getChunk(), sliceDataDto.getMetaData().getHash(),
-                        mve.getLastUpdated(), mve.getExpired(), sliceDataDto.getBinaryData());
+                        mve.getLastUpdated(), mve.getExpired(),  sliceCalculationService.getSliceType(),
+                        sliceDataDto.getBinaryData());
 
                     x = mve.getX();
                     y = mve.getY();
@@ -331,7 +333,7 @@ public class GeneratorService {
     }
 
     private void saveSlice(String kid, String id, String chunk, String hash,
-                           ZonedDateTime lastUpdated, ZonedDateTime expired, byte[] binaryData) {
+                           ZonedDateTime lastUpdated, ZonedDateTime expired, SliceType dataType, byte[] binaryData) {
 
         SliceEntity sliceEntity = new SliceEntity();
 
@@ -342,6 +344,7 @@ public class GeneratorService {
         sliceEntity.setHash(hash);
         sliceEntity.setLastUpdated(lastUpdated);
         sliceEntity.setExpired(expired);
+        sliceEntity.setDataType(dataType);
         sliceEntity.setBinaryData(binaryData);
         sliceEntity.setToBeDeleted(false);
 
@@ -364,6 +367,7 @@ public class GeneratorService {
         partitionEntity.setZ(z);
         partitionEntity.setLastUpdated(lastUpdated);
         partitionEntity.setExpired(expired);
+        partitionEntity.setDataType(SliceType.BLOOMFILTER);
         partitionEntity.setChunks(chunksJson);
         partitionEntity.setToBeDeleted(false
         );

@@ -45,6 +45,12 @@ public class SliceCalculationBloomFilterImpl implements SliceCalculation {
     private final DgcConfigProperties properties;
     private final HelperFunctions helperFunctions;
 
+
+    @Override
+    public SliceType getSliceType() {
+        return SliceType.BLOOMFILTER;
+    }
+
     @Override
     public SliceDataDto calculateSlice(String[] hashes) {
         if (hashes.length <= 0) {

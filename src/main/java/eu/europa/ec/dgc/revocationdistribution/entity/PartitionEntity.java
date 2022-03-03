@@ -23,10 +23,13 @@ package eu.europa.ec.dgc.revocationdistribution.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import eu.europa.ec.dgc.revocationdistribution.dto.PartitionChunksJsonItemDto;
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -105,6 +108,13 @@ public class PartitionEntity {
     @Column(name = "expired")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "UTC")
     private ZonedDateTime expired;
+
+    /**
+     * The type of the binary data e.g. BLOOMFILTER or VARHASHLIST
+     */
+    @Column(name = "data_type")
+    @Enumerated(EnumType.STRING)
+    private SliceType dataType;
 
     /**
      * The hashes of the chunk.

@@ -47,6 +47,11 @@ public class SliceCalculationHashListImpl implements SliceCalculation {
     private static final int NUMBER_OF_BYTES_TO_STORE = 2;
 
     @Override
+    public SliceType getSliceType() {
+        return SliceType.VARHASHLIST;
+    }
+
+    @Override
     public SliceDataDto calculateSlice(String[] hashes) {
         if (hashes.length <= 0) {
             return null;
@@ -56,7 +61,7 @@ public class SliceCalculationHashListImpl implements SliceCalculation {
 
         SliceDataDto sliceDataDto = new SliceDataDto();
 
-        sliceDataDto.getMetaData().setType(SliceType.HASHLIST.name());
+        sliceDataDto.getMetaData().setType(SliceType.VARHASHLIST.name());
         sliceDataDto.getMetaData().setVersion(properties.getHashList().getVersion());
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS partitions
     expired timestamp with time zone,
     lastupdated timestamp with time zone,
     to_be_deleted boolean,
+    data_type text COLLATE pg_catalog."default",
     chunks_json_data jsonb,
     CONSTRAINT partitions_pkey PRIMARY KEY (db_id)
 )
