@@ -77,6 +77,13 @@ public class RevocationListDownloadServiceGatewayImpl {
             } catch (DateTimeParseException e) {
                 log.error("Could not parse loaded last Updated timestamp: {}", lastUpdatedString);
             }
+        } else {
+            // Load initial timestamp
+            try {
+                lastUpdatedBatchDate = ZonedDateTime.parse("2021-06-01T00:00:00Z");
+            } catch (DateTimeParseException e) {
+                log.error("Could not parse loaded last Updated timestamp: 2021-06-01T00:00:00Z");
+            }
         }
     }
 

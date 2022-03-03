@@ -80,12 +80,19 @@ public class RevocationListService {
 
         List<HashesEntity> hashes = new ArrayList<>();
 
-        for (RevocationBatchDto.BatchEntryDto hash : revocationBatchDto.getEntries()) {
-            try {
-                hashes.add(getHashEntity(batchListEntity, hash, revocationBatchDto.getKid()));
-            } catch (IndexOutOfBoundsException e) {
-                log.error("Error calculating x,y,z. Hash value length is to short: {}",
-                    hash.getHash().getBytes(StandardCharsets.UTF_8).length);
+
+        for (RevocationBatchDto.BatchEntryDto batchEntry : revocationBatchDto.getEntries()) {
+            if (batchEntry.getHash() != null) {
+                try {
+                    hashes.add(getHashEntity(batchListEntity, batchEntry, revocationBatchDto.getKid()));
+                } catch (IndexOutOfBoundsException e) {
+                    log.error("Error calculating x,y,z. Hash value length is to short: {}",
+                        batchEntry.getHash().getBytes(StandardCharsets.UTF_8).length);
+                } catch (IllegalArgumentException e) {
+                    log.error("Hash failed base64 decoding: {}", batchEntry.getHash());
+                }
+            } else {
+                log.warn("Batch ({}) includes hash with null value, hash is ignored", batchId);
             }
         }
         hashesRepository.saveAll(hashes);
