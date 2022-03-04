@@ -21,10 +21,13 @@
 package eu.europa.ec.dgc.revocationdistribution.controller;
 
 import com.nimbusds.jose.util.Base64URL;
+import eu.europa.ec.dgc.revocationdistribution.config.DgcConfigProperties;
 import eu.europa.ec.dgc.revocationdistribution.dto.PartitionResponseDto;
 import eu.europa.ec.dgc.revocationdistribution.dto.RevocationListJsonResponseDto;
 import eu.europa.ec.dgc.revocationdistribution.entity.RevocationListJsonEntity;
+import eu.europa.ec.dgc.revocationdistribution.exception.BadRequestException;
 import eu.europa.ec.dgc.revocationdistribution.exception.PreconditionFailedException;
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import eu.europa.ec.dgc.revocationdistribution.service.InfoService;
 import eu.europa.ec.dgc.revocationdistribution.service.RevocationListService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,7 +65,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RevocationListController {
 
+    private static final String SLICE_DATA_TYPE_HEADER = "X-SLICE-FILTER-TYPE";
     private final InfoService infoService;
+    private final DgcConfigProperties properties;
     private final RevocationListService revocationListService;
 
 
@@ -144,6 +149,13 @@ public class RevocationListController {
                 required = false,
                 schema = @Schema(implementation = String.class)),
             @Parameter(
+                in = ParameterIn.HEADER,
+                name =  SLICE_DATA_TYPE_HEADER,
+                description = "Can be used to select the filter type of the slice data, if the backend offers more than"
+                    + " one type. Possible values are BLOOMFILTER, VARHASHLIST",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
                 in = ParameterIn.PATH,
                 name = "kid",
                 description = "The kid, for which the partition should be returned.",
@@ -166,7 +178,8 @@ public class RevocationListController {
     public ResponseEntity<List<PartitionResponseDto>> getPartitionListForKid(
         @PathVariable String kid,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
-        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
+        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince,
+        @RequestHeader(value = SLICE_DATA_TYPE_HEADER, required = false) String sliceDataTypeHeader
     ) {
 
         kid = transformBase64Url(kid);
@@ -175,6 +188,8 @@ public class RevocationListController {
 
         List<PartitionResponseDto> result;
 
+        SliceType dataType = getSliceDataType(sliceDataTypeHeader);
+
         if (ifModifiedSince != null) {
             ZonedDateTime ifModifiedDateTime;
             try {
@@ -182,13 +197,15 @@ public class RevocationListController {
             } catch (DateTimeParseException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            result = revocationListService.getPartitionsByKidAndDate(currentEtag, kid, ifModifiedDateTime);
+            result = revocationListService.getPartitionsByKidAndDate(currentEtag, kid, dataType, ifModifiedDateTime);
         } else {
-            result = revocationListService.getPartitionsByKid(currentEtag, kid);
+            result = revocationListService.getPartitionsByKid(currentEtag, kid, dataType);
         }
 
         return ResponseEntity.ok(result);
     }
+
+
 
     /**
      * Http Method for getting a particular partition of a kid.
@@ -214,6 +231,13 @@ public class RevocationListController {
                 in = ParameterIn.HEADER,
                 name = "If-Modified-Since",
                 description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name =  SLICE_DATA_TYPE_HEADER,
+                description = "Can be used to select the filter type of the slice data, if the backend offers more than"
+                    + " one type. Possible values are BLOOMFILTER, VARHASHLIST",
                 required = false,
                 schema = @Schema(implementation = String.class)),
             @Parameter(
@@ -245,12 +269,15 @@ public class RevocationListController {
         @PathVariable String kid,
         @PathVariable String id,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
-        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
+        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince,
+        @RequestHeader(value = SLICE_DATA_TYPE_HEADER, required = false) String sliceDataTypeHeader
     ) {
 
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
+
+        SliceType dataType = getSliceDataType(sliceDataTypeHeader);
 
         PartitionResponseDto result;
 
@@ -261,9 +288,10 @@ public class RevocationListController {
             } catch (DateTimeParseException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            result = revocationListService.getPartitionsByKidAndIdAndDate(currentEtag, kid, id, ifModifiedDateTime);
+            result = revocationListService.getPartitionsByKidAndIdAndDate(
+                currentEtag, kid, id, dataType, ifModifiedDateTime);
         } else {
-            result = revocationListService.getPartitionsByKidAndId(currentEtag, kid, id);
+            result = revocationListService.getPartitionsByKidAndId(currentEtag, kid, id, dataType);
         }
 
         return ResponseEntity.ok(result);
@@ -306,6 +334,13 @@ public class RevocationListController {
                 required = false,
                 schema = @Schema(implementation = String.class)),
             @Parameter(
+                in = ParameterIn.HEADER,
+                name =  SLICE_DATA_TYPE_HEADER,
+                description = "Can be used to select the filter type of the slice data, if the backend offers more than"
+                    + " one type. Possible values are BLOOMFILTER, VARHASHLIST",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
                 in = ParameterIn.PATH,
                 name = "kid",
                 description = "The kid, for which the data should be returned.",
@@ -334,12 +369,15 @@ public class RevocationListController {
         @PathVariable String id,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince,
+        @RequestHeader(value = SLICE_DATA_TYPE_HEADER, required = false) String sliceDataTypeHeader,
         @Valid @RequestBody(required = false) List<String> reqestedChunksList
     ) {
 
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
+
+        SliceType dataType = getSliceDataType(sliceDataTypeHeader);
 
         byte[] result;
 
@@ -353,18 +391,18 @@ public class RevocationListController {
             if (reqestedChunksList == null) {
 
                 result = revocationListService.getAllChunkDataFromPartitionSinceDate(
-                    currentEtag, kid, id, ifModifiedDateTime);
+                    currentEtag, kid, id, dataType, ifModifiedDateTime);
             } else {
                 result = revocationListService.getAllChunkDataFromPartitionWithFilterSinceDate(
-                    currentEtag, kid, id, reqestedChunksList, ifModifiedDateTime);
+                    currentEtag, kid, id, dataType, reqestedChunksList, ifModifiedDateTime);
             }
         } else {
             if (reqestedChunksList == null) {
 
-                result = revocationListService.getAllChunkDataFromPartition(currentEtag, kid, id);
+                result = revocationListService.getAllChunkDataFromPartition(currentEtag, kid, id, dataType);
             } else {
                 result = revocationListService.getAllChunkDataFromPartitionWithFilter(
-                    currentEtag, kid, id, reqestedChunksList);
+                    currentEtag, kid, id, dataType, reqestedChunksList);
             }
         }
         return ResponseEntity.ok(result);
@@ -396,6 +434,13 @@ public class RevocationListController {
                 in = ParameterIn.HEADER,
                 name = "If-Modified-Since",
                 description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name =  SLICE_DATA_TYPE_HEADER,
+                description = "Can be used to select the filter type of the slice data, if the backend offers more than"
+                    + " one type. Possible values are BLOOMFILTER, VARHASHLIST",
                 required = false,
                 schema = @Schema(implementation = String.class)),
             @Parameter(
@@ -433,12 +478,15 @@ public class RevocationListController {
         @PathVariable String id,
         @PathVariable String cid,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
-        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
+        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince,
+        @RequestHeader(value = SLICE_DATA_TYPE_HEADER, required = false) String sliceDataTypeHeader
     ) {
 
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
+
+        SliceType dataType = getSliceDataType(sliceDataTypeHeader);
 
         byte[] result;
 
@@ -449,9 +497,10 @@ public class RevocationListController {
             } catch (DateTimeParseException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            result = revocationListService.getChunkDataSinceDate(currentEtag, kid, id, cid, ifModifiedDateTime);
+            result = revocationListService.getChunkDataSinceDate(
+                currentEtag, kid, id, cid, dataType, ifModifiedDateTime);
         } else {
-            result = revocationListService.getChunkData(currentEtag, kid, id, cid);
+            result = revocationListService.getChunkData(currentEtag, kid, id, cid, dataType);
         }
 
         return ResponseEntity.ok(result);
@@ -464,7 +513,7 @@ public class RevocationListController {
      * @param kid the kid for which the partitions are requested
      * @param id the id of the requested partition
      * @param cid the id of the requested chunk
-     * @param reqestedSliceList list of slices to download
+     * @param requestedSliceList list of slices to download
      *
      * @return gzip file containing binary slice data of a chunk
      */
@@ -492,6 +541,13 @@ public class RevocationListController {
                 in = ParameterIn.HEADER,
                 name = "If-Modified-Since",
                 description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name =  SLICE_DATA_TYPE_HEADER,
+                description = "Can be used to select the filter type of the slice data, if the backend offers more than"
+                    + " one type. Possible values are BLOOMFILTER, VARHASHLIST",
                 required = false,
                 schema = @Schema(implementation = String.class)),
             @Parameter(
@@ -530,12 +586,15 @@ public class RevocationListController {
         @PathVariable String cid,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince,
-        @Valid @RequestBody(required = false) List<String> reqestedSliceList
+        @RequestHeader(value = SLICE_DATA_TYPE_HEADER, required = false) String sliceDataTypeHeader,
+        @Valid @RequestBody(required = false) List<String> requestedSliceList
     ) {
 
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
+
+        SliceType dataType = getSliceDataType(sliceDataTypeHeader);
 
         byte[] result;
 
@@ -546,18 +605,19 @@ public class RevocationListController {
             } catch (DateTimeParseException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            if (reqestedSliceList == null) {
-                result = revocationListService.getChunkDataSinceDate(currentEtag, kid, id, cid, ifModifiedDateTime);
+            if (requestedSliceList == null) {
+                result = revocationListService.getChunkDataSinceDate(
+                    currentEtag, kid, id, cid, dataType, ifModifiedDateTime);
             } else {
                 result = revocationListService.getAllSliceDataForChunkWithFilterSinceDate(
-                    currentEtag, kid, id, cid, reqestedSliceList, ifModifiedDateTime);
+                    currentEtag, kid, id, cid, dataType, requestedSliceList, ifModifiedDateTime);
             }
         } else {
-            if (reqestedSliceList == null) {
-                result = revocationListService.getChunkData(currentEtag, kid, id, cid);
+            if (requestedSliceList == null) {
+                result = revocationListService.getChunkData(currentEtag, kid, id, cid, dataType);
             } else {
                 result = revocationListService.getAllSliceDataForChunkWithFilter(
-                    currentEtag, kid, id, cid, reqestedSliceList);
+                    currentEtag, kid, id, cid, dataType, requestedSliceList);
             }
         }
 
@@ -593,6 +653,13 @@ public class RevocationListController {
                 in = ParameterIn.HEADER,
                 name = "If-Modified-Since",
                 description = "Returns only the objects which are modified behind the given date.",
+                required = false,
+                schema = @Schema(implementation = String.class)),
+            @Parameter(
+                in = ParameterIn.HEADER,
+                name =  SLICE_DATA_TYPE_HEADER,
+                description = "Can be used to select the filter type of the slice data, if the backend offers more than"
+                    + " one type. Possible values are BLOOMFILTER, VARHASHLIST",
                 required = false,
                 schema = @Schema(implementation = String.class)),
             @Parameter(
@@ -637,12 +704,15 @@ public class RevocationListController {
         @PathVariable String cid,
         @PathVariable String sid,
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
-        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince
+        @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince,
+        @RequestHeader(value = SLICE_DATA_TYPE_HEADER, required = false) String sliceDataTypeHeader
     ) {
 
         kid = transformBase64Url(kid);
 
         String currentEtag = checkEtag(ifMatch);
+
+        SliceType dataType = getSliceDataType(sliceDataTypeHeader);
 
         byte[] result;
 
@@ -653,9 +723,10 @@ public class RevocationListController {
             } catch (DateTimeParseException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            result = revocationListService.getSliceDataSinceDate(currentEtag, kid, id, cid, sid, ifModifiedDateTime);
+            result = revocationListService.getSliceDataSinceDate(
+                currentEtag, kid, id, cid, sid, dataType, ifModifiedDateTime);
         } else {
-            result = revocationListService.getSliceData(currentEtag, kid, id, cid, sid);
+            result = revocationListService.getSliceData(currentEtag, kid, id, cid, sid, dataType);
         }
 
         return ResponseEntity.ok(result);
@@ -685,6 +756,18 @@ public class RevocationListController {
             throw new PreconditionFailedException();
         }
         return currentEtag;
+    }
+
+    private SliceType getSliceDataType(String sliceDataTypeHeader) {
+        if (sliceDataTypeHeader != null) {
+            try {
+                return SliceType.valueOf(sliceDataTypeHeader);
+            } catch (IllegalArgumentException e) {
+                log.info("Unkown slice data type requested {}", sliceDataTypeHeader);
+                throw new BadRequestException("Requested slice data type unknown: " + sliceDataTypeHeader);
+            }
+        }
+        return properties.getDefaultRevocationDataType();
     }
 
 }

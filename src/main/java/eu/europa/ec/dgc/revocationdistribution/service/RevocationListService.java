@@ -31,6 +31,7 @@ import eu.europa.ec.dgc.revocationdistribution.entity.SliceEntity;
 import eu.europa.ec.dgc.revocationdistribution.exception.DataNotChangedException;
 import eu.europa.ec.dgc.revocationdistribution.exception.DataNotFoundException;
 import eu.europa.ec.dgc.revocationdistribution.mapper.PartitionListMapper;
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import eu.europa.ec.dgc.revocationdistribution.repository.BatchListRepository;
 import eu.europa.ec.dgc.revocationdistribution.repository.HashesRepository;
 import eu.europa.ec.dgc.revocationdistribution.repository.PartitionRepository;
@@ -165,14 +166,16 @@ public class RevocationListService {
      * @throws DataNotChangedException thrown if no data changed after date
      */
     public List<PartitionResponseDto> getPartitionsByKidAndDate(
-        String etag, String kid, ZonedDateTime ifModifiedSince) throws DataNotFoundException, DataNotChangedException {
+        String etag, String kid, SliceType dataType, ZonedDateTime ifModifiedSince)
+        throws DataNotFoundException, DataNotChangedException {
 
-        List<PartitionResponseDto> partitions =  partitionRepository.findAllByEtagAndKidAndLastUpdatedAfter(
-            etag, kid, ifModifiedSince).stream().map(partitionListMapper::map).collect(Collectors.toList());
+        List<PartitionResponseDto> partitions =
+            partitionRepository.findAllByEtagAndKidAndDataTypeAndLastUpdatedAfter(
+            etag, kid, dataType, ifModifiedSince).stream().map(partitionListMapper::map).collect(Collectors.toList());
 
         if (partitions.isEmpty()) {
             //check if there is data at all. -> throws exception if not
-            getPartitionsByKid(etag, kid);
+            getPartitionsByKid(etag, kid, dataType);
             throw new DataNotChangedException();
         }
 
@@ -187,9 +190,11 @@ public class RevocationListService {
      * @return the partition meta data
      * @throws DataNotFoundException thrown if no data was found
      */
-    public List<PartitionResponseDto> getPartitionsByKid(String etag, String kid) throws DataNotFoundException {
+    public List<PartitionResponseDto> getPartitionsByKid(String etag, String kid, SliceType dataType)
+        throws DataNotFoundException {
 
-        List<PartitionResponseDto> partitions = partitionRepository.findAllByEtagAndKid(etag, kid).stream()
+        List<PartitionResponseDto> partitions =
+            partitionRepository.findAllByEtagAndKidAndDataType(etag, kid, dataType).stream()
             .map(partitionListMapper::map).collect(Collectors.toList());
 
         if (partitions.isEmpty()) {
@@ -208,16 +213,16 @@ public class RevocationListService {
      * @return the partition meta data
      * @throws DataNotFoundException thrown if no data was found
      */
-    public PartitionResponseDto getPartitionsByKidAndId(String etag, String kid, String id)
+    public PartitionResponseDto getPartitionsByKidAndId(String etag, String kid, String id, SliceType dataType)
         throws DataNotFoundException {
 
         Optional<PartitionEntity> partition;
 
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
-            partition = partitionRepository.findOneByEtagAndKidAndIdIsNull(etag, kid);
+            partition = partitionRepository.findOneByEtagAndKidAndIdIsNullAndDataType(etag, kid, dataType);
         } else {
-            partition = partitionRepository.findOneByEtagAndKidAndId(etag, kid, id);
+            partition = partitionRepository.findOneByEtagAndKidAndIdAndDataType(etag, kid, id, dataType);
         }
 
         if (!partition.isPresent()) {
@@ -239,7 +244,7 @@ public class RevocationListService {
      * @throws DataNotChangedException thrown if no data changed after date
      */
     public PartitionResponseDto getPartitionsByKidAndIdAndDate(
-        String etag, String kid, String id, ZonedDateTime ifModifiedSince)
+        String etag, String kid, String id, SliceType dataType, ZonedDateTime ifModifiedSince)
         throws DataNotFoundException {
 
         Optional<PartitionEntity> partition;
@@ -247,19 +252,21 @@ public class RevocationListService {
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
             partition =
-                partitionRepository.findOneByEtagAndKidAndIdIsNullAndLastUpdatedAfter(etag, kid, ifModifiedSince);
+                partitionRepository.findOneByEtagAndKidAndIdIsNullAndDataTypeAndLastUpdatedAfter(
+                    etag, kid, dataType, ifModifiedSince);
         } else {
             partition =
-                partitionRepository.findOneByEtagAndKidAndIdAndLastUpdatedAfter(etag, kid, id, ifModifiedSince);
+                partitionRepository.findOneByEtagAndKidAndIdAndDataTypeAndLastUpdatedAfter(
+                    etag, kid, id, dataType, ifModifiedSince);
         }
 
         if (partition.isEmpty()) {
             Long count;
 
             if (id.equalsIgnoreCase("null")) {
-                count = partitionRepository.countByEtagAndKidAndIdIsNull(etag, kid);
+                count = partitionRepository.countByEtagAndKidAndIdIsNullAndDataType(etag, kid,dataType);
             } else {
-                count = partitionRepository.countByEtagAndKidAndId(etag, kid, id);
+                count = partitionRepository.countByEtagAndKidAndIdAndDataType(etag, kid, id, dataType);
             }
 
             if (count == 0) {
@@ -281,14 +288,16 @@ public class RevocationListService {
      * @return the partition binary slice data
      * @throws DataNotFoundException thrown if no data was found
      */
-    public byte[] getAllChunkDataFromPartition(String etag, String kid, String id) throws DataNotFoundException {
+    public byte[] getAllChunkDataFromPartition(String etag, String kid, String id, SliceType dataType)
+        throws DataNotFoundException {
+
         List<SliceEntity> sliceEntityList;
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNull(etag, kid);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndDataType(etag, kid, dataType);
 
         } else {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndId(etag, kid, id);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndDataType(etag, kid, id, dataType);
         }
 
         if (sliceEntityList.isEmpty()) {
@@ -313,27 +322,28 @@ public class RevocationListService {
         String etag,
         String kid,
         String id,
+        SliceType dataType,
         ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
 
         List<SliceEntity> sliceEntityList;
 
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndLastUpdatedAfter(
-                etag, kid, ifModifiedDateTime);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndDataTypeAndLastUpdatedAfter(
+                etag, kid, dataType, ifModifiedDateTime);
 
         } else {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndLastUpdatedAfter(
-                etag, kid, id, ifModifiedDateTime);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndDataTypeAndLastUpdatedAfter(
+                etag, kid, id, dataType, ifModifiedDateTime);
         }
 
         if (sliceEntityList.isEmpty()) {
             Long count;
 
             if (id.equalsIgnoreCase("null")) {
-                count = sliceRepository.countByEtagAndKidAndIdIsNull(etag, kid);
+                count = sliceRepository.countByEtagAndKidAndIdIsNullAndDataType(etag, kid, dataType);
             } else {
-                count = sliceRepository.countByEtagAndKidAndId(etag, kid, id);
+                count = sliceRepository.countByEtagAndKidAndIdAndDataType(etag, kid, id, dataType);
             }
 
             if (count == 0) {
@@ -363,14 +373,17 @@ public class RevocationListService {
         String etag,
         String kid,
         String id,
+        SliceType dataType,
         List<String> filter) throws DataNotFoundException {
 
         List<SliceEntity> sliceEntityList;
         if (id.equalsIgnoreCase("null")) {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkIn(etag, kid, filter);
+            sliceEntityList =
+                sliceRepository.findAllByEtagAndKidAndIdIsNullAndDataTypeAndChunkIn(etag, kid, dataType, filter);
 
         } else {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkIn(etag, kid, id, filter);
+            sliceEntityList =
+                sliceRepository.findAllByEtagAndKidAndIdAndDataTypeAndChunkIn(etag, kid, id, dataType, filter);
         }
 
         if (sliceEntityList.isEmpty()) {
@@ -398,26 +411,27 @@ public class RevocationListService {
         String etag,
         String kid,
         String id,
+        SliceType dataType,
         List<String> filter,
         ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
 
         List<SliceEntity> sliceEntityList;
         if (id.equalsIgnoreCase("null")) {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkInAndLastUpdatedAfter(
-                etag, kid, filter, ifModifiedDateTime);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndDataTypeAndChunkInAndLastUpdatedAfter(
+                etag, kid, dataType, filter, ifModifiedDateTime);
 
         } else {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkInAndLastUpdatedAfter(
-                etag, kid, id, filter, ifModifiedDateTime);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndDataTypeAndChunkInAndLastUpdatedAfter(
+                etag, kid, id, dataType, filter, ifModifiedDateTime);
         }
 
         if (sliceEntityList.isEmpty()) {
             Long count;
 
             if (id.equalsIgnoreCase("null")) {
-                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunkIn(etag, kid, filter);
+                count = sliceRepository.countByEtagAndKidAndIdIsNullAndDataTypeAndChunkIn(etag, kid, dataType, filter);
             } else {
-                count = sliceRepository.countByEtagAndKidAndIdAndChunkIn(etag, kid, id, filter);
+                count = sliceRepository.countByEtagAndKidAndIdAndDataTypeAndChunkIn(etag, kid, id, dataType, filter);
             }
 
             if (count == 0) {
@@ -440,14 +454,17 @@ public class RevocationListService {
      * @return the chunk binary slice data
      * @throws DataNotFoundException thrown if no data was found
      */
-    public byte[] getChunkData(String etag, String kid, String id, String cid) throws DataNotFoundException {
+    public byte[] getChunkData(String etag, String kid, String id, String cid, SliceType dataType)
+        throws DataNotFoundException {
+
         List<SliceEntity> sliceEntityList;
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunk(etag, kid, cid);
+            sliceEntityList =
+                sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndDataType(etag, kid, cid, dataType);
 
         } else {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunk(etag, kid, id, cid);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndDataType(etag, kid, id, cid, dataType);
         }
 
         if (sliceEntityList.isEmpty()) {
@@ -474,26 +491,27 @@ public class RevocationListService {
         String kid,
         String id,
         String cid,
+        SliceType dataType,
         ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
 
         List<SliceEntity> sliceEntityList;
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndLastUpdatedAfter(
-                etag, kid, cid, ifModifiedDateTime);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndDataTypeAndLastUpdatedAfter(
+                etag, kid, cid, dataType, ifModifiedDateTime);
 
         } else {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndLastUpdatedAfter(
-                etag, kid, id, cid, ifModifiedDateTime);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndDataTypeAndLastUpdatedAfter(
+                etag, kid, id, cid, dataType, ifModifiedDateTime);
         }
 
         if (sliceEntityList.isEmpty()) {
             Long count;
 
             if (id.equalsIgnoreCase("null")) {
-                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunk(etag, kid, cid);
+                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunkAndDataType(etag, kid, cid, dataType);
             } else {
-                count = sliceRepository.countByEtagAndKidAndIdAndChunk(etag, kid, id, cid);
+                count = sliceRepository.countByEtagAndKidAndIdAndChunkAndDataType(etag, kid, id, cid,dataType);
             }
 
             if (count == 0) {
@@ -523,16 +541,19 @@ public class RevocationListService {
         String kid,
         String id,
         String cid,
+        SliceType dataType,
         List<String> filter) throws DataNotFoundException {
 
         List<SliceEntity> sliceEntityList;
 
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndHashIn(etag, kid, cid, filter);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndDataTypeAndHashIn(
+                etag, kid, cid, dataType, filter);
 
         } else {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndHashIn(etag, kid, id, cid, filter);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndDataTypeAndHashIn(
+                etag, kid, id, cid, dataType, filter);
         }
 
         if (sliceEntityList.isEmpty()) {
@@ -560,6 +581,7 @@ public class RevocationListService {
         String kid,
         String id,
         String cid,
+        SliceType dataType,
         List<String> filter,
         ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
 
@@ -567,21 +589,24 @@ public class RevocationListService {
 
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndHashInAndLastUpdatedAfter(
-                etag, kid, cid, filter, ifModifiedDateTime);
+            sliceEntityList =
+                sliceRepository.findAllByEtagAndKidAndIdIsNullAndChunkAndDataTypeAndHashInAndLastUpdatedAfter(
+                etag, kid, cid, dataType, filter, ifModifiedDateTime);
 
         } else {
-            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndHashInAndLastUpdatedAfter(
-                etag, kid, id, cid, filter, ifModifiedDateTime);
+            sliceEntityList = sliceRepository.findAllByEtagAndKidAndIdAndChunkAndDataTypeAndHashInAndLastUpdatedAfter(
+                etag, kid, id, cid, dataType, filter, ifModifiedDateTime);
         }
 
         if (sliceEntityList.isEmpty()) {
             Long count;
 
             if (id.equalsIgnoreCase("null")) {
-                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunkAndHashIn(etag, kid, cid, filter);
+                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunkAndDataTypeAndHashIn(
+                    etag, kid, cid, dataType, filter);
             } else {
-                count = sliceRepository.countByEtagAndKidAndIdAndChunkAndHashIn(etag, kid, id, cid, filter);
+                count = sliceRepository.countByEtagAndKidAndIdAndChunkAndDataTypeAndHashIn(
+                    etag, kid, id, cid,dataType, filter);
             }
 
             if (count == 0) {
@@ -606,16 +631,18 @@ public class RevocationListService {
      * @return the chunk binary slice data
      * @throws DataNotFoundException thrown if no data was found
      */
-    public byte[] getSliceData(String etag, String kid, String id, String cid, String sid)
+    public byte[] getSliceData(String etag, String kid, String id, String cid, String sid, SliceType dataType)
         throws DataNotFoundException {
 
         Optional<SliceEntity> sliceEntity;
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
-            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdIsNullAndChunkAndHash(etag, kid, cid, sid);
+            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdIsNullAndChunkAndHashAndDataType(
+                etag, kid, cid, sid, dataType);
 
         } else {
-            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdAndChunkAndHash(etag, kid, id, cid, sid);
+            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdAndChunkAndHashAndDataType(
+                etag, kid, id, cid, sid, dataType);
         }
 
         if (!sliceEntity.isPresent()) {
@@ -646,26 +673,29 @@ public class RevocationListService {
         String id,
         String cid,
         String sid,
+        SliceType dataType,
         ZonedDateTime ifModifiedDateTime) throws DataNotFoundException, DataNotChangedException {
 
         Optional<SliceEntity> sliceEntity;
         if (id.equalsIgnoreCase("null")) {
             log.info("id is null");
-            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdIsNullAndChunkAndHashAndLastUpdatedAfter(
-                etag, kid, cid, sid, ifModifiedDateTime);
+            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdIsNullAndChunkAndHashAndDataTypeAndLastUpdatedAfter(
+                etag, kid, cid, sid, dataType, ifModifiedDateTime);
 
         } else {
-            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdAndChunkAndHashAndLastUpdatedAfter(
-                etag, kid, id, cid, sid, ifModifiedDateTime);
+            sliceEntity = sliceRepository.findOneByEtagAndKidAndIdAndChunkAndHashAndDataTypeAndLastUpdatedAfter(
+                etag, kid, id, cid, sid, dataType, ifModifiedDateTime);
         }
 
         if (!sliceEntity.isPresent()) {
             Long count;
 
             if (id.equalsIgnoreCase("null")) {
-                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunkAndHash(etag, kid, cid, sid);
+                count = sliceRepository.countByEtagAndKidAndIdIsNullAndChunkAndHashAndDataType(
+                    etag, kid, cid, sid, dataType);
             } else {
-                count = sliceRepository.countByEtagAndKidAndIdAndChunkAndHash(etag, kid, id, cid, sid);
+                count = sliceRepository.countByEtagAndKidAndIdAndChunkAndHashAndDataType(
+                    etag, kid, id, cid, sid, dataType);
             }
 
             if (count == 0) {

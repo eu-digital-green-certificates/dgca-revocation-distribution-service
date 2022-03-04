@@ -21,14 +21,13 @@
 package eu.europa.ec.dgc.revocationdistribution.service;
 
 
-import eu.europa.ec.dgc.bloomfilter.BloomFilter;
-import eu.europa.ec.dgc.bloomfilter.BloomFilterImpl;
 import eu.europa.ec.dgc.revocationdistribution.config.DgcConfigProperties;
 import eu.europa.ec.dgc.revocationdistribution.dto.SliceDataDto;
 import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import eu.europa.ec.dgc.revocationdistribution.utils.HelperFunctions;
 import java.io.ByteArrayOutputStream;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.DecoderException;
@@ -39,12 +38,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@ConditionalOnProperty("dgc.hashList.enabled")
-public class SliceCalculationHashListImpl implements SliceCalculation {
+@ConditionalOnProperty("dgc.varHashList.enabled")
+public class SliceCalculationVarHashListImpl implements SliceCalculation {
 
     private final DgcConfigProperties properties;
     private final HelperFunctions helperFunctions;
-    private static final int NUMBER_OF_BYTES_TO_STORE = 2;
 
     @Override
     public SliceType getSliceType() {
@@ -57,24 +55,25 @@ public class SliceCalculationHashListImpl implements SliceCalculation {
             return null;
         }
 
-        BloomFilter bloomFilter = new BloomFilterImpl(hashes.length, properties.getBloomFilter().getProbRate());
+        Arrays.sort(hashes);
+
+        int numBytesToStore = properties.getVarHashList().getMinByteCount();
 
         SliceDataDto sliceDataDto = new SliceDataDto();
 
         sliceDataDto.getMetaData().setType(SliceType.VARHASHLIST.name());
-        sliceDataDto.getMetaData().setVersion(properties.getHashList().getVersion());
+        sliceDataDto.getMetaData().setVersion(properties.getVarHashList().getVersion());
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
+        baos.write(numBytesToStore);
         for (String hash : hashes) {
             try {
                 byte[] hashBytes = helperFunctions.getBytesFromHexString(hash);
-                baos.write(hashBytes, 0, NUMBER_OF_BYTES_TO_STORE);
+                baos.write(hashBytes, 0, numBytesToStore);
             } catch (DecoderException e) {
                 log.error("Could not add hash to hash list: {} , {}", hash, e.getMessage());
             }
         }
-
 
         sliceDataDto.setBinaryData(baos.toByteArray());
 

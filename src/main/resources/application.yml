@@ -61,11 +61,17 @@ dgc:
   revocationListDownload:
     timeInterval: 1800000
     lockLimit: 3600000
+  defaultRevocationDataType: BLOOMFILTER  # Possible values are BLOOMFILTER and VARHASHLIST
   bloomFilter:
     enabled: true
-    type: Bloom
     version: 1.0
     probRate: 0.000000000001f
+  varHashList:
+    enabled: true
+    version: 1.0
+    probRate: 0.000000000001f
+    minByteCount: 4
+
   issuance:
     dgci:
       endpoint: ${DGC_ISSUANCE_DGCI_ENDPOINT}
