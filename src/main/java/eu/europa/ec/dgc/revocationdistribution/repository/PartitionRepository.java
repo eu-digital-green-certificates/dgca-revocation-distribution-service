@@ -21,8 +21,8 @@
 package eu.europa.ec.dgc.revocationdistribution.repository;
 
 import eu.europa.ec.dgc.revocationdistribution.entity.PartitionEntity;
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,28 +33,30 @@ import org.springframework.data.repository.query.Param;
 public interface PartitionRepository extends JpaRepository<PartitionEntity, String> {
 
 
-    List<PartitionEntity> findAllByEtagAndKid(String etag, String kid);
+    List<PartitionEntity> findAllByEtagAndKidAndDataType(String etag, String kid, SliceType dataType);
 
-    List<PartitionEntity> findAllByEtagAndKidAndLastUpdatedAfter(
-        String etag, String kid, ZonedDateTime ifModifiedSince);
+    List<PartitionEntity> findAllByEtagAndKidAndDataTypeAndLastUpdatedAfter(
+        String etag, String kid, SliceType dataType, ZonedDateTime ifModifiedSince);
 
     @Modifying
     @Query("UPDATE PartitionEntity p SET p.toBeDeleted = true WHERE p.kid in :kids")
     void setToBeDeletedForKids(@Param("kids") List<String> kids);
 
 
-    Optional<PartitionEntity> findOneByEtagAndKidAndId(String etag, String kid, String id);
+    Optional<PartitionEntity> findOneByEtagAndKidAndIdAndDataType(
+        String etag, String kid, String id, SliceType dataType);
 
-    Optional<PartitionEntity> findOneByEtagAndKidAndIdIsNull(String etag, String kid);
+    Optional<PartitionEntity> findOneByEtagAndKidAndIdIsNullAndDataType(
+        String etag, String kid, SliceType dataType);
 
 
-    Optional<PartitionEntity> findOneByEtagAndKidAndIdAndLastUpdatedAfter(
-        String etag, String kid, String id, ZonedDateTime ifModifiedSince);
+    Optional<PartitionEntity> findOneByEtagAndKidAndIdAndDataTypeAndLastUpdatedAfter(
+        String etag, String kid, String id, SliceType dataType, ZonedDateTime ifModifiedSince);
 
-    Optional<PartitionEntity> findOneByEtagAndKidAndIdIsNullAndLastUpdatedAfter(
-        String etag, String kid, ZonedDateTime ifModifiedSince);
+    Optional<PartitionEntity> findOneByEtagAndKidAndIdIsNullAndDataTypeAndLastUpdatedAfter(
+        String etag, String kid, SliceType dataType, ZonedDateTime ifModifiedSince);
 
-    Long countByEtagAndKidAndId(String etag, String kid, String id);
+    Long countByEtagAndKidAndIdAndDataType(String etag, String kid, String id, SliceType dataType);
 
-    Long countByEtagAndKidAndIdIsNull(String etag, String kid);
+    Long countByEtagAndKidAndIdIsNullAndDataType(String etag, String kid,SliceType dataType);
 }

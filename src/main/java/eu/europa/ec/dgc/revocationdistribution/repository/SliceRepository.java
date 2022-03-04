@@ -21,6 +21,7 @@
 package eu.europa.ec.dgc.revocationdistribution.repository;
 
 import eu.europa.ec.dgc.revocationdistribution.entity.SliceEntity;
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,82 +33,94 @@ import org.springframework.data.repository.query.Param;
 public interface SliceRepository extends JpaRepository<SliceEntity, String> {
 
 
-    Optional<SliceEntity> findOneByEtagAndKidAndIdAndChunkAndHash(
-        String etag, String kid, String id, String cid, String sid);
+    Optional<SliceEntity> findOneByEtagAndKidAndIdAndChunkAndHashAndDataType(
+        String etag, String kid, String id, String cid, String sid, SliceType dataType);
 
-    Optional<SliceEntity> findOneByEtagAndKidAndIdIsNullAndChunkAndHash(
-        String etag, String kid, String cid, String sid);
+    Optional<SliceEntity> findOneByEtagAndKidAndIdIsNullAndChunkAndHashAndDataType(
+        String etag, String kid, String cid, String sid, SliceType dataType);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdAndChunk(String etag, String kid, String id, String cid);
+    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkAndDataType(
+        String etag, String kid, String id, String cid, SliceType dataType);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunk(String etag, String kid, String cid);
+    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkAndDataType(
+        String etag, String kid, String cid, SliceType dataType);
 
     @Modifying
     @Query("UPDATE SliceEntity s SET s.toBeDeleted = true WHERE s.kid in :kids")
     void setToBeDeletedForKids(@Param("kids") List<String> kids);
 
-    List<SliceEntity> findAllByEtagAndKidAndId(String etag, String kid, String id);
+    List<SliceEntity> findAllByEtagAndKidAndIdAndDataType(String etag, String kid, String id, SliceType dataType);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdIsNull(String etag, String kid);
+    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndDataType(String etag, String kid, SliceType dataType);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndLastUpdatedAfter(
-        String etag, String kid, ZonedDateTime ifModifiedDateTime);
+    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndDataTypeAndLastUpdatedAfter(
+        String etag, String kid, SliceType dataType, ZonedDateTime ifModifiedDateTime);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdAndLastUpdatedAfter(
-        String etag, String kid, String id, ZonedDateTime ifModifiedDateTime);
+    List<SliceEntity> findAllByEtagAndKidAndIdAndDataTypeAndLastUpdatedAfter(
+        String etag, String kid, String id, SliceType dataType, ZonedDateTime ifModifiedDateTime);
 
 
-    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkIn(String etag, String kid, List<String> chunks);
+    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndDataTypeAndChunkIn(
+        String etag, String kid, SliceType dataType, List<String> chunks);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkIn(String etag, String kid, String id, List<String> chunks);
+    List<SliceEntity> findAllByEtagAndKidAndIdAndDataTypeAndChunkIn(
+        String etag, String kid, String id, SliceType dataType, List<String> chunks);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkAndHashIn(
-        String etag, String kid, String cid, List<String> hashes);
+    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkAndDataTypeAndHashIn(
+        String etag, String kid, String cid, SliceType dataType, List<String> hashes);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkAndHashIn(
-        String etag, String kid, String id, String cid, List<String> hashes);
+    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkAndDataTypeAndHashIn(
+        String etag, String kid, String id, String cid, SliceType dataType, List<String> hashes);
 
-    Long countByEtagAndKidAndIdIsNull(String etag, String kid);
+    Long countByEtagAndKidAndIdIsNullAndDataType(String etag, String kid, SliceType dataType);
 
-    Long countByEtagAndKidAndId(String etag, String kid, String id);
+    Long countByEtagAndKidAndIdAndDataType(String etag, String kid, String id, SliceType dataType);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkInAndLastUpdatedAfter(
-        String etag, String kid, List<String> filter, ZonedDateTime ifModifiedDateTime);
+    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndDataTypeAndChunkInAndLastUpdatedAfter(
+        String etag, String kid, SliceType dataType, List<String> filter, ZonedDateTime ifModifiedDateTime);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkInAndLastUpdatedAfter(
-        String etag, String kid, String id, List<String> filter, ZonedDateTime ifModifiedDateTime);
+    List<SliceEntity> findAllByEtagAndKidAndIdAndDataTypeAndChunkInAndLastUpdatedAfter(
+        String etag, String kid, String id, SliceType dataType, List<String> filter, ZonedDateTime ifModifiedDateTime);
 
-    Long countByEtagAndKidAndIdIsNullAndChunkIn(String etag, String kid, List<String> filter);
+    Long countByEtagAndKidAndIdIsNullAndDataTypeAndChunkIn(
+        String etag, String kid, SliceType dataType, List<String> filter);
 
-    Long countByEtagAndKidAndIdAndChunkIn(String etag, String kid, String id, List<String> filter);
+    Long countByEtagAndKidAndIdAndDataTypeAndChunkIn(
+        String etag, String kid, String id, SliceType dataType, List<String> filter);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkAndLastUpdatedAfter(
-        String etag, String kid, String cid, ZonedDateTime ifModifiedDateTime);
+    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkAndDataTypeAndLastUpdatedAfter(
+        String etag, String kid, String cid, SliceType dataType, ZonedDateTime ifModifiedDateTime);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkAndLastUpdatedAfter(
-        String etag, String kid, String id, String cid, ZonedDateTime ifModifiedDateTime);
+    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkAndDataTypeAndLastUpdatedAfter(
+        String etag, String kid, String id, String cid, SliceType dataType, ZonedDateTime ifModifiedDateTime);
 
-    Long countByEtagAndKidAndIdIsNullAndChunk(String etag, String kid, String cid);
+    Long countByEtagAndKidAndIdIsNullAndChunkAndDataType(String etag, String kid, String cid, SliceType dataType);
 
-    Long countByEtagAndKidAndIdAndChunk(String etag, String kid, String id, String cid);
+    Long countByEtagAndKidAndIdAndChunkAndDataType(String etag, String kid, String id, String cid, SliceType dataType);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkAndHashInAndLastUpdatedAfter(
-        String etag, String kid, String cid, List<String> filter, ZonedDateTime ifModifiedDateTime);
+    List<SliceEntity> findAllByEtagAndKidAndIdIsNullAndChunkAndDataTypeAndHashInAndLastUpdatedAfter(
+        String etag, String kid, String cid, SliceType dataType, List<String> filter, ZonedDateTime ifModifiedDateTime);
 
-    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkAndHashInAndLastUpdatedAfter(
-        String etag, String kid, String id, String cid, List<String> filter, ZonedDateTime ifModifiedDateTime);
+    List<SliceEntity> findAllByEtagAndKidAndIdAndChunkAndDataTypeAndHashInAndLastUpdatedAfter(
+        String etag, String kid, String id, String cid, SliceType dataType,
+        List<String> filter, ZonedDateTime ifModifiedDateTime);
 
-    Long countByEtagAndKidAndIdIsNullAndChunkAndHashIn(String etag, String kid, String cid, List<String> filter);
+    Long countByEtagAndKidAndIdIsNullAndChunkAndDataTypeAndHashIn(
+        String etag, String kid, String cid, SliceType dataType, List<String> filter);
 
-    Long countByEtagAndKidAndIdAndChunkAndHashIn(String etag, String kid, String id, String cid, List<String> filter);
+    Long countByEtagAndKidAndIdAndChunkAndDataTypeAndHashIn(
+        String etag, String kid, String id, String cid, SliceType dataType, List<String> filter);
 
-    Optional<SliceEntity> findOneByEtagAndKidAndIdIsNullAndChunkAndHashAndLastUpdatedAfter(
-        String etag, String kid, String cid, String sid, ZonedDateTime ifModifiedDateTime);
+    Optional<SliceEntity> findOneByEtagAndKidAndIdIsNullAndChunkAndHashAndDataTypeAndLastUpdatedAfter(
+        String etag, String kid, String cid, String sid, SliceType dataType, ZonedDateTime ifModifiedDateTime);
 
-    Optional<SliceEntity> findOneByEtagAndKidAndIdAndChunkAndHashAndLastUpdatedAfter(
-        String etag, String kid, String id, String cid, String sid, ZonedDateTime ifModifiedDateTime);
+    Optional<SliceEntity> findOneByEtagAndKidAndIdAndChunkAndHashAndDataTypeAndLastUpdatedAfter(
+        String etag, String kid, String id, String cid, String sid,
+        SliceType dataType, ZonedDateTime ifModifiedDateTime);
 
-    Long countByEtagAndKidAndIdIsNullAndChunkAndHash(String etag, String kid, String cid, String sid);
+    Long countByEtagAndKidAndIdIsNullAndChunkAndHashAndDataType(
+        String etag, String kid, String cid, String sid, SliceType dataType);
 
-    Long countByEtagAndKidAndIdAndChunkAndHash(String etag, String kid, String id, String cid, String sid);
+    Long countByEtagAndKidAndIdAndChunkAndHashAndDataType(
+        String etag, String kid, String id, String cid, String sid, SliceType dataType);
 }

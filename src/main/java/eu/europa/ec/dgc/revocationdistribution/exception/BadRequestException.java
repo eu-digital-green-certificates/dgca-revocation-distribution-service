@@ -18,20 +18,34 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.revocationdistribution.service;
+package eu.europa.ec.dgc.revocationdistribution.exception;
 
+public class BadRequestException extends RuntimeException {
+    public int getStatus() {
+        return status;
+    }
 
-import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+    private final int status = 400;
 
-@Slf4j
-@RequiredArgsConstructor
-@Service
-public class SliceCalculationService {
+    /**
+     * Constructor for BadRequestException.
+     *
+     * @param message Massage of the exception.
+     * @param inner Inner exception information
+     */
+    public BadRequestException(String message, Throwable inner) {
 
-    private final Optional<SliceCalculationHashListImpl> sliceCalculationServiceHashList;
+        super(message, inner);
+    }
 
+    /**
+     * Constructor for BadRequestException.
+     *
+     * @param message Massage of the exception.
+     */
+    public BadRequestException(String message) {
+
+        super(message);
+    }
 
 }

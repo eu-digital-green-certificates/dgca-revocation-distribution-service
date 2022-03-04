@@ -20,6 +20,7 @@
 
 package eu.europa.ec.dgc.revocationdistribution.config;
 
+import eu.europa.ec.dgc.revocationdistribution.exception.BadRequestException;
 import eu.europa.ec.dgc.revocationdistribution.exception.DataNotChangedException;
 import eu.europa.ec.dgc.revocationdistribution.exception.DataNotFoundException;
 import eu.europa.ec.dgc.revocationdistribution.exception.PreconditionFailedException;
@@ -85,6 +86,19 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(TokenValidationException.class)
     public ResponseEntity<Object> handleException(TokenValidationException e) {
+        return ResponseEntity
+            .status(e.getStatus())
+            .body(e.getMessage());
+    }
+
+    /**
+     * Handles {@link BadRequestException} when a validation failed.
+     *
+     * @param e the thrown {@link BadRequestException}
+     * @return A ResponseEntity with a ErrorMessage inside.
+     */
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Object> handleException(BadRequestException e) {
         return ResponseEntity
             .status(e.getStatus())
             .body(e.getMessage());

@@ -20,6 +20,7 @@
 
 package eu.europa.ec.dgc.revocationdistribution.config;
 
+import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -31,7 +32,9 @@ public class DgcConfigProperties {
 
     private final GatewayDownload revocationListDownload = new GatewayDownload();
     private final BloomFilterConfig bloomFilter = new BloomFilterConfig();
-    private final HashListConfig hashList = new HashListConfig();
+    private final VarHashListConfig varHashList = new VarHashListConfig();
+
+    private final SliceType defaultRevocationDataType = SliceType.BLOOMFILTER;//"BLOOMFILTER";
 
 
     @Getter
@@ -52,9 +55,15 @@ public class DgcConfigProperties {
 
     @Getter
     @Setter
-    public static class HashListConfig {
+    public static class VarHashListConfig {
         private boolean enabled;
         private String type = "hash_list";
         private String version;
+        private float probRate;
+        private int minByteCount = 4;
+
+        public int getMinByteCount() {
+            return minByteCount > 255 ? 255 : minByteCount;
+        }
     }
 }
