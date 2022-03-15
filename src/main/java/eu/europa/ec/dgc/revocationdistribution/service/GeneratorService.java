@@ -227,7 +227,8 @@ public class GeneratorService {
         List<ChunkMetaViewDto> entities = pointViewRepository.findAllByKid(changeItem.getKidId()).stream()
             .map(pointViewMapper::map).collect(Collectors.toList());
 
-        partitionGeneratorService.generatePartition(etag, entities, changeItem.getKidId(), null);
+        partitionGeneratorService.generatePartition(
+            etag, entities, changeItem.getKidId(), null, changeItem.getNewStorageMode());
 
 
     }
@@ -244,7 +245,8 @@ public class GeneratorService {
                 vectorViewRepository.findAllByKidAndId(changeItem.getKidId(), partitionId).stream()
                     .map(vectorViewMapper::map).collect(Collectors.toList());
 
-            partitionGeneratorService.generatePartition(etag, entities, changeItem.getKidId(), partitionId);
+            partitionGeneratorService.generatePartition(
+                etag, entities, changeItem.getKidId(), partitionId, changeItem.getNewStorageMode());
 
         }
 
@@ -262,7 +264,8 @@ public class GeneratorService {
                 coordinateViewRepository.findAllByKidAndId(changeItem.getKidId(), partitionId).stream()
                     .map(coordinateViewMapper::map).collect(Collectors.toList());
 
-            partitionGeneratorService.generatePartition(etag, entities, changeItem.getKidId(), partitionId);
+            partitionGeneratorService.generatePartition(
+                etag, entities, changeItem.getKidId(), partitionId, changeItem.getNewStorageMode());
 
         }
 

@@ -60,10 +60,7 @@ public class DgcConfigProperties {
         private String type = "hash_list";
         private String version;
         private float probRate;
-        private int minByteCount = 4;
+        private byte minByteCount = 4;
 
-        public int getMinByteCount() {
-            return minByteCount > 255 ? 255 : minByteCount;
-        }
     }
 }

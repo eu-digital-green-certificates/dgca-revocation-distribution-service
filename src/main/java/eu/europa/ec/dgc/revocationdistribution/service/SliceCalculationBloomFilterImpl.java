@@ -52,7 +52,7 @@ public class SliceCalculationBloomFilterImpl implements SliceCalculation {
     }
 
     @Override
-    public SliceDataDto calculateSlice(String[] hashes) {
+    public SliceDataDto calculateSlice(String[] hashes, String storageMode) {
         if (hashes.length <= 0) {
             return null;
         }
