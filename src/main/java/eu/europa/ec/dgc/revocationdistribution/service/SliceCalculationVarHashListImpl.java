@@ -20,14 +20,14 @@
 
 package eu.europa.ec.dgc.revocationdistribution.service;
 
-
+import eu.europa.ec.dgc.partialvariablehashfilter.PartialVariableHashFilter;
+import eu.europa.ec.dgc.partialvariablehashfilter.PartitionOffset;
 import eu.europa.ec.dgc.revocationdistribution.config.DgcConfigProperties;
 import eu.europa.ec.dgc.revocationdistribution.dto.SliceDataDto;
 import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import eu.europa.ec.dgc.revocationdistribution.utils.HelperFunctions;
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.DecoderException;
@@ -50,35 +50,38 @@ public class SliceCalculationVarHashListImpl implements SliceCalculation {
     }
 
     @Override
-    public SliceDataDto calculateSlice(String[] hashes) {
+    public SliceDataDto calculateSlice(String[] hashes, String storageMode) {
         if (hashes.length <= 0) {
             return null;
         }
 
-        Arrays.sort(hashes);
-
-        int numBytesToStore = properties.getVarHashList().getMinByteCount();
+        byte minByteCount = properties.getVarHashList().getMinByteCount();
 
         SliceDataDto sliceDataDto = new SliceDataDto();
 
         sliceDataDto.getMetaData().setType(SliceType.VARHASHLIST.name());
         sliceDataDto.getMetaData().setVersion(properties.getVarHashList().getVersion());
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write(numBytesToStore);
+        PartialVariableHashFilter filter =
+            new PartialVariableHashFilter(minByteCount, getPartitionOffset(storageMode), hashes.length,
+                properties.getVarHashList().getProbRate());
+
+
         for (String hash : hashes) {
             try {
                 byte[] hashBytes = helperFunctions.getBytesFromHexString(hash);
-                baos.write(hashBytes, 0, numBytesToStore);
+                filter.add(hashBytes);
             } catch (DecoderException e) {
                 log.error("Could not add hash to hash list: {} , {}", hash, e.getMessage());
             }
         }
 
-        sliceDataDto.setBinaryData(baos.toByteArray());
-
         try {
+            sliceDataDto.setBinaryData(filter.writeTo());
             sliceDataDto.getMetaData().setHash(helperFunctions.calculateHash(sliceDataDto.getBinaryData()));
+        } catch (IOException e) {
+            log.error("Could not set binary data.");
+            return null;
         } catch (NoSuchAlgorithmException e) {
             log.error("Could not calculate hash for binary data.");
             return null;
@@ -87,5 +90,19 @@ public class SliceCalculationVarHashListImpl implements SliceCalculation {
         return sliceDataDto;
     }
 
+    private PartitionOffset getPartitionOffset(String storageMode) {
+        switch (storageMode) {
+            case "POINT": {
+                return PartitionOffset.POINT;
+            }
+            case "VECTOR": {
+                return PartitionOffset.VECTOR;
+            }
+            case "COORDINATE":
+            default: {
+                return PartitionOffset.COORDINATE;
+            }
+        }
+    }
 
 }

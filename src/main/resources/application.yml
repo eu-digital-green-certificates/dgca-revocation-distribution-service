@@ -25,6 +25,7 @@ spring:
     scheduling:
       pool:
         size: 5
+
 management:
   server:
     ssl:
@@ -56,6 +57,7 @@ springdoc:
     enabled: true
   swagger-ui:
     path: /swagger
+    tagsSorter=alpha:
 
 dgc:
   revocationListDownload:

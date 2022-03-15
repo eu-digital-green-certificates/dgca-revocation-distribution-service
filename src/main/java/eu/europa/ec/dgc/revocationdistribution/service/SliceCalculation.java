@@ -27,7 +27,7 @@ public interface SliceCalculation {
 
     SliceType getSliceType();
 
-    SliceDataDto calculateSlice(String[] hashes);
+    SliceDataDto calculateSlice(String[] hashes, String storageMode);
 
 
 }
