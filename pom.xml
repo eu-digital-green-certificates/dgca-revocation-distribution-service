@@ -34,7 +34,7 @@
 		<lombok.version>1.18.22</lombok.version>
 		<springdoc.version>1.6.0</springdoc.version>
 		<mapstruct.version>1.4.2.Final</mapstruct.version>
-		<junit.version>5.8.1</junit.version>
+		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 		<mockito.version>4.1.0</mockito.version>
 		<bcpkix.version>1.70</bcpkix.version>
 		<okhttp.version>4.9.1</okhttp.version>
@@ -144,6 +144,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>io.zonky.test.postgres</groupId>
+				<artifactId>embedded-postgres-binaries-bom</artifactId>
+				<version>9.6.16</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -195,7 +202,7 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>${junit.version}</version>
+			<version>${junit.jupiter.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -300,6 +307,18 @@
 			<artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
 			<version>0.11.2</version>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.zonky.test</groupId>
+			<artifactId>embedded-database-spring-test</artifactId>
+			<version>2.1.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.zonky.test</groupId>
+			<artifactId>embedded-postgres</artifactId>
+			<version>1.2.10</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
