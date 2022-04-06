@@ -1,6 +1,7 @@
 logging:
   level:
-    default: TRACE
+    eu.europa.ec.dgc: INFO
+    default: INFO
     org.hibernate.SQL: INFO
     org.hibernate.type.descriptor.sql: INFO
 server:
@@ -17,6 +18,12 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc.batch_size: 2000
+        order_inserts: true
+        format_sql: true
+
   liquibase:
     change-log: classpath:db/changelog.xml
     database-change-log-table: RD_CHANGELOG
@@ -55,14 +62,18 @@ springdoc:
   api-docs:
     path: /api/docs
     enabled: true
+    writer-with-order-by-keys: true
   swagger-ui:
     path: /swagger
-    tagsSorter=alpha:
+    tagsSorter: alpha
+    operationsSorter: alpha
+
 
 dgc:
   revocationListDownload:
     timeInterval: 1800000
-    lockLimit: 3600000
+    lockLimit: 14400000
+    downloadLimit: 90000 #max download time should be less than timeInterval
   defaultRevocationDataType: BLOOMFILTER  # Possible values are BLOOMFILTER and VARHASHLIST
   bloomFilter:
     enabled: true

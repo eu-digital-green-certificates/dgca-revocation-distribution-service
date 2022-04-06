@@ -128,52 +128,68 @@ public class GeneratorService {
         Map<String, RevocationListJsonResponseItemDto> itemsMap =
             items.stream().collect(Collectors.toMap(i -> i.getKid(), i -> i));
 
+        List<String> goneKids = new ArrayList<>(itemsMap.keySet());
+        goneKids.removeAll(kidViewEntityList.stream().map(KidViewEntity::getKid).collect(Collectors.toList()));
+        changeList.getDeletedKids().addAll(goneKids);
+        log.debug("Gone kid entries: {}", goneKids);
+
+
+        log.trace("Update items start");
         //Update Items
         kidViewEntityList.stream().forEach(kve -> {
 
             if (kve.getTypes().isEmpty() && kve.getExpired() == null) {
                 log.debug("Delete kid entry : {} ", kve.getKid());
                 if (itemsMap.remove(kve.getKid()) != null) {
-                    changeList.getDeleted().add(new ChangeListItem(kve, null));
+                    changeList.getDeletedKids().add(kve.getKid());
                 }
             } else {
-                if (kve.isUpdated()) {
-                    RevocationListJsonResponseItemDto item;
-                    item = new RevocationListJsonResponseItemDto();
-                    item.setKid(kve.getKid());
-                    item.setLastUpdated(kve.getLastUpdated());
-                    item.setHashTypes(kve.getTypes());
-                    item.setMode(kve.getStorageMode());
-                    item.setExpires(kve.getExpired());
 
+                RevocationListJsonResponseItemDto item = getRevocationListJsonItem(kve);
+
+                if (kve.isUpdated() || (!itemsMap.containsKey(kve.getKid()))) {
+
+                    itemsMap.put(item.getKid(), item);
+                    changeList.getUpdated().add(new ChangeListItem(kve));
+
+                } else {
                     RevocationListJsonResponseItemDto oldItem;
-                    oldItem = itemsMap.put(item.getKid(), item);
+                    oldItem = itemsMap.get(kve.getKid());
 
-                    if (oldItem != null) {
-                        changeList.getUpdated().add(new ChangeListItem(kve, oldItem.getMode()));
-                    } else {
-                        changeList.getCreated().add(new ChangeListItem(kve, null));
+                    if (!oldItem.equals(item)) {
+                        itemsMap.put(item.getKid(), item);
+                        changeList.getUpdated().add(new ChangeListItem(kve));
                     }
                 }
             }
         });
-
+        log.trace("update items stop");
         RevocationListJsonEntity revocationListJsonEntity = new RevocationListJsonEntity();
         revocationListJsonEntity.setEtag(etag);
         revocationListJsonEntity.setJsonData(new ArrayList<>(itemsMap.values()));
-
+        log.trace("before save");
         revocationListService.saveRevocationListJson(revocationListJsonEntity);
-
-        log.trace(itemsMap.values().toString());
+        log.trace("create list finished");
+        //log.trace(itemsMap.values().toString());
         return changeList;
     }
 
+    private RevocationListJsonResponseItemDto getRevocationListJsonItem(KidViewEntity kve) {
+        RevocationListJsonResponseItemDto item = new RevocationListJsonResponseItemDto();
+
+        item.setKid(kve.getKid());
+        item.setLastUpdated(kve.getLastUpdated());
+        item.setHashTypes(kve.getTypes());
+        item.setMode(kve.getStorageMode());
+        item.setExpires(kve.getExpired());
+
+        return item;
+    }
+
+
     private void handleChangeList(ChangeList changeList) {
         //handle deleted kIds
-        List<String> deletedKids =
-            changeList.getDeleted().stream().map(ChangeListItem::getKidId).collect(Collectors.toList());
-
-        markDataForRemoval(deletedKids);
+        markDataForRemoval(changeList.getDeletedKids());
 
         //handle updated kIds
         List<String> updatedKids =

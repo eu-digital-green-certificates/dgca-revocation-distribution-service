@@ -1,0 +1,13 @@
+logging:
+  level:
+    eu.europa.ec.dgc: TRACE
+    default: TRACE
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql: INFO
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        generate_statistics: true
+    show-sql: true

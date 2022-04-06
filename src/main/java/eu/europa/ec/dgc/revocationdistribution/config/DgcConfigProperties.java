@@ -41,6 +41,7 @@ public class DgcConfigProperties {
     @Setter
     public static class GatewayDownload {
         private Integer timeInterval;
+        private Integer downloadLimit;
         private Integer lockLimit;
     }
 

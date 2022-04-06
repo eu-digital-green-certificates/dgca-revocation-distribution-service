@@ -20,8 +20,10 @@
 
 package eu.europa.ec.dgc.revocationdistribution.entity;
 
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -30,6 +32,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import org.springframework.data.domain.Persistable;
 
 
 @Getter
@@ -38,12 +42,17 @@ import lombok.Setter;
 @Table(name = "hashes")
 @AllArgsConstructor
 @NoArgsConstructor
-public class HashesEntity {
+public class HashesEntity implements Persistable<UUID> {
+
+
+    @Id
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    private UUID id;
 
     /**
      * The revoked hash.
      */
-    @Id
     @Column(name = "hash", nullable = false)
     private String hash;
 
@@ -87,4 +96,13 @@ public class HashesEntity {
     @Column(name = "updated")
     private boolean updated;
 
+    @Override
+    public UUID getId() {
+        return id;
+    }
+
+    @Override
+    public boolean isNew() {
+        return true;
+    }
 }

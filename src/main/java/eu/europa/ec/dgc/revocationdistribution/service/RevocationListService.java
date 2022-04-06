@@ -76,7 +76,7 @@ public class RevocationListService {
      */
     @Transactional
     public void updateRevocationListBatch(String batchId, RevocationBatchDto revocationBatchDto) {
-
+        log.trace("start batchupdate");
         BatchListEntity batchListEntity =  saveBatchList(batchId, revocationBatchDto);
 
         List<HashesEntity> hashes = new ArrayList<>();
@@ -96,7 +96,9 @@ public class RevocationListService {
                 log.warn("Batch ({}) includes hash with null value, hash is ignored", batchId);
             }
         }
+        log.trace("before db save");
         hashesRepository.saveAll(hashes);
+        log.trace("Stop batchupdate");
     }
 
 
