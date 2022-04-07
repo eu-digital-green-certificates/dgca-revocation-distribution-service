@@ -65,6 +65,7 @@ dgc:
   revocationListDownload:
     timeInterval: 1800000
     lockLimit: 3600000
+    downloadLimit: 60000 #max download time should be less than timeInterval
   bloomFilter:
     enabled: true
     type: Bloom

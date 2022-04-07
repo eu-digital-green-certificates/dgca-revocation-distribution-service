@@ -3,7 +3,6 @@
 
 CREATE TABLE IF NOT EXISTS hashes
 (
-    id uuid NOT NULL,
     hash character varying(255) COLLATE pg_catalog."default" NOT NULL,
     batch_id character varying(36) COLLATE pg_catalog."default",
     kid character varying(12) COLLATE pg_catalog."default",
@@ -12,7 +11,7 @@ CREATE TABLE IF NOT EXISTS hashes
     y character(1) COLLATE pg_catalog."default" NOT NULL,
     z character(1) COLLATE pg_catalog."default" NOT NULL,
     last_updated timestamp with time zone DEFAULT now(),
-    CONSTRAINT hashes_pkey PRIMARY KEY (id),
+    CONSTRAINT hashes_pkey PRIMARY KEY (hash),
     CONSTRAINT fk_batch_id FOREIGN KEY (batch_id)
         REFERENCES batch_list (batch_id) MATCH SIMPLE
         ON UPDATE NO ACTION
