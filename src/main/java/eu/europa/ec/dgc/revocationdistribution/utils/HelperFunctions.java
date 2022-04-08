@@ -73,14 +73,14 @@ public class HelperFunctions {
      */
     public boolean compareRevocationListItems(
         RevocationListJsonResponseDto.RevocationListJsonResponseItemDto item1,
-        RevocationListJsonResponseDto.RevocationListJsonResponseItemDto item2 ) {
+        RevocationListJsonResponseDto.RevocationListJsonResponseItemDto item2) {
 
-        return  item1.getKid().equals(item2.getKid()) &&
-            item1.getHashTypes().equals(item2.getHashTypes()) &&
-            item1.getMode().equals(item2.getMode()) &&
-            item1.getExpires().truncatedTo(ChronoUnit.SECONDS).
-                isEqual(item2.getExpires().truncatedTo(ChronoUnit.SECONDS)) &&
-            item1.getLastUpdated().truncatedTo(ChronoUnit.SECONDS).
-                isEqual(item2.getLastUpdated().truncatedTo(ChronoUnit.SECONDS));
+        return  item1.getKid().equals(item2.getKid())
+            && item1.getHashTypes().equals(item2.getHashTypes())
+            && item1.getMode().equals(item2.getMode())
+            && item1.getExpires().truncatedTo(ChronoUnit.SECONDS)
+                .isEqual(item2.getExpires().truncatedTo(ChronoUnit.SECONDS))
+            && item1.getLastUpdated().truncatedTo(ChronoUnit.SECONDS)
+                .isEqual(item2.getLastUpdated().truncatedTo(ChronoUnit.SECONDS));
     }
 }
