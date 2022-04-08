@@ -36,6 +36,7 @@ import eu.europa.ec.dgc.revocationdistribution.repository.PartitionRepository;
 import eu.europa.ec.dgc.revocationdistribution.repository.PointViewRepository;
 import eu.europa.ec.dgc.revocationdistribution.repository.SliceRepository;
 import eu.europa.ec.dgc.revocationdistribution.repository.VectorViewRepository;
+import eu.europa.ec.dgc.revocationdistribution.utils.HelperFunctions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,8 @@ public class GeneratorService {
     private final VectorViewMapper vectorViewMapper;
 
     private final CoordinateViewMapper coordinateViewMapper;
+
+    private final HelperFunctions helperFunctions;
 
     private String etag;
     private String oldEtag;
@@ -156,7 +159,7 @@ public class GeneratorService {
                     RevocationListJsonResponseItemDto oldItem;
                     oldItem = itemsMap.get(kve.getKid());
 
-                    if (!oldItem.equals(item)) {
+                    if (!helperFunctions.compareRevocationListItems(item, oldItem)) {
                         itemsMap.put(item.getKid(), item);
                         changeList.getUpdated().add(new ChangeListItem(kve));
                     }
@@ -254,7 +257,7 @@ public class GeneratorService {
         //get all ids for kId
         List<String> partitionIds = vectorViewRepository.findDistinctIdsByKid(changeItem.getKidId());
 
-        log.debug("PartionIds {}", partitionIds);
+        log.debug("PartitionIds {}", partitionIds);
 
         for (String partitionId : partitionIds) {
             List<ChunkMetaViewDto> entities =
@@ -273,7 +276,7 @@ public class GeneratorService {
         //get all ids for kId
         List<String> partitionIds = coordinateViewRepository.findDistinctIdsByKid(changeItem.getKidId());
 
-        log.debug("PartionIds {}", partitionIds);
+        log.debug("PartitionIds {}", partitionIds);
 
         for (String partitionId : partitionIds) {
             List<ChunkMetaViewDto> entities =
