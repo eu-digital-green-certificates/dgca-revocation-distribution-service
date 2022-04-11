@@ -38,10 +38,10 @@ public interface HashesRepository extends JpaRepository<HashesEntity, String> {
     @Query("DELETE HashesEntity h WHERE  h.batch = null")
     void deleteAllOrphanedHashes();
 
-    @Query("SELECT h.id FROM HashesEntity h WHERE h.id IN :hashes")
+    @Query("SELECT h.hash FROM HashesEntity h WHERE h.hash IN :hashes")
     List<String> getHashesPresentInListAndDb(@Param("hashes") List<String> hashes);
 
-    @Query("SELECT h.id FROM HashesEntity h INNER JOIN h.batch b WHERE h.id IN :hashes AND b.expires > :checkTime")
+    @Query("SELECT h.hash FROM HashesEntity h INNER JOIN h.batch b WHERE h.hash IN :hashes AND b.expires > :checkTime")
     List<String> getHashesPresentInListAndDbAndNotExpired(
         @Param("hashes") List<String> hashes,
         @Param("checkTime") ZonedDateTime checkTime);

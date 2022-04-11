@@ -66,7 +66,7 @@ public class PartitionGeneratorService {
 
     public void generatePartition(String etag, List<ChunkMetaViewDto> entities,
                                    String kid, String id, String storageMode) {
-
+        log.info("Generate Partition of entities: {}, kId: {}, ID: {}, etag: {}", entities.size(), kid, id, etag);
         if (sliceCalculationBloomFilter.isPresent()) {
             generatePartition(etag, entities, kid, id, sliceCalculationBloomFilter.get(), storageMode);
         }
@@ -98,7 +98,7 @@ public class PartitionGeneratorService {
             if (!Objects.equals(mve.getKid(), kid) || !Objects.equals(mve.getId(), id)) {
                 log.error("Kid and/or id does not match: kid: {} , {} id {}, {}", kid, mve.getKid(), id, mve.getId());
             } else {
-
+                log.info("Number of hashes per slice: {}",mve.getHashes().length);
                 SliceDataDto sliceDataDto = sliceCalculation.calculateSlice(mve.getHashes(), storageMode);
                 if (sliceDataDto != null) {
                     Map<String, PartitionChunksJsonItemDto> chunkItemsMap;

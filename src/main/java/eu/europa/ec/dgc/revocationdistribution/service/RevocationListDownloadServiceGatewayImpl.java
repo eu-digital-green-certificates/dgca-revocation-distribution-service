@@ -99,9 +99,9 @@ public class RevocationListDownloadServiceGatewayImpl {
 
         boolean needsCalculation = getNeedsCalculation();
 
-        int timeInterval = properties.getRevocationListDownload().getTimeInterval();
+        int downloadLimit = properties.getRevocationListDownload().getDownloadLimit();
 
-        ZonedDateTime abortTime =  ZonedDateTime.now().plusSeconds((timeInterval / 1000) / 2);
+        ZonedDateTime abortTime =  ZonedDateTime.now().plusSeconds(downloadLimit / 1000);
 
         DgcGatewayRevocationListDownloadIterator revocationListIterator;
 
@@ -133,7 +133,7 @@ public class RevocationListDownloadServiceGatewayImpl {
                         RevocationBatchDto revocationBatchDto =
                             dgcGatewayDownloadConnector.getRevocationListBatchById(batchListItem.getBatchId());
 
-                        log.trace(revocationBatchDto.toString());
+                        //log.trace(revocationBatchDto.toString());
 
                         revocationListservice.updateRevocationListBatch(batchListItem.getBatchId(), revocationBatchDto);
                         log.info("Downloaded batch: {}", batchListItem.getBatchId());

@@ -32,6 +32,6 @@ import lombok.Setter;
 public class ChangeList {
     private List<ChangeListItem> created = new ArrayList<>();
     private List<ChangeListItem> updated = new ArrayList<>();
-    private List<ChangeListItem> deleted = new ArrayList<>();
+    private List<String> deletedKids = new ArrayList<>();
 }
 

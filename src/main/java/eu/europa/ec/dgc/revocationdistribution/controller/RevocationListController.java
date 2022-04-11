@@ -79,7 +79,7 @@ public class RevocationListController {
     @GetMapping(path = "lists", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Returns an overview about all available revocation lists.",
-        description = "This method returns an over about available revocation lists for each KID. The response "
+        description = "This method returns an overview about available revocation lists for each KID. The response "
             + "contains for all available KIDs the last modification date, the used hash types etc.",
         tags = {"Revocation Lists"},
         parameters = {
@@ -763,7 +763,7 @@ public class RevocationListController {
             try {
                 return SliceType.valueOf(sliceDataTypeHeader);
             } catch (IllegalArgumentException e) {
-                log.info("Unkown slice data type requested {}", sliceDataTypeHeader);
+                log.info("Unknown slice data type requested {}", sliceDataTypeHeader);
                 throw new BadRequestException("Requested slice data type unknown: " + sliceDataTypeHeader);
             }
         }

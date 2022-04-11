@@ -20,5 +20,6 @@
     <include file="db/changelog/013_create_set_new_etag_function.sql"/>
     <include file="db/changelog/014_load_boundaries_configuration.sql"/>
     <include file="db/changelog/015_create_schedlock_table.sql"/>
+    <include file="db/changelog/016_reset_database_alter_hashes.sql"/>
 
 </databaseChangeLog>

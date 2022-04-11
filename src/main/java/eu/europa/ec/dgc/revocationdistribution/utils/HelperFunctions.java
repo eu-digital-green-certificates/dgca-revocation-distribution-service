@@ -20,11 +20,13 @@
 
 package eu.europa.ec.dgc.revocationdistribution.utils;
 
+import eu.europa.ec.dgc.revocationdistribution.dto.RevocationListJsonResponseDto;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Hex;
 import org.springframework.stereotype.Service;
@@ -62,4 +64,23 @@ public class HelperFunctions {
         return Hex.decode(hex);
     }
 
+
+    /**
+     * Compare two RevocationListItems for equality.
+     * @param item1 item to be compared
+     * @param item2 item to be compared
+     * @return true if equal
+     */
+    public boolean compareRevocationListItems(
+        RevocationListJsonResponseDto.RevocationListJsonResponseItemDto item1,
+        RevocationListJsonResponseDto.RevocationListJsonResponseItemDto item2) {
+
+        return  item1.getKid().equals(item2.getKid())
+            && item1.getHashTypes().equals(item2.getHashTypes())
+            && item1.getMode().equals(item2.getMode())
+            && item1.getExpires().truncatedTo(ChronoUnit.SECONDS)
+                .isEqual(item2.getExpires().truncatedTo(ChronoUnit.SECONDS))
+            && item1.getLastUpdated().truncatedTo(ChronoUnit.SECONDS)
+                .isEqual(item2.getLastUpdated().truncatedTo(ChronoUnit.SECONDS));
+    }
 }

@@ -1,7 +1,6 @@
 logging:
   level:
-    eu.europa.ec.dgc: INFO
-    default: INFO
+    default: TRACE
     org.hibernate.SQL: INFO
     org.hibernate.type.descriptor.sql: INFO
 server:
@@ -18,21 +17,18 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
-    properties:
-      hibernate:
-        jdbc.batch_size: 2000
-        order_inserts: true
-        format_sql: true
-
   liquibase:
     change-log: classpath:db/changelog.xml
     database-change-log-table: RD_CHANGELOG
     database-change-log-lock-table: RD_CHANGELOG_LOCK
+  h2:
+    console:
+      enabled: false
+      path: /h2-console
   task:
     scheduling:
       pool:
         size: 5
-
 management:
   server:
     ssl:
@@ -62,29 +58,19 @@ springdoc:
   api-docs:
     path: /api/docs
     enabled: true
-    writer-with-order-by-keys: true
   swagger-ui:
     path: /swagger
-    tagsSorter: alpha
-    operationsSorter: alpha
-
 
 dgc:
   revocationListDownload:
     timeInterval: 1800000
-    lockLimit: 14400000
-    downloadLimit: 90000 #max download time should be less than timeInterval
-  defaultRevocationDataType: BLOOMFILTER  # Possible values are BLOOMFILTER and VARHASHLIST
+    lockLimit: 3600000
+    downloadLimit: 60000 #max download time should be less than timeInterval
   bloomFilter:
     enabled: true
+    type: Bloom
     version: 1.0
     probRate: 0.000000000001f
-  varHashList:
-    enabled: true
-    version: 1.0
-    probRate: 0.000000000001f
-    minByteCount: 4
-
   issuance:
     dgci:
       endpoint: ${DGC_ISSUANCE_DGCI_ENDPOINT}
