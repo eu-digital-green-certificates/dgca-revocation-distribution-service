@@ -129,7 +129,7 @@ public class GeneratorService {
 
         //Create items Map
         Map<String, RevocationListJsonResponseItemDto> itemsMap =
-            items.stream().collect(Collectors.toMap(i -> i.getKid(), i -> i));
+            items.stream().collect(Collectors.toMap(RevocationListJsonResponseItemDto::getKid, i -> i));
 
         List<String> goneKids = new ArrayList<>(itemsMap.keySet());
         goneKids.removeAll(kidViewEntityList.stream().map(KidViewEntity::getKid).collect(Collectors.toList()));

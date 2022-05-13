@@ -113,7 +113,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception e) {
-        log.error("Uncatched Exception {}", e);
+        log.error("Uncatched Exception {}", e.toString());
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .contentType(MediaType.APPLICATION_JSON)

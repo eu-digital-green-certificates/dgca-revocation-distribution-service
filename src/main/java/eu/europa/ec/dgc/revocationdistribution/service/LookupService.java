@@ -59,7 +59,7 @@ public class LookupService {
     private final HashesRepository hashesRepository;
 
     /**
-     * Validates the given recocationCheckTokes. Therefore it checks the format and signature. For the signature check
+     * Validates the given recocationCheckTokes. Therefore, it checks the format and signature. For the signature check
      * the public key of the certificate is downloaded.
      *
      * @param revocationCheckTokens list of revocation check tokens to be validated
@@ -161,7 +161,7 @@ public class LookupService {
         try {
             return ECKey.parse(didAuth.getPublicKeyJsw().toString()).toPublicKey();
         } catch (ParseException | JOSEException e) {
-            log.error("Parsing of publicKey failed. {}", e);
+            log.error("Parsing of publicKey failed. {}", e.toString());
             throw new TokenValidationException("Token verification failed: Public key could not be parsed",
                 HttpStatus.BAD_REQUEST.value());
         }

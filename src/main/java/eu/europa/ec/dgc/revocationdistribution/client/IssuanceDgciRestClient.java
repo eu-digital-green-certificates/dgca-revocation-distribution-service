@@ -36,7 +36,7 @@ public interface IssuanceDgciRestClient {
 
 
     /**
-     * Gets the the dgci for a given hash value.
+     * Gets the dgci for a given hash value.
      *
      * @param hash The hash value of the dgci
      * @return dgci values as DidDocument.
