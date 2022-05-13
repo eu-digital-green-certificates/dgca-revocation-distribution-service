@@ -122,10 +122,10 @@ public class RevocationListService {
     }
 
     /**
-     * Gets the revocation list meta data for an etag.
+     * Gets the revocation list metadata for an etag.
      *
-     * @param currentEtag Etag for which the revocation list meta data should be returned
-     * @return revocation list meta data if present
+     * @param currentEtag Etag for which the revocation list metadata should be returned
+     * @return revocation list metadata if present
      */
     public Optional<RevocationListJsonEntity> getRevocationListJsonData(String currentEtag) {
         return revocationListJsonRepository.findById(currentEtag);
@@ -148,7 +148,7 @@ public class RevocationListService {
     }
 
     /**
-     * Deletes all revocation lists meta data, except the one belonging to the given etag.
+     * Deletes all revocation lists metadata, except the one belonging to the given etag.
      *
      * @param currendEtag the etag of the data that should not be deleted.
      */
@@ -227,7 +227,7 @@ public class RevocationListService {
             partition = partitionRepository.findOneByEtagAndKidAndIdAndDataType(etag, kid, id, dataType);
         }
 
-        if (!partition.isPresent()) {
+        if (partition.isEmpty()) {
             throw new DataNotFoundException();
         }
         return partitionListMapper.map(partition.get());
@@ -647,7 +647,7 @@ public class RevocationListService {
                 etag, kid, id, cid, sid, dataType);
         }
 
-        if (!sliceEntity.isPresent()) {
+        if (sliceEntity.isEmpty()) {
             throw new DataNotFoundException();
         }
 
@@ -689,7 +689,7 @@ public class RevocationListService {
                 etag, kid, id, cid, sid, dataType, ifModifiedDateTime);
         }
 
-        if (!sliceEntity.isPresent()) {
+        if (sliceEntity.isEmpty()) {
             Long count;
 
             if (id.equalsIgnoreCase("null")) {

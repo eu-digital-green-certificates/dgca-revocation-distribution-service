@@ -29,7 +29,7 @@
 		<owasp.version>6.5.0</owasp.version>
 		<spring.boot.version>2.6.3</spring.boot.version>
 		<spring.cloud.version>2021.0.0</spring.cloud.version>
-		<spring.test.version>5.3.12</spring.test.version>
+		<spring.test.version>5.3.19</spring.test.version>
 		<spring.security.version>5.6.0</spring.security.version>
 		<lombok.version>1.18.22</lombok.version>
 		<springdoc.version>1.6.0</springdoc.version>

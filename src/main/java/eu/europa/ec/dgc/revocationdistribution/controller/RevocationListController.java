@@ -116,11 +116,9 @@ public class RevocationListController {
         Optional<RevocationListJsonEntity> revocationListJsonEntity =
             revocationListService.getRevocationListJsonData(currentEtag);
 
-        if (!revocationListJsonEntity.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
+        return revocationListJsonEntity.map(listJsonEntity -> ResponseEntity.ok().eTag(currentEtag)
+            .body(listJsonEntity.getJsonData())).orElseGet(() -> ResponseEntity.notFound().build());
 
-        return ResponseEntity.ok().eTag(currentEtag).body(revocationListJsonEntity.get().getJsonData());
     }
 
 

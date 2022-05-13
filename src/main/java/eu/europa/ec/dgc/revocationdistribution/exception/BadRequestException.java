@@ -21,11 +21,6 @@
 package eu.europa.ec.dgc.revocationdistribution.exception;
 
 public class BadRequestException extends RuntimeException {
-    public int getStatus() {
-        return status;
-    }
-
-    private final int status = 400;
 
     /**
      * Constructor for BadRequestException.
@@ -46,6 +41,15 @@ public class BadRequestException extends RuntimeException {
     public BadRequestException(String message) {
 
         super(message);
+    }
+
+
+    /**
+     *  Get Http return code.
+     * @return http bad request code
+     */
+    public int getStatus() {
+        return 400;
     }
 
 }

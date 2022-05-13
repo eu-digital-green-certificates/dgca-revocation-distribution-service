@@ -90,7 +90,7 @@ public class KidViewEntity {
     private void onLoad() {
 
         this.types = Arrays.stream(typesString.split(","))
-            .filter(i -> TYPES_NAMES.contains(i)).collect(Collectors.toList());
+            .filter(TYPES_NAMES::contains).collect(Collectors.toList());
 
     }
 

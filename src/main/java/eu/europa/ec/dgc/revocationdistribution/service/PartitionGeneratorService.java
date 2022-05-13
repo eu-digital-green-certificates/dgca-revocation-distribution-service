@@ -67,13 +67,11 @@ public class PartitionGeneratorService {
     public void generatePartition(String etag, List<ChunkMetaViewDto> entities,
                                    String kid, String id, String storageMode) {
         log.info("Generate Partition of entities: {}, kId: {}, ID: {}, etag: {}", entities.size(), kid, id, etag);
-        if (sliceCalculationBloomFilter.isPresent()) {
-            generatePartition(etag, entities, kid, id, sliceCalculationBloomFilter.get(), storageMode);
-        }
+        sliceCalculationBloomFilter.ifPresent(calculationBloomFilter -> generatePartition(etag, entities, kid, id,
+            calculationBloomFilter, storageMode));
 
-        if (sliceCalculationHashList.isPresent()) {
-            generatePartition(etag, entities, kid, id, sliceCalculationHashList.get(), storageMode);
-        }
+        sliceCalculationHashList.ifPresent(sliceCalculationVarHashList -> generatePartition(etag, entities, kid, id,
+            sliceCalculationVarHashList, storageMode));
 
     }
 

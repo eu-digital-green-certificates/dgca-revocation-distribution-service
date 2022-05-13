@@ -23,12 +23,6 @@ package eu.europa.ec.dgc.revocationdistribution.client;
 import feign.Client;
 import feign.Logger;
 import feign.httpclient.ApacheHttpClient;
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.context.annotation.Bean;
@@ -44,10 +38,7 @@ public class IssuanceDgciRestClientConfig {
      * @return Instance of HttpClient
      */
     @Bean
-    public Client issuanceDgciClient() throws
-        UnrecoverableKeyException, CertificateException,
-        IOException, NoSuchAlgorithmException,
-        KeyStoreException, KeyManagementException {
+    public Client issuanceDgciClient() {
 
         return new ApacheHttpClient(HttpClientBuilder.create()
             .build());
