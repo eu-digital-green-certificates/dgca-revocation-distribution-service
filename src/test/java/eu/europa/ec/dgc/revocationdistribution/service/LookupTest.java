@@ -25,7 +25,13 @@ import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider.ZO
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
 import eu.europa.ec.dgc.gateway.connector.DgcGatewayCountryListDownloadConnector;
 import eu.europa.ec.dgc.gateway.connector.DgcGatewayValidationRuleDownloadConnector;
 import eu.europa.ec.dgc.gateway.connector.DgcGatewayValueSetDownloadConnector;
@@ -34,6 +40,8 @@ import eu.europa.ec.dgc.gateway.connector.dto.RevocationBatchDto;
 import eu.europa.ec.dgc.gateway.connector.dto.RevocationHashTypeDto;
 import eu.europa.ec.dgc.revocationdistribution.client.IssuanceDgciRestClient;
 import eu.europa.ec.dgc.revocationdistribution.dto.ChunkMetaViewDto;
+import eu.europa.ec.dgc.revocationdistribution.dto.DidAuthentication;
+import eu.europa.ec.dgc.revocationdistribution.dto.DidDocument;
 import eu.europa.ec.dgc.revocationdistribution.dto.RevocationCheckTokenPayload;
 import eu.europa.ec.dgc.revocationdistribution.dto.RevocationListJsonResponseDto;
 import eu.europa.ec.dgc.revocationdistribution.entity.BatchListEntity;
@@ -56,7 +64,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @Slf4j
 @SpringBootTest(
@@ -75,6 +86,7 @@ class LookupTest {
 
     @MockBean
     IssuanceDgciRestClient issuanceDgciRestClient;
+
     @MockBean
     DgcGatewayValidationRuleDownloadConnector dgcGatewayValidationRuleDownloadConnector;
 
@@ -90,16 +102,23 @@ class LookupTest {
     @Autowired
     RevocationListService revocationListService;
 
-    final String TEST_HASH ="TESTHASH";
+    final String TEST_HASH = "TESTHASH";
     final String SEARCH_HASH = "4c44931c0487";
+    final String VALID_TOKEN =
+      "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5Mjc3NDVlYzM0NTJiYTUzNzYzZjEyMGFhMGNjZWZlMDllMmY2MWI2NzlmODYxNDgwNDc1NTYwNTUyYTc5YjYwIiwicGF5bG9hZCI6WyI5Mjc3NDVlYzM0NTJiYTUzNzYzZjEyMGFhMGNjZWZlMCIsImVjZGNhMjAzMjlhZjUwZGIwN2VjNDM5YTQwM2E3YmYwIiwiYjRiYTFlOWFmNWQ5MTgzM2ZkY2VlODEzZWYyOTA1YmUiXSwiZXhwIjoxNjQ5NDI5NjQ4NTAxfQ.MEUCIH2s-iNykya_39yjisR_3KnpgsE0RHDMw61jLNzjhYrsAiEAsMbMwey8PyWvPVi-fJ7XSdHKhLcfh5kQWKwdvSTxZj0";
 
-   /* @Test
-    void validateRevocationCheckTokensRunThrough() {
+
+    @Test
+    void validateRevocationCheckTokensRunThrough() throws JsonProcessingException {
+        //ReflectionTestUtils.setField(classUnderTest, "issuanceDgciRestClient", issuanceDgciRestClient);
+        DidDocument document = createDidDocument();
+        ResponseEntity<DidDocument> response = new ResponseEntity<>(document,HttpStatus.OK);
+        when(issuanceDgciRestClient.getDgciByHash(any())).thenReturn(response);
         List<String> tokens = new ArrayList<>();
-        tokens.add("TESTTOKEN");
+        tokens.add(VALID_TOKEN);
         var result = classUnderTest.validateRevocationCheckTokens(tokens);
-        //TODO test with real token
-    }*/
+        assertFalse(result.isEmpty());
+    }
 
     @Test
     void validateRevocationCheckTokensWrongTokenFormat() {
@@ -120,7 +139,7 @@ class LookupTest {
         assertFalse(result.isEmpty());
     }
 
-    private RevocationCheckTokenPayload createRevocationCheckTokenPayload(){
+    private RevocationCheckTokenPayload createRevocationCheckTokenPayload() {
         RevocationCheckTokenPayload payload = new RevocationCheckTokenPayload();
         List<String> payloadStrings = new ArrayList<>();
         payloadStrings.add(SEARCH_HASH);
@@ -141,9 +160,34 @@ class LookupTest {
         dto.setEntries(entries);
         return dto;
     }
+
     private RevocationBatchDto.BatchEntryDto createBatchEntryDto() {
         RevocationBatchDto.BatchEntryDto entry = new RevocationBatchDto.BatchEntryDto();
         entry.setHash(TEST_HASH);
         return entry;
+    }
+    private DidDocument createDidDocument() throws JsonProcessingException {
+
+        DidDocument document = new DidDocument();
+        document.setId("URN:UVCI:V1:DE:2UETP55W3VVS7LF2MOB8W1998L");
+        document.setContext("https://w3id.org/did/v1");
+        document.setController("URN:UVCI:V1:DE:2UETP55W3VVS7LF2MOB8W1998L");
+        DidAuthentication auth = new DidAuthentication();
+        auth.setController("URN:UVCI:V1:DE:2UETP55W3VVS7LF2MOB8W1998L");
+        auth.setExpires("2023-04-08T14:27:33Z");
+        auth.setType("EcdsaSecp256r1VerificationKey2019");
+        String json = "{\n" +
+          "\"kty\": \"EC\",\n" +
+          "\"crv\": \"P-256\",\n" +
+          "\"x\": \"edmj8B6t1YF5yrDzihq6ezp9bZ-sYa92z84tGU9Xiwk\",\n" +
+          "\"y\": \"4PAeyxdxh3hjsvR6F-V_wpWHCkM7mI9EAS47-FxZOxk\"\n" +
+          "}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode publicKeyJSW = mapper.readTree(json);
+        auth.setPublicKeyJsw(publicKeyJSW);
+        List<DidAuthentication> auths = new ArrayList<>();
+        auths.add(auth);
+        document.setAuthentication(auths);
+        return  document;
     }
 }
