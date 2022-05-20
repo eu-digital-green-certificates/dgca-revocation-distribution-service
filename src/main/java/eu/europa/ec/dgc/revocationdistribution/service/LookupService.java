@@ -71,10 +71,11 @@ public class LookupService {
         List<RevocationCheckTokenPayload> tokenPayloads = new ArrayList<>();
 
         for (String token : revocationCheckTokens) {
-            Jwt jwt = revocationCheckTokenParser.extractPayload(token);
+            var jwt = revocationCheckTokenParser.extractPayload(token);
 
             Claims claims = (Claims) jwt.getBody();
 
+            //TODO unreachable code expired tokens will already be catched above in extractPayload
             if (claims.containsKey("exp")
                 && claims.getExpiration().toInstant().getEpochSecond() < Instant.now().getEpochSecond()) {
                 log.warn("Invalid revocation check token: expired");
@@ -150,6 +151,10 @@ public class LookupService {
         }
 
         didDocument = responseEntity.getBody();
+        if (didDocument == null) {
+            throw new TokenValidationException("Token verification failed: No Public key found.",
+              HttpStatus.BAD_REQUEST.value());
+        }
 
         if (didDocument.getAuthentication().isEmpty()) {
             throw new TokenValidationException("Token verification failed: No Public key found.",

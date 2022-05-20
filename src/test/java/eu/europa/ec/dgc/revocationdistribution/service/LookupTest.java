@@ -52,6 +52,7 @@ import eu.europa.ec.dgc.revocationdistribution.exception.TokenValidationExceptio
 import eu.europa.ec.dgc.revocationdistribution.model.SliceType;
 import eu.europa.ec.dgc.revocationdistribution.repository.BatchListRepository;
 import eu.europa.ec.dgc.revocationdistribution.repository.HashesRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -106,13 +107,15 @@ class LookupTest {
     final String SEARCH_HASH = "4c44931c0487";
     final String VALID_TOKEN =
       "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5Mjc3NDVlYzM0NTJiYTUzNzYzZjEyMGFhMGNjZWZlMDllMmY2MWI2NzlmODYxNDgwNDc1NTYwNTUyYTc5YjYwIiwicGF5bG9hZCI6WyI5Mjc3NDVlYzM0NTJiYTUzNzYzZjEyMGFhMGNjZWZlMCIsImVjZGNhMjAzMjlhZjUwZGIwN2VjNDM5YTQwM2E3YmYwIiwiYjRiYTFlOWFmNWQ5MTgzM2ZkY2VlODEzZWYyOTA1YmUiXSwiZXhwIjoxNjQ5NDI5NjQ4NTAxfQ.MEUCIH2s-iNykya_39yjisR_3KnpgsE0RHDMw61jLNzjhYrsAiEAsMbMwey8PyWvPVi-fJ7XSdHKhLcfh5kQWKwdvSTxZj0";
-
+    final String EXPIRED_TOKEN =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5Mjc3NDVlYzM0NTJiYTUzNzYzZjEyMGFhMGNjZWZlMDllMmY2MWI2NzlmODYxNDgwNDc1NTYwNTUyYTc5YjYwIiwicGF5bG9hZCI6WyI5Mjc3NDVlYzM0NTJiYTUzNzYzZjEyMGFhMGNjZWZlMCIsImVjZGNhMjAzMjlhZjUwZGIwN2VjNDM5YTQwM2E3YmYwIiwiYjRiYTFlOWFmNWQ5MTgzM2ZkY2VlODEzZWYyOTA1YmUiXSwiZXhwIjo5NTg4MTY4NDd9.ktIQ8goeLR_uAApF4Hq_whkBMS821_6U8bAXFNRd3xweyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5Mjc3NDVlYzM0NTJiYTUzNzYzZjEyMGFhMGNjZWZlMDllMmY2MWI2NzlmODYxNDgwNDc1NTYwNTUyYTc5YjYwIiwicGF5bG9hZCI6WyI5Mjc3NDVlYzM0NTJiYTUzNzYzZjEyMGFhMGNjZWZlMCIsImVjZGNhMjAzMjlhZjUwZGIwN2VjNDM5YTQwM2E3YmYwIiwiYjRiYTFlOWFmNWQ5MTgzM2ZkY2VlODEzZWYyOTA1YmUiXSwiZXhwIjo5NTg4MTY4NDd9.ktIQ8goeLR_uAApF4Hq_whkBMS821_6U8bAXFNRd3xw";
+    final String  NOPAYLOAD_TOKEN=
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5Mjc3NDVlYzM0NTJiYTUzNzYzZjEyMGFhMGNjZWZlMDllMmY2MWI2NzlmODYxNDgwNDc1NTYwNTUyYTc5YjYwIiwiZXhwIjoxNjQ5NDI5NjQ4NTAxfQ.bbB2jzFH1PkLeBa0D1FG4h5RnxofSfWy0XncB1_V29w";
 
     @Test
     void validateRevocationCheckTokensRunThrough() throws JsonProcessingException {
-        //ReflectionTestUtils.setField(classUnderTest, "issuanceDgciRestClient", issuanceDgciRestClient);
         DidDocument document = createDidDocument();
-        ResponseEntity<DidDocument> response = new ResponseEntity<>(document,HttpStatus.OK);
+        ResponseEntity<DidDocument> response = new ResponseEntity<>(document, HttpStatus.OK);
         when(issuanceDgciRestClient.getDgciByHash(any())).thenReturn(response);
         List<String> tokens = new ArrayList<>();
         tokens.add(VALID_TOKEN);
@@ -124,6 +127,20 @@ class LookupTest {
     void validateRevocationCheckTokensWrongTokenFormat() {
         List<String> tokens = new ArrayList<>();
         tokens.add("TESTTOKEN");
+        assertThrows(TokenValidationException.class, () -> classUnderTest.validateRevocationCheckTokens(tokens));
+    }
+
+    @Test
+    void validateRevocationCheckTokensExpiredToken() {
+        List<String> tokens = new ArrayList<>();
+        tokens.add(EXPIRED_TOKEN);
+        assertThrows(ExpiredJwtException.class, () -> classUnderTest.validateRevocationCheckTokens(tokens));
+    }
+
+    @Test
+    void validateRevocationCheckTokensNoPayload() {
+        List<String> tokens = new ArrayList<>();
+        tokens.add(NOPAYLOAD_TOKEN);
         assertThrows(TokenValidationException.class, () -> classUnderTest.validateRevocationCheckTokens(tokens));
     }
 
@@ -166,6 +183,7 @@ class LookupTest {
         entry.setHash(TEST_HASH);
         return entry;
     }
+
     private DidDocument createDidDocument() throws JsonProcessingException {
 
         DidDocument document = new DidDocument();
@@ -188,6 +206,6 @@ class LookupTest {
         List<DidAuthentication> auths = new ArrayList<>();
         auths.add(auth);
         document.setAuthentication(auths);
-        return  document;
+        return document;
     }
 }
