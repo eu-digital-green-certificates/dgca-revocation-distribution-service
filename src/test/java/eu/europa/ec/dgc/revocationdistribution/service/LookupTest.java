@@ -78,24 +78,13 @@ import org.springframework.test.util.ReflectionTestUtils;
     "springdoc.api-docs.path=/openapi",
     "dgc.gateway.connector.enabled=false"
   },
-  webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @AutoConfigureEmbeddedDatabase(provider = ZONKY)
 class LookupTest {
-    @MockBean
-    DgcGatewayConnectorRestClientConfig dgcGatewayConnectorRestClientConfig;
 
     @MockBean
     IssuanceDgciRestClient issuanceDgciRestClient;
-
-    @MockBean
-    DgcGatewayValidationRuleDownloadConnector dgcGatewayValidationRuleDownloadConnector;
-
-    @MockBean
-    DgcGatewayValueSetDownloadConnector dgcGatewayValueSetDownloadConnector;
-
-    @MockBean
-    DgcGatewayCountryListDownloadConnector dgcGatewayCountryListDownloadConnector;
 
     @Autowired
     LookupService classUnderTest;

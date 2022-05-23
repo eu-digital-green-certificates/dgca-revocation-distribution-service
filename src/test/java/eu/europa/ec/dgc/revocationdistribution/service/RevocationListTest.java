@@ -63,24 +63,14 @@ import org.springframework.test.annotation.DirtiesContext;
     "springdoc.api-docs.path=/openapi",
     "dgc.gateway.connector.enabled=false"
   },
-  webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @AutoConfigureEmbeddedDatabase(provider = ZONKY)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class RevocationListTest {
-    @MockBean
-    DgcGatewayConnectorRestClientConfig dgcGatewayConnectorRestClientConfig;
 
     @MockBean
     IssuanceDgciRestClient issuanceDgciRestClient;
-    @MockBean
-    DgcGatewayValidationRuleDownloadConnector dgcGatewayValidationRuleDownloadConnector;
-
-    @MockBean
-    DgcGatewayValueSetDownloadConnector dgcGatewayValueSetDownloadConnector;
-
-    @MockBean
-    DgcGatewayCountryListDownloadConnector dgcGatewayCountryListDownloadConnector;
 
     @Autowired
     RevocationListService classUnderTest;
