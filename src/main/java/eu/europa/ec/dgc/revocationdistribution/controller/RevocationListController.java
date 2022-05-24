@@ -63,6 +63,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings({"DefaultAnnotationParam"})
 public class RevocationListController {
 
     private static final String SLICE_DATA_TYPE_HEADER = "X-SLICE-FILTER-TYPE";
@@ -368,7 +369,7 @@ public class RevocationListController {
         @RequestHeader(value = HttpHeaders.IF_MATCH, required = true) String ifMatch,
         @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSince,
         @RequestHeader(value = SLICE_DATA_TYPE_HEADER, required = false) String sliceDataTypeHeader,
-        @Valid @RequestBody(required = false) List<String> reqestedChunksList
+        @Valid @RequestBody(required = false) List<String> requestedChunksList
     ) {
 
         kid = transformBase64Url(kid);
@@ -386,21 +387,21 @@ public class RevocationListController {
             } catch (DateTimeParseException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            if (reqestedChunksList == null) {
+            if (requestedChunksList == null) {
 
                 result = revocationListService.getAllChunkDataFromPartitionSinceDate(
                     currentEtag, kid, id, dataType, ifModifiedDateTime);
             } else {
                 result = revocationListService.getAllChunkDataFromPartitionWithFilterSinceDate(
-                    currentEtag, kid, id, dataType, reqestedChunksList, ifModifiedDateTime);
+                    currentEtag, kid, id, dataType, requestedChunksList, ifModifiedDateTime);
             }
         } else {
-            if (reqestedChunksList == null) {
+            if (requestedChunksList == null) {
 
                 result = revocationListService.getAllChunkDataFromPartition(currentEtag, kid, id, dataType);
             } else {
                 result = revocationListService.getAllChunkDataFromPartitionWithFilter(
-                    currentEtag, kid, id, dataType, reqestedChunksList);
+                    currentEtag, kid, id, dataType, requestedChunksList);
             }
         }
         return ResponseEntity.ok(result);
