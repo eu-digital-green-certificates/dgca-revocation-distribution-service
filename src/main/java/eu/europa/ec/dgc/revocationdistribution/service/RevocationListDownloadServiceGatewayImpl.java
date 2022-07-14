@@ -129,6 +129,7 @@ public class RevocationListDownloadServiceGatewayImpl {
                     deletedBatchIds.add(batchListItem.getBatchId());
                 } else {
                     try {
+                        log.info("Start download of batch: {}", batchListItem.getBatchId());
 
                         RevocationBatchDto revocationBatchDto =
                             dgcGatewayDownloadConnector.getRevocationListBatchById(batchListItem.getBatchId());
@@ -140,8 +141,11 @@ public class RevocationListDownloadServiceGatewayImpl {
 
                     } catch (RevocationBatchGoneException e) {
                         goneBatchIds.add(batchListItem.getBatchId());
-                    } catch (RevocationBatchDownloadException | RevocationBatchParseException e) {
-                        log.error("Batch download failed");
+                    } catch (RevocationBatchParseException e) {
+                        log.error("Batch download parse exception for batch: {}", batchListItem.getBatchId());
+                    } catch (RevocationBatchDownloadException e) {
+                        log.error("Batch download failed: {}", batchListItem.getBatchId());
+                        break;
                     }
                 }
                 lastUpdatedBatchDate = batchListItem.getDate();
