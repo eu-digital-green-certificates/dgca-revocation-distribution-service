@@ -22,13 +22,13 @@ package eu.europa.ec.dgc.revocationdistribution.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import eu.europa.ec.dgc.revocationdistribution.dto.RevocationListJsonResponseDto;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

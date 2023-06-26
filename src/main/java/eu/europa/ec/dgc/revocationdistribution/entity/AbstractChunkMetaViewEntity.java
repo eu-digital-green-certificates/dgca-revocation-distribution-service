@@ -21,10 +21,10 @@
 package eu.europa.ec.dgc.revocationdistribution.entity;
 
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import java.time.ZonedDateTime;
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 import lombok.Getter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;

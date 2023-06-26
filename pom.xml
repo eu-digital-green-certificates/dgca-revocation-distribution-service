@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.2</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-starter-parent</artifactId>
+		<version>2022.0.3</version>
+		<relativePath/>
 	</parent>
 
 	<groupId>eu.europa.ec.dgc</groupId>
@@ -19,38 +19,31 @@
 	</organization>
 
 	<properties>
-		<java.version>11</java.version>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 		<!-- charset -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<!-- dependencies -->
-		<owasp.version>6.5.0</owasp.version>
-		<spring.boot.version>2.6.3</spring.boot.version>
-		<spring.cloud.version>2021.0.0</spring.cloud.version>
-		<spring.test.version>5.3.19</spring.test.version>
-		<spring.security.version>5.6.0</spring.security.version>
-		<lombok.version>1.18.22</lombok.version>
-		<springdoc.version>1.6.0</springdoc.version>
-		<mapstruct.version>1.4.2.Final</mapstruct.version>
-		<junit.jupiter.version>5.8.2</junit.jupiter.version>
-		<mockito.version>4.1.0</mockito.version>
+		<owasp.version>8.3.1</owasp.version>
+		<lombok.version>1.18.28</lombok.version>
+		<springdoc.version>2.1.0</springdoc.version>
+		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<bcpkix.version>1.70</bcpkix.version>
-		<okhttp.version>4.9.1</okhttp.version>
-		<shedlock.version>4.30.0</shedlock.version>
+		<shedlock.version>5.4.0</shedlock.version>
 		<nimbusds.version>9.9.2</nimbusds.version>
-		<dgc.lib.version>1.1.13</dgc.lib.version>
+		<dgc.lib.version>2.0.2</dgc.lib.version>
 		<dgc.bloomfilter.version>0.0.0-29d785a</dgc.bloomfilter.version>
 		<dgc.partialvarriablehashfilter.version>0.0.0-613ab9b</dgc.partialvarriablehashfilter.version>
-		<sap.cloud.sdk.version>3.57.0</sap.cloud.sdk.version>
+		<sap.cloud.sdk.version>4.16.0</sap.cloud.sdk.version>
+		<sap.cloud.logging.version>3.7.0</sap.cloud.logging.version>
 		<jjwt.version>0.11.2</jjwt.version>
 		<!-- plugins -->
-		<plugin.checkstyle.version>3.1.2</plugin.checkstyle.version>
-		<plugin.sonar.version>3.9.0.2155</plugin.sonar.version>
-		<plugin.jacoco.version>0.8.7</plugin.jacoco.version>
+		<plugin.checkstyle.version>3.3.0</plugin.checkstyle.version>
+		<plugin.sonar.version>3.9.1.2184</plugin.sonar.version>
+		<plugin.jacoco.version>0.8.10</plugin.jacoco.version>
 		<plugin.os-maven.version>1.7.0</plugin.os-maven.version>
-		<plugin.surefire.version>3.0.0-M5</plugin.surefire.version>
 		<!-- license -->
 		<license.projectName>EU Digital COVID Certificate Revocation Distribution Service / dgca-revocation-distribution-service
 		</license.projectName>
@@ -97,64 +90,24 @@
 		</repository>
 	</distributionManagement>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${spring.boot.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-openfeign-dependencies -->
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-openfeign-dependencies</artifactId>
-				<version>3.1.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring.cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-				<exclusions>
-					<exclusion>  <!-- declare the exclusion here -->
-						<groupId>org.springframework.cloud</groupId>
-						<artifactId>spring-cloud-openfeign-dependencies</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.projectlombok</groupId>
-				<artifactId>lombok</artifactId>
-				<version>${lombok.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springdoc</groupId>
-				<artifactId>springdoc-openapi-ui</artifactId>
-				<version>${springdoc.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sap.cloud.sdk</groupId>
-				<artifactId>sdk-bom</artifactId>
-				<version>${sap.cloud.sdk.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>io.zonky.test.postgres</groupId>
-				<artifactId>embedded-postgres-binaries-bom</artifactId>
-				<version>9.6.16</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20230618</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>32.0.1-jre</version>
+		</dependency>
+
 		<dependency>
 			<groupId>eu.europa.ec.dgc</groupId>
 			<artifactId>dgc-lib</artifactId>
@@ -192,28 +145,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-test</artifactId>
-			<scope>test</scope>
+			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>${junit.jupiter.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${spring.test.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -223,7 +163,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
 		</dependency>
 		<dependency>
@@ -235,17 +175,6 @@
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
 			<version>${mapstruct.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-web</artifactId>
-			<version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.javacrumbs.shedlock</groupId>
@@ -260,17 +189,17 @@
 		<dependency>
 			<groupId>com.vladmihalcea</groupId>
 			<artifactId>hibernate-types-52</artifactId>
-			<version>2.10.4</version>
+			<version>2.21.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-			<version>1.21</version>
+			<version>1.23.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.pivotal.cfenv</groupId>
 			<artifactId>java-cfenv-boot</artifactId>
-			<version>2.3.0</version>
+			<version>2.4.2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -281,43 +210,45 @@
 		<dependency>
 			<groupId>com.sap.cloud.sdk.cloudplatform</groupId>
 			<artifactId>scp-cf</artifactId>
+			<version>${sap.cloud.sdk.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sap.hcp.cf.logging</groupId>
 			<artifactId>cf-java-logging-support-logback</artifactId>
+			<version>${sap.cloud.logging.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
-			<version>9.10.1</version>
+			<version>9.31</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.11.2</version>
+			<version>0.11.5</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>0.11.2</version>
+			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-			<version>0.11.2</version>
+			<artifactId>jjwt-jackson</artifactId>			<!-- or jjwt-gson if Gson is preferred -->
+			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.zonky.test</groupId>
 			<artifactId>embedded-database-spring-test</artifactId>
-			<version>2.1.1</version>
+			<version>2.3.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.zonky.test</groupId>
 			<artifactId>embedded-postgres</artifactId>
-			<version>1.2.10</version>
+			<version>2.0.4</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -325,11 +256,6 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>${spring.boot.version}</version>
-				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
@@ -352,11 +278,11 @@
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>${plugin.jacoco.version}</version>
 				</plugin>
-				<plugin>
+				<!-- <plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${plugin.surefire.version}</version>
-				</plugin>
+				</plugin> -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -383,10 +309,6 @@
 					<suppressionFile>./owasp/suppressions.xml</suppressionFile>
 					<failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

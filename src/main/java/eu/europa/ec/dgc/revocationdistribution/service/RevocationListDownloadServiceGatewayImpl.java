@@ -29,12 +29,12 @@ import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchGoneException
 import eu.europa.ec.dgc.gateway.connector.exception.RevocationBatchParseException;
 import eu.europa.ec.dgc.gateway.connector.iterator.DgcGatewayRevocationListDownloadIterator;
 import eu.europa.ec.dgc.revocationdistribution.config.DgcConfigProperties;
+import jakarta.annotation.PostConstruct;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
